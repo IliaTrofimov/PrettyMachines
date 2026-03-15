@@ -1,0 +1,20 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AHashCode_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2024_002E2_003Fresharper_002Dhost_003FSourcesCache_003F1eb6528896cde47d258f8dcfe277f25331d31a26c439c49d7a7737810e36_003FHashCode_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AIEqualityComparer_00601_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2024_002E2_003Fresharper_002Dhost_003FDecompilerCache_003Fdecompiler_003F19674998a88c4c42be3692b32f3379d21046510_003F8b_003Fcbbdc342_003FIEqualityComparer_00601_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003ALinkedList_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2024_002E2_003Fresharper_002Dhost_003FSourcesCache_003F74b2ad5ea433da71a378b52e2fe95faf8d8772e48485484656e951f5625678_003FLinkedList_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=1c24cacd_002D75b9_002D4851_002Daf14_002D4802eda808ab/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TapeTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.TapeTests&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.MachineTests.CreateMachine_Default&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.MachineTests.CannotAddStatesFromOtherMachine&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.MachineTests.CannotCreateWithEmptyAlphabet&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.MachineTests.CreateMachine_FailWithEmptyAlphabet&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.MachineTests.Example_Concatenation&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.MachineTests.Example_ConcatenationShortSyntax&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=32bf0ca6_002D7fb4_002D4ab3_002Dac89_002D055cf0a610a2/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="CreatingTape_Default" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.TapeTests.CreatingTape_WithEmptyCells&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
