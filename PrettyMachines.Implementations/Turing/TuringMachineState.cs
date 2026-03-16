@@ -4,34 +4,42 @@ namespace PrettyMachines.Implementations.Turing;
 public class TuringMachineState : IEquatable<TuringMachineState>
 {
     /// <summary>Default terminating state.</summary>
-    public static readonly TuringMachineState DefaultTerminalState = new() { IsTerminal = true, Id = int.MinValue };
+    public static readonly TuringMachineState DefaultTerminalState = new();
     
     private TuringMachineState() {}
 
     /// <summary>Turing machine's state.</summary>
-    public TuringMachineState(TuringMachine machine, string? stateName, bool isTerminal = false)
+    public TuringMachineState(int id, string? stateName, bool isTerminal = false)
     {
-        Machine = machine;
+        if (id == DefaultTerminalState.Id)
+            throw new InvalidOperationException("Cannot create a new state with a default state ID.");
+        
+        Id = id;
         IsTerminal = isTerminal;
         Name = stateName;
-        Id = machine.GetNewStateIndex();
-        if (Id == DefaultTerminalState.Id)
-            throw new InvalidOperationException("Cannot create a new state with a default state ID.");
     }
     
-    
-    /// <summary>Reference to the Turing machine that defines this state.</summary>
-    public TuringMachine Machine { get; }
-    
+    /// <summary>Unique identifier of the state.</summary>
+    public int Id { get; } = int.MinValue;
+
     /// <summary>Returns <c>true</c> if this state requires Turing machine to stop.</summary>
-    public bool IsTerminal { get; private init; }
+    public bool IsTerminal { get; } = true;
 
     /// <summary>Optional state's name.</summary>
     public string? Name { get; }
+        
+    /// <summary>Reference to the Turing machine that defines this state. State can be attached only once.</summary>
+    public TuringMachine? Machine { get; private set; }
 
-    /// <summary>Unique identifier of the state given by Turing machine.</summary>
-    public int Id { get; private init; }
 
+    /// <summary>Attach this state to given Turing machine. State can be attached only once.</summary>
+    /// <exception cref="InvalidOperationException">State can be attached only once.</exception>
+    public void Attach(TuringMachine machine)
+    {
+        if (Machine != null && !ReferenceEquals(Machine, machine))
+            throw new InvalidOperationException("State is already attached to other Turing machine.");
+        Machine = machine;
+    }
     
     public bool Equals(TuringMachineState? other)
     {
@@ -51,8 +59,8 @@ public class TuringMachineState : IEquatable<TuringMachineState>
         if (Id == DefaultTerminalState.Id) 
             return "!";
         
-        const string shortTerminalFmt = "*Q_{0}";
-        const string longTerminalFmt = "*Q_{0} '{1}'";
+        const string shortTerminalFmt = "!Q_{0}";
+        const string longTerminalFmt = "!Q_{0} '{1}'";
         const string shortFmt = "Q_{0}";
         const string longFmt = "Q_{0} '{1}'"; 
         

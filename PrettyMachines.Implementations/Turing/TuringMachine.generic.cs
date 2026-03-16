@@ -1,157 +1,136 @@
+
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 
 namespace PrettyMachines.Implementations.Turing;
 
-
-/// <summary>Represents Turing machine.</summary>
-/// <typeparam name="TSymbol">Data type of the tape's cells.</typeparam>
-[DebuggerDisplay("States {States.Count,nq}, alphabet length {alphabet.Count,nq}")]
-public class TuringMachine<TSymbol> : FixedTuringMachine<TSymbol>
+public class TuringMachine<TSymbol> : TuringMachine
     where TSymbol : IEquatable<TSymbol>
 {
-    private readonly IEqualityComparer<TSymbol> symbolsComparer;
     private readonly InstructionsTable<TSymbol> instructions;
-    private readonly HashSet<TSymbol> alphabet;
-    private readonly bool hasFixedAlphabet;
-    private readonly TSymbol? emptySymbol;
+    private readonly HashSet<TSymbol>? alphabet;
+    private TuringMachineState currentState, initialState;
     
-    public TuringMachineState? CurrentState { get; set; }
-
     
-    /// <summary>Creates new Turing machine without specifying alphabet.</summary>
-    /// <remarks>Alphabet will be determined from added instructions later.</remarks>
-    /// <param name="symbolsComparer">Object that will test equality of symbols and provide hash codes.</param>
-    public TuringMachine(IEqualityComparer<TSymbol>? symbolsComparer = null)
+    /// <summary>Create new Turing machine with configured instructions table.</summary>
+    /// <remarks>Machine can scan any symbol <typeparamref name="TSymbol"/>.</remarks>
+    public TuringMachine(InstructionsTable<TSymbol> instructions)
     {
-        this.symbolsComparer ??= EqualityComparer<TSymbol>.Default;
-        instructions = new InstructionsTable<TSymbol>(this.symbolsComparer);
-        hasFixedAlphabet = false;
-        alphabet = new HashSet<TSymbol>(this.symbolsComparer);
-        emptySymbol = default;
+        if (instructions.StatesCount == 0)
+            throw new ArgumentException("Must have at least one state", nameof(instructions));
+        if (instructions.InstructionsCount == 0)
+            throw new ArgumentException("Must have at least one instruction", nameof(instructions));
+        
+        foreach (var state in instructions.States) state.Attach(this);
+        this.instructions = instructions;
+        initialState = currentState = instructions.States.MinBy(s => s.Id)!;
     }
     
-    /// <summary>Creates new Turing machine with specified alphabet.</summary>
-    /// <remarks>All instructions must have symbols specified in given alphabet.</remarks>
-    /// <param name="alphabet">
-    /// Set of predetermined symbols that machine can read and understand. Empty symbol can be omitted from this list.
-    /// Scanning any not-empty symbol that wasn't listed in this alphabet will cause machine to stop.
-    /// </param>
-    /// <param name="symbolsComparer">Object that will test equality of symbols and provide hash codes.</param>
-    ///  <exception cref="ArgumentException">Alphabet cannot be empty.</exception>
-    public TuringMachine(ICollection<TSymbol> alphabet, IEqualityComparer<TSymbol>? symbolsComparer = null, TSymbol? emptySymbol = default)
+    /// <summary>Create new Turing machine with configured instructions table and fixed alphabet.</summary>
+    /// <remarks>Any scanned symbol <typeparamref name="TSymbol"/> that isn't present in the alphabet will cause an exception.</remarks>
+    public TuringMachine(InstructionsTable<TSymbol> instructions, HashSet<TSymbol> alphabet) : this(instructions)
     {
         if (alphabet.Count == 0)
-            throw new ArgumentException("Turing machine's alphabet must not be empty.");
-
-        this.symbolsComparer ??= EqualityComparer<TSymbol>.Default;
-        instructions = new InstructionsTable<TSymbol>(this.symbolsComparer);
-        hasFixedAlphabet = false;
-        this.alphabet = new HashSet<TSymbol>(alphabet, this.symbolsComparer);
-        this.alphabet.Remove(emptySymbol);
-        this.emptySymbol = emptySymbol;
+            throw new ArgumentException("Alphabet must not be empty.");
+        this.alphabet = alphabet;
     }
 
-    /// <inheritdoc/> 
-    public override int GetNewStateIndex()
+    public TuringMachine(TuringMachineState initialState, InstructionsTable<TSymbol> instructions) 
+        : this(instructions)
     {
-        return States.Count;
-    }
-
-    /// <summary>Adds new unnamed non-terminating state.</summary>
-    public TuringMachineState AddState() => AddState(null);
-    
-    /// <summary>Adds new unnamed terminating state.</summary>
-    public TuringMachineState AddTerminalState() => AddState(null, true);
-    
-    /// <summary>Adds new named state that can be terminating or not.</summary>
-    public TuringMachineState AddState(string? name, bool isTerminal = false)
-    {
-        var state = new TuringMachineState(this, name, isTerminal);
-        States.Add(state);
-        return state;
+        this.initialState = CurrentState = initialState;
     }
     
-    /// <summary>Adds new instruction with given condition that will stop this machine. Initial state must be attached to this object.</summary>
-    /// <returns>This Turing machine reference.</returns>
-    /// <exception cref="ArgumentException">Initial state must be attached to this object</exception>
-    public TuringMachine<TSymbol> AddTerminatingInstruction(TuringMachineCondition<TSymbol> condition)
+    public TuringMachine(TuringMachineState initialState, InstructionsTable<TSymbol> instructions, HashSet<TSymbol> alphabet) 
+        : this(instructions, alphabet)
     {
-        return AddInstruction(condition, new TuringMachineAction<TSymbol>(TuringMachineState.DefaultTerminalState));    
+        this.initialState = CurrentState = initialState;
     }
     
-    /// <summary>Adds new instruction with given condition that will stop this machine. Initial state must be attached to this object.</summary>
-    /// <returns>This Turing machine reference.</returns>
-    /// <exception cref="ArgumentException">Initial state must be attached to this object</exception>
-    public TuringMachine<TSymbol> AddTerminatingInstruction(TuringMachineCondition<TSymbol> condition, TSymbol printedSymbol)
+    
+    /// <summary>
+    /// If <c>true</c>, than scanning any symbol that isn't present in the alphabet will cause an <see cref="InvalidOperationException"/>.
+    /// Does nothing when alphabet wasn't passed to the constructor.
+    /// </summary>
+    public bool HasStrictAlphabet { get; set; }
+    
+    /// <summary>Get or set current machine's state. State must be attached to this Turing machine object.</summary>
+    /// <exception cref="ArgumentException">New state wasn't attached to this object.</exception>
+    public TuringMachineState CurrentState
     {
-        return AddInstruction(condition, new TuringMachineAction<TSymbol>(TuringMachineState.DefaultTerminalState, printedSymbol));    
-    }
-
-    /// <summary>Adds new instruction with given condition and action. Initial and next states must be attached to this object.</summary>
-    /// <returns>This Turing machine reference.</returns>
-    /// <exception cref="ArgumentException">Initial and next states must be attached to this object</exception>
-    public TuringMachine<TSymbol> AddInstruction(TuringMachineCondition<TSymbol> condition, TuringMachineAction<TSymbol> action)
-    {
-        if (condition.InitialState.Machine is not TuringMachine<TSymbol> m1 || !ReferenceEquals(m1, this))
-            throw new ArgumentException($"{nameof(condition.InitialState)} isn't attached to this Turing machine.", nameof(condition));
-
-        if (action.NextState.Id != TuringMachineState.DefaultTerminalState.Id)
+        get => currentState;
+        set
         {
-            if (action.NextState.Machine is not TuringMachine<TSymbol> m2 || !ReferenceEquals(m2, this))
-                throw new ArgumentException($"{nameof(action.NextState)} isn't attached to this Turing machine.", nameof(action));
+            ValidateState(value);
+            currentState = value;
         }
-
-        if (hasFixedAlphabet)
-        {
-            if (condition.Mode == SymbolAcceptance.ExactValue && !alphabet.Contains(condition.ScannedSymbol!))
-                throw new ArgumentException($"{nameof(condition.ScannedSymbol)} does not listed in the initial alphabet.", nameof(condition));
-            if (action.ShouldPrintSymbol && !alphabet.Contains(action.PrintedSymbol!))
-                throw new ArgumentException($"{nameof(action.PrintedSymbol)} does not listed in the initial alphabet.", nameof(action));
-        }
-        else
-        {
-            if (condition.Mode == SymbolAcceptance.ExactValue && !symbolsComparer.Equals(emptySymbol, condition.ScannedSymbol))
-                alphabet.Add(condition.ScannedSymbol!);
-            if (action.ShouldPrintSymbol && !symbolsComparer.Equals(emptySymbol, action.PrintedSymbol))
-                alphabet.Add(action.PrintedSymbol!);
-        }
-
-        if (condition.Mode == SymbolAcceptance.ExactValue && symbolsComparer.Equals(emptySymbol, condition.ScannedSymbol))
-        {
-            // fix acceptance mode
-            condition = new TuringMachineCondition<TSymbol>(condition.InitialState, SymbolAcceptance.EmptyValue);
-        }
-        
-        CurrentState ??= condition.InitialState;
-        instructions.AddInstruction(condition, action);
-        return this;
     }
     
-    /// <summary>Execute one step.</summary>
-    /// <returns><c>True</c>, if execution can be continued.</returns>
-    /// <exception cref="InvalidOperationException">Turing machine wasn't properly initialized.</exception>
-    public override bool NextStep(IMachineTape<TSymbol> tape, [NotNullWhen(true)] out TuringMachineAction<TSymbol>? appliedAction)
+    /// <summary>Reset current state to the first added.</summary>
+    public void ResetState()
     {
-        if (CurrentState == null)
-            throw new InvalidOperationException("The Turing Machine was not initialized.");
-        
+        CurrentState = initialState;
+    }
+    
+    /// <summary>Executes one step with given tape.</summary>
+    /// <returns><c>True</c>, if execution can be continued and next state is not terminal, <c>false</c> otherwise.</returns>
+    /// <exception cref="InvalidOperationException">Cannot scan unknown symbols with <see cref="HasStrictAlphabet"/> enabled.</exception>
+    public bool NextStep(IMachineTape<TSymbol> tape) => NextStep(tape, out _);
+    
+    /// <summary>Executes one step with given tape. Outputs action that was selected this time.</summary>
+    /// <inheritdoc cref="NextStep(PrettyMachines.Implementations.Turing.IMachineTape{TSymbol})"/>
+    public bool NextStep(IMachineTape<TSymbol> tape, out TuringMachineAction<TSymbol>? appliedAction)
+    {
         var hasValue = tape.ReadSymbol(out var symbol);
-        appliedAction = instructions.FindInstruction(CurrentState, !hasValue, symbol);
+        if (hasValue && HasStrictAlphabet && alphabet?.Contains(symbol!) == false)
+        {
+            throw new InvalidOperationException($"Symbol '{symbol}' wasn't present in the alphabet. " +
+                                                $"Cannot scan unknown symbols with {nameof(HasStrictAlphabet)} enabled.");
+        }
         
+        appliedAction = instructions.FindInstruction(currentState, !hasValue, symbol);
         if (appliedAction == null)
             return false;
-        
-        CurrentState = appliedAction.NextState;
-
         if (appliedAction.ShouldPrintSymbol)
             tape.PutSymbol(appliedAction.PrintedSymbol!);
         
-        if (CurrentState.IsTerminal)
+        currentState = appliedAction.NextState;
+
+        if (currentState.IsTerminal)
             return false;
         
         tape.MoveHead(appliedAction.Movement);
         return true;
+    }
+
+    public int Run(IMachineTape<TSymbol> tape, int maxSteps = 1000)
+    {
+        var steps = 1;
+        while (NextStep(tape) && steps != maxSteps)
+            steps++;
+        return steps;
+    }
+    
+    public IEnumerable<(TapeSymbol<TSymbol>? cell, TuringMachineState state, TuringMachineAction<TSymbol>? action)> RunVerbose(IMachineTape<TSymbol> tape, int maxSteps = 1000)
+    {
+        var steps = 1;
+        var shouldContinue = true;
+        
+        while (shouldContinue && steps != maxSteps)
+        {
+            steps++;
+            var cell = tape.ReadSymbol();
+            var state = CurrentState;
+            shouldContinue = NextStep(tape, out var action);
+            yield return (cell, state, action);
+        }
+    }
+    
+    
+    [StackTraceHidden]
+    private void ValidateState(TuringMachineState value)
+    {
+        if (value.Machine is not TuringMachine<TSymbol> m || !ReferenceEquals(m, this))
+            throw new ArgumentException($"Cannot set state {value} that is not attached to this Turing machine.", nameof(value));
     }
 }

@@ -1,6 +1,3 @@
-using System.Diagnostics;
-
-
 namespace PrettyMachines.Implementations.Turing;
 
 /// <summary>
@@ -8,13 +5,6 @@ namespace PrettyMachines.Implementations.Turing;
 /// </summary>
 public abstract class TuringMachine
 {
-    protected readonly List<TuringMachineState> States = [];
-
-    
-    /// <summary>Returns index for the next added state.</summary>
-    public abstract int GetNewStateIndex();
-    
-    
     /// <summary>For given initial state creates new condition that accepts exact value.</summary>
     public static TuringMachineCondition<T> AcceptsExact<T>(TuringMachineState initialState, T symbol) where T : IEquatable<T>
     {

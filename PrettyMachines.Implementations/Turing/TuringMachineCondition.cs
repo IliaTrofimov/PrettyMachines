@@ -1,6 +1,3 @@
-using System.Diagnostics.Contracts;
-
-
 namespace PrettyMachines.Implementations.Turing;
 
 /// <summary>
@@ -42,7 +39,6 @@ public class TuringMachineCondition<TSymbol>
     /// <summary>Value comparision type.</summary>
     public SymbolAcceptance Mode { get; }
     
-   
 
     public override string ToString()
     {

@@ -11,6 +11,9 @@
     &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.MachineTests.CreateMachine_FailWithEmptyAlphabet&lt;/TestId&gt;
     &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.MachineTests.Example_Concatenation&lt;/TestId&gt;
     &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.MachineTests.Example_ConcatenationShortSyntax&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.MachineTests.InitialStateMustBeNonTerminal&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.MachineTests.Example_BinaryIncrement&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::60AD47E7-E6AC-4781-9D39-DC70D2B662A1::net10.0::PrettyMachines.Tests.Turing.MachineTests.Example_Example_BinaryIncrementShortSyntax&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=32bf0ca6_002D7fb4_002D4ab3_002Dac89_002D055cf0a610a2/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="CreatingTape_Default" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
