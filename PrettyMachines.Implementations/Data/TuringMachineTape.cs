@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 
-namespace PrettyMachines.Implementations.Turing;
+namespace PrettyMachines.Implementations.Data;
 
 
 /// <summary>Default tape with sequence of symbols to feed into Turing machine.</summary>

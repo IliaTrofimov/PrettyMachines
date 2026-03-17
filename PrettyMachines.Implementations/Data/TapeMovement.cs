@@ -1,4 +1,4 @@
-namespace PrettyMachines.Implementations.Turing;
+namespace PrettyMachines.Implementations.Data;
 
 public enum TapeMovement : sbyte
 {

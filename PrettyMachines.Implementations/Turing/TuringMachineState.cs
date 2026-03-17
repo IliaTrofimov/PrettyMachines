@@ -4,14 +4,14 @@ namespace PrettyMachines.Implementations.Turing;
 public class TuringMachineState : IEquatable<TuringMachineState>
 {
     /// <summary>Default terminating state.</summary>
-    public static readonly TuringMachineState DefaultTerminalState = new();
+    public static readonly TuringMachineState Halt = new();
     
     private TuringMachineState() {}
 
     /// <summary>Turing machine's state.</summary>
     public TuringMachineState(int id, string? stateName, bool isTerminal = false)
     {
-        if (id == DefaultTerminalState.Id)
+        if (id == Halt.Id)
             throw new InvalidOperationException("Cannot create a new state with a default state ID.");
         
         Id = id;
@@ -36,10 +36,13 @@ public class TuringMachineState : IEquatable<TuringMachineState>
     /// <exception cref="InvalidOperationException">State can be attached only once.</exception>
     public void Attach(TuringMachine machine)
     {
+        if (Id == Halt.Id) 
+            return;
         if (Machine != null && !ReferenceEquals(Machine, machine))
-            throw new InvalidOperationException("State is already attached to other Turing machine.");
+            throw new InvalidOperationException($"State '{this}' is already attached to other Turing machine.");
         Machine = machine;
     }
+    
     
     public bool Equals(TuringMachineState? other)
     {
@@ -56,7 +59,7 @@ public class TuringMachineState : IEquatable<TuringMachineState>
     public override string ToString() => ToString(false);
     public string ToString(bool shortString)
     {
-        if (Id == DefaultTerminalState.Id) 
+        if (Id == Halt.Id) 
             return "!";
         
         const string shortTerminalFmt = "!Q_{0}";

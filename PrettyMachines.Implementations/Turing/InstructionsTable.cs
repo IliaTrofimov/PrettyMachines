@@ -17,6 +17,11 @@ public class InstructionsTable<TSymbol>(IEqualityComparer<TSymbol>? symbolCompar
     private readonly IEqualityComparer<TSymbol> symbolComparer = symbolComparer ?? EqualityComparer<TSymbol>.Default;
 
     
+    /// <summary>
+    /// If <c>true</c>, than calling <c>FindInstruction</c> for unknown symbol will throw <see cref="InvalidOperationException"/>.
+    /// </summary>
+    public bool StrictAlphabet { get; set; }
+    
     /// <summary>Amount of all unique states.</summary>
     public int StatesCount => instructions.Keys.Count;
     
@@ -74,7 +79,8 @@ public class InstructionsTable<TSymbol>(IEqualityComparer<TSymbol>? symbolCompar
             };
         }
         
-        instructions.TryAdd(action.NextState, null);
+        if (action.NextState.Id != TuringMachineState.Halt.Id)
+            instructions.TryAdd(action.NextState, null);
         
         if (condition is { Mode: SymbolAcceptance.ExactValue, ScannedSymbol: not null })
             addedSymbols.TryAdd(symbolComparer.GetHashCode(condition.ScannedSymbol), condition.ScannedSymbol!);
@@ -85,25 +91,30 @@ public class InstructionsTable<TSymbol>(IEqualityComparer<TSymbol>? symbolCompar
 
     /// <summary>Try finding action for given state and tape's symbol.</summary>
     /// <returns>Corresponding action or <c>null</c> if such initial values cannot be accepted.</returns>
+    /// <exception cref="InvalidOperationException">Found unknown symbol with StrictAlphabet = true.</exception>
     public TuringMachineAction<TSymbol>? FindInstruction(TuringMachineState state, bool isEmpty, TSymbol? symbol)
     {
         if (!instructions.TryGetValue(state, out Dictionary<Key, TuringMachineAction<TSymbol>>? symbolsDict) || symbolsDict == null)
             return null;
         
-        TuringMachineAction<TSymbol>? action;
+        TuringMachineAction<TSymbol> action;
         
         if (isEmpty)
         {
             if (symbolsDict.TryGetValue(GetSymbolKey(symbol, SymbolAcceptance.EmptyValue), out action))
                 return action;
         }
-        else if (symbolsDict.TryGetValue(GetSymbolKey(symbol, SymbolAcceptance.ExactValue), out action))
-        {
-            return action;
-        }
-        else if (symbolsDict.TryGetValue(GetSymbolKey(symbol, SymbolAcceptance.NotEmptyValue), out action))
-        {
-            return action;
+        else
+        { 
+            if (StrictAlphabet && !addedSymbols.ContainsKey(symbolComparer.GetHashCode(symbol!)))
+                throw new InvalidOperationException($"Symbol '{symbol}' wasn't present in the alphabet. " +
+                                                    $"Cannot scan unknown symbols with {nameof(StrictAlphabet)} enabled.");
+            
+            if (symbolsDict.TryGetValue(GetSymbolKey(symbol, SymbolAcceptance.ExactValue), out action))
+                return action;
+            
+            if (symbolsDict.TryGetValue(GetSymbolKey(symbol, SymbolAcceptance.NotEmptyValue), out action))
+                return action;
         }
         
         return symbolsDict.TryGetValue(GetSymbolKey(symbol, SymbolAcceptance.AnyValue), out action) 

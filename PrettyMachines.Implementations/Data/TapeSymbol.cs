@@ -1,4 +1,4 @@
-namespace PrettyMachines.Implementations.Turing;
+namespace PrettyMachines.Implementations.Data;
 
 /// <summary>Wrapper type for single cell of the tape.</summary>
 /// <typeparam name="TSymbol">Data type of the cell.</typeparam>

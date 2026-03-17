@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 
 
-namespace PrettyMachines.Implementations.Turing;
+namespace PrettyMachines.Implementations.Data;
 
 /// <summary>Abstract automaton's tape.</summary>
 /// <typeparam name="TSymbol">Data type of the tape cells.</typeparam>
