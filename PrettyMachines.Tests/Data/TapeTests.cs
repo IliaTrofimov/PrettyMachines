@@ -1,8 +1,7 @@
 using PrettyMachines.Implementations.Data;
-using PrettyMachines.Implementations.Turing;
 
 
-namespace PrettyMachines.Tests.Turing;
+namespace PrettyMachines.Tests.Data;
 
 public class TapeTests
 {
@@ -256,8 +255,12 @@ public class TapeTests
     private static void TestSymbol<T>(IMachineTape<T> tape, T? expected, bool isEmpty, int index) where T : IEquatable<T>
     {
         T? s;
-        if (isEmpty) Assert.False(tape.ReadSymbol(out s), $"symbol {index} should be empty");
-        else Assert.True(tape.ReadSymbol(out s), $"symbol {index} should not be empty");
-        Assert.Equal(expected, s);
+        var cell = tape.ReadSymbol();
+        if (isEmpty) 
+            Assert.True(cell.IsEmpty, $"symbol {index} should be empty");
+        else 
+            Assert.False(cell.IsEmpty, $"symbol {index} should not be empty");
+        
+        Assert.Equal(expected, cell.Symbol);
     }
 }

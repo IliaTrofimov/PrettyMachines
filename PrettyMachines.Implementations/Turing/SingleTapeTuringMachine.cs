@@ -4,7 +4,7 @@ using PrettyMachines.Implementations.Data;
 
 namespace PrettyMachines.Implementations.Turing;
 
-/// <summary>Turing Machine with one head.</summary>
+/// <summary>Turing Machine with one head that can read single 1d tape.</summary>
 /// <typeparam name="TSymbol">Input cell data type.</typeparam>
 [DebuggerDisplay("Current state {CurrentState?.ToString(true)}, states {instructions?.StatesCount}, symbols {instructions?.AlphabetLength}, instructions {instructions?.InstructionsCount}")]
 public class SingleTapeTuringMachine<TSymbol> : TuringMachine
@@ -15,13 +15,15 @@ public class SingleTapeTuringMachine<TSymbol> : TuringMachine
     private TuringMachineState currentState;
     
     
-    /// <summary>Create new Turing machine with configured instructions table and initial state.</summary>
+    /// <summary>Create new Turing machine with configured instructions table. First added state will be used as initial.</summary>
+    /// <remarks>States and instructions must not be empty. All states must not be attached to other machine.</remarks>
     public SingleTapeTuringMachine(InstructionsTable<TSymbol> instructions) 
         : this(instructions.States.MinBy(s => s.Id)!, instructions)
     {
     }
-
+    
     /// <summary>Create new Turing machine with configured instructions table.</summary>
+    /// <inheritdoc cref="SingleTapeTuringMachine{TSymbol}(InstructionsTable{TSymbol})"/>
     public SingleTapeTuringMachine(TuringMachineState initialState, InstructionsTable<TSymbol> instructions) 
     {
         if (instructions.StatesCount == 0)
@@ -41,6 +43,9 @@ public class SingleTapeTuringMachine<TSymbol> : TuringMachine
         this.instructions = instructions;
         this.initialState = currentState = initialState;
     }
+    
+    /// <summary>Get readonly instructions.</summary>
+    public InstructionsTable<TSymbol>.Readonly Instructions => new(instructions);
 
     
     /// <summary>
@@ -80,9 +85,9 @@ public class SingleTapeTuringMachine<TSymbol> : TuringMachine
     /// <inheritdoc cref="NextStep(IMachineTape{TSymbol})"/>
     public bool NextStep(IMachineTape<TSymbol> tape, out TuringMachineAction<TSymbol>? appliedAction)
     {
-        var hasValue = tape.ReadSymbol(out var symbol);
+        var cell = tape.ReadSymbol();
         
-        appliedAction = instructions.FindInstruction(currentState, !hasValue, symbol);
+        appliedAction = instructions.FindInstruction(currentState, cell.IsEmpty, cell.Symbol);
         if (!appliedAction.HasValue)
             return false;
         if (appliedAction.Value.ShouldPrintSymbol)
@@ -98,11 +103,11 @@ public class SingleTapeTuringMachine<TSymbol> : TuringMachine
     }
 
     /// <summary>Execute steps until terminal state is reached.</summary>
-    /// <returns>Amount of steps executed.</returns>
+    /// <returns>Amount of executed steps.</returns>
     public int Run(IMachineTape<TSymbol> tape, int maxSteps = 1000) => Run(tape, maxSteps, null);
 
     /// <summary>Execute steps until terminal state is reached. Each step will invoke given callback.</summary>
-    /// <returns>Amount of steps executed.</returns>
+    /// <returns>Amount of executed steps.</returns>
     public int Run(IMachineTape<TSymbol> tape,
                    Action<int, TapeSymbol<TSymbol>, TuringMachineState, TuringMachineAction<TSymbol>?>? onStep)
     {

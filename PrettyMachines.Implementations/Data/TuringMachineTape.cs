@@ -5,7 +5,8 @@ using System.Diagnostics.CodeAnalysis;
 namespace PrettyMachines.Implementations.Data;
 
 
-/// <summary>Default tape with sequence of symbols to feed into Turing machine.</summary>
+/// <summary>Default infinite tape with sequence of symbols to feed into Turing machine.</summary>
+/// <remarks>Uses linked list to implement infinite tape.</remarks>
 /// <typeparam name="TSymbol">Data type of the tape cells.</typeparam>
 [DebuggerDisplay("Current {currentCell.Value,nq}, length {Length,nq}, filled {filledCellsCount,nq}, indexes from {FirstIndex,nq} to {LastIndex,nq}")]
 public class TuringMachineTape<TSymbol> : IMachineTape<TSymbol> where TSymbol : IEquatable<TSymbol>
@@ -126,20 +127,7 @@ public class TuringMachineTape<TSymbol> : IMachineTape<TSymbol> where TSymbol : 
             filledCellsCount--;
         currentCell.Value = TapeSymbol<TSymbol>.Empty(emptyCellValue, currentCell.Value.Position);
     }
-
-    /// <inheritdoc/>
-    public bool ReadSymbol([NotNullWhen(true)] out TSymbol? symbol)
-    {
-        if (currentCell.Value.IsEmpty)
-        {
-            symbol = emptyCellValue;
-            return false;
-        }
-
-        symbol = currentCell.Value.Symbol!;
-        return true;
-    }
-
+    
     /// <inheritdoc/>
     public TapeSymbol<TSymbol> ReadSymbol()
     {

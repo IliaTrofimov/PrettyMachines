@@ -9,10 +9,10 @@ public class TuringMachineState : IEquatable<TuringMachineState>
     private TuringMachineState() {}
 
     /// <summary>Turing machine's state.</summary>
-    public TuringMachineState(int id, string? stateName, bool isTerminal = false)
+    public TuringMachineState(int id, string? stateName = null, bool isTerminal = false)
     {
         if (id == Halt.Id)
-            throw new InvalidOperationException("Cannot create a new state with a default state ID.");
+            throw new ArgumentException("Cannot create a new state with a default state ID.", nameof(id));
         
         Id = id;
         IsTerminal = isTerminal;

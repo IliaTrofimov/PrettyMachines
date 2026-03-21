@@ -1,5 +1,3 @@
-
-
 using System.Diagnostics;
 using PrettyMachines.Implementations.Data;
 
@@ -8,7 +6,7 @@ namespace PrettyMachines.Implementations.Turing;
 
 /// <summary>Class that helps create <see cref="SingleTapeTuringMachine{TSymbol}"/>.</summary>
 /// <typeparam name="TSymbol">Data type of the tape's cells.</typeparam>
-[DebuggerDisplay("States {instructions.StatesCount}, instructions {instructions.InstructionsCount}, alphabet length {alphabet.Count}")]
+[DebuggerDisplay("States {instructions.StatesCount}, instructions {instructions.InstructionsCount}, alphabet length {instructions.AlphabetLength}")]
 public class TuringMachineBuilder<TSymbol> where TSymbol : IEquatable<TSymbol>
 {
     private readonly EqualityComparer<TSymbol> symbolsComparer;
@@ -16,6 +14,9 @@ public class TuringMachineBuilder<TSymbol> where TSymbol : IEquatable<TSymbol>
     private readonly TSymbol? emptySymbol;
     
     private int currentStateId;
+    
+    /// <summary>Access current instructions set.</summary>
+    internal InstructionsTable<TSymbol> Instructions => instructions;
 
     
     /// <summary>Create builder.</summary>
@@ -39,6 +40,8 @@ public class TuringMachineBuilder<TSymbol> where TSymbol : IEquatable<TSymbol>
         return new SingleTapeTuringMachine<TSymbol>(initialState, instructions);
     }
 
+    /// <summary>Update first state index. This action is only allowed before first state was created.</summary>
+    /// <exception cref="ArgumentException">Cannot use TuringMachineState.<see cref="TuringMachineState.Halt"/>.Id (int.MinValue).</exception>
     public TuringMachineBuilder<TSymbol> SetInitialStateId(int stateId)
     {
         if (currentStateId > 0)

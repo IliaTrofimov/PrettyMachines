@@ -1,9 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
-
-
 namespace PrettyMachines.Implementations.Data;
 
-/// <summary>Abstract automaton's tape.</summary>
+/// <summary>Abstract automaton's tape with one dimension.</summary>
 /// <typeparam name="TSymbol">Data type of the tape cells.</typeparam>
 public interface IMachineTape<TSymbol> where TSymbol : IEquatable<TSymbol>
 {
@@ -19,10 +16,6 @@ public interface IMachineTape<TSymbol> where TSymbol : IEquatable<TSymbol>
     /// <summary>Put empty symbol into current cell.</summary>
     public void EraseSymbol();
     
-    /// <summary>Get current cell's value.</summary>
-    /// <returns><c>True</c> if cell wasn't empty.</returns>
-    public bool ReadSymbol([NotNullWhen(true)] out TSymbol? symbol);
-    
     /// <summary>Get current cell.</summary>
     public TapeSymbol<TSymbol> ReadSymbol();
     
@@ -37,10 +30,33 @@ public static class MachineTapeExtensions
     /// <summary>
     /// Concatenate all symbols into one string representation.
     /// </summary>
-    public static string JoinAsString<T>(this IMachineTape<T> tape, string separator = "", bool trimEmptyCells = true) 
+    public static string Print<T>(this IMachineTape<T> tape, string separator = "", bool trimEmptyCells = true) 
         where T : IEquatable<T>
     {
         return string.Join(separator, tape.EnumerateCells(trimEmptyCells));
+    }
+    
+    /// <summary>
+    /// Print all symbols into the stream.
+    /// </summary>
+    public static void Print<T>(this IMachineTape<T> tape, TextWriter writer, string separator = "", bool trimEmptyCells = true) 
+        where T : IEquatable<T>
+    {
+        var hasSeparator = !string.IsNullOrEmpty(separator);
+        foreach (var c in tape.EnumerateCells(trimEmptyCells))
+        {
+            writer.Write(c);
+            if (hasSeparator) writer.Write(separator);
+        }
+    }
+    
+    /// <summary>
+    /// Print all symbols into <see cref="Console"/>.
+    /// </summary>
+    public static void PrintConsole<T>(this IMachineTape<T> tape, string separator = "", bool trimEmptyCells = true) 
+        where T : IEquatable<T>
+    {
+        Print(tape, Console.Out, separator, trimEmptyCells);
     }
 
     /// <summary>

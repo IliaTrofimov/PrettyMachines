@@ -1,6 +1,6 @@
 namespace PrettyMachines.Implementations.Turing;
 
 /// <summary>
-/// Base class for all Turing machines. Also contains static helper methods. 
+/// Base class for all Turing machines.
 /// </summary>
 public abstract class TuringMachine { }

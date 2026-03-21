@@ -22,6 +22,8 @@ public readonly struct TuringMachineCondition<TSymbol>
     {
         if (initialState.IsTerminal) 
             throw new ArgumentException("Initial state cannot be terminal.", nameof(initialState));
+        if (accepts == SymbolAcceptance.ExactValue) 
+            throw new ArgumentException("SymbolAcceptance cannot be ExactValue with no value provided.", nameof(accepts));
 
         InitialState = initialState;
         Mode = accepts;
