@@ -23,6 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\PrettyMachines.Algorithms\PrettyMachines.Algorithms.csproj" />
       <ProjectReference Include="..\PrettyMachines.Implementations\PrettyMachines.Implementations.csproj" />
     </ItemGroup>
 

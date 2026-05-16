@@ -1,26 +1,10 @@
-namespace PrettyMachines.Implementations.Turing;
+namespace PrettyMachines.Algorithms.Turing;
 
 /// <summary>Turing machine's state.</summary>
 public class TuringMachineState : IEquatable<TuringMachineState>
 {
-    /// <summary>Default terminating state.</summary>
-    public static readonly TuringMachineState Halt = new();
-    
-    private TuringMachineState() {}
-
-    /// <summary>Turing machine's state.</summary>
-    public TuringMachineState(int id, string? stateName = null, bool isTerminal = false)
-    {
-        if (id == Halt.Id)
-            throw new ArgumentException("Cannot create a new state with a default state ID.", nameof(id));
-        
-        Id = id;
-        IsTerminal = isTerminal;
-        Name = stateName;
-    }
-    
     /// <summary>Unique identifier of the state.</summary>
-    public int Id { get; } = int.MinValue;
+    public int Id { get; private init; }
 
     /// <summary>Returns <c>true</c> if this state requires Turing machine to stop.</summary>
     public bool IsTerminal { get; } = true;
@@ -32,6 +16,26 @@ public class TuringMachineState : IEquatable<TuringMachineState>
     public TuringMachine? Machine { get; private set; }
 
 
+    
+    /// <summary>Default terminating state.</summary>
+    public static TuringMachineState Halt { get; } = new() { Id = int.MinValue };
+    
+    private TuringMachineState() {}
+    
+    public TuringMachineState(int id, bool isTerminal) : this(id, null, isTerminal) { }
+    
+    /// <summary>Turing machine's state.</summary>
+    public TuringMachineState(int id, string? stateName = null, bool isTerminal = false)
+    {
+        if (id == Halt.Id)
+            throw new ArgumentException("Cannot create a new state with a default state ID.", nameof(id));
+        
+        Id = id;
+        IsTerminal = isTerminal;
+        Name = stateName;
+    }
+    
+    
     /// <summary>Attach this state to given Turing machine. State can be attached only once.</summary>
     /// <exception cref="InvalidOperationException">State can be attached only once.</exception>
     public void Attach(TuringMachine machine)
