@@ -2,7 +2,6 @@ using System.Collections;
 using System.Diagnostics;
 using PrettyMachines.Algorithms.Abstract;
 
-
 namespace PrettyMachines.Algorithms.Turing;
 
 /// <summary>
@@ -15,7 +14,7 @@ public class InstructionsTable : IEnumerable<TuringMachineInstruction<string>>
     private readonly HashSet<string?> alphabet;
     private readonly HashSet<string>? markers;
     private readonly FuzzyKeyComparer<string> fuzzySymbolsComparer;
-    private readonly Dictionary<TuringMachineState, Dictionary<FuzzyKey<string>, TuringMachineAction<string>>> statesDict;
+    private readonly Dictionary<TuringMachineState, Dictionary<FuzzyKey<string>, TuringMachineAction>> statesDict;
 
     
     /// <summary>Gets total number of added instructions.</summary>
@@ -32,7 +31,7 @@ public class InstructionsTable : IEnumerable<TuringMachineInstruction<string>>
     public IReadOnlySet<string>? Markers => markers;
     
     /// <summary>Gets special value that represents an empty symbol.</summary>
-    public string? BlankSymbol { get; }
+    public string? BlankSymbol { get; init; }
     
     
     /// <summary>Initializes new instructions table with given set of allowed symbols and string comparision type.</summary>
@@ -107,10 +106,13 @@ public class InstructionsTable : IEnumerable<TuringMachineInstruction<string>>
         alphabet = new HashSet<string?>(other.alphabet, other.alphabet.Comparer);
         markers = other.markers == null ? null : new HashSet<string>(other.markers, other.alphabet.Comparer);
         fuzzySymbolsComparer = other.fuzzySymbolsComparer;
-        statesDict = new Dictionary<TuringMachineState, Dictionary<FuzzyKey<string>, TuringMachineAction<string>>>(other.statesDict.Count);
+        statesDict = new Dictionary<TuringMachineState, Dictionary<FuzzyKey<string>, TuringMachineAction>>(other.statesDict.Count);
         
         foreach (var (state, symbolsDict) in other.statesDict)
             statesDict[state] = symbolsDict.ToDictionary(x => x.Key, x => x.Value, fuzzySymbolsComparer);
+        
+        BlankSymbol = other.BlankSymbol;
+        RulesCount = other.RulesCount;
     }
     
     /// <summary>Adds new state with no instructions. Does nothing if state is already added.</summary>
@@ -127,7 +129,7 @@ public class InstructionsTable : IEnumerable<TuringMachineInstruction<string>>
     /// <param name="action">Action that will be associated with given conditions.</param>
     /// <exception cref="AlgorithmException">Initial state is terminal.</exception>
     /// <exception cref="SymbolIsNotAllowedException">Symbol or action have invalid symbols.</exception>
-    public void AddRule(TuringMachineState initialState, in FuzzyKey<string> symbol, in TuringMachineAction<string> action)
+    public void AddRule(TuringMachineState initialState, in FuzzyKey<string> symbol, in TuringMachineAction action)
     {
         if (initialState.IsTerminal)
             throw new AlgorithmException("Instruction's initial state must not be terminal.");
@@ -140,10 +142,10 @@ public class InstructionsTable : IEnumerable<TuringMachineInstruction<string>>
             statesDict.Add(initialState, symbolsDict);
         }
 
-        if (symbolsDict.TryAdd(symbol, action))
-        {
+        if (!symbolsDict.ContainsKey(symbol))
             RulesCount++;
-        }
+        
+        symbolsDict[symbol] = action;
         
         if (action.NextState.Equals(TuringMachineState.Halt) && !statesDict.ContainsKey(action.NextState))
         {
@@ -156,11 +158,11 @@ public class InstructionsTable : IEnumerable<TuringMachineInstruction<string>>
     /// <param name="symbol">Input symbol.</param>
     /// <param name="action">Resulting action. When the returned value is <c>false</c> always equal to the HALT action.</param>
     /// <returns><c>True</c> if such action exists in the instructions table.</returns>
-    public bool TryFindRule(TuringMachineState state, string? symbol, out TuringMachineAction<string> action)
+    public bool TryFindRule(TuringMachineState state, string? symbol, out TuringMachineAction action)
     {
         if (!statesDict.TryGetValue(state, out var symbolsDict))
         {
-            action = TuringMachineAction<string>.Halt;
+            action = TuringMachineAction.Halt;
             return false;
         }
 
@@ -175,7 +177,12 @@ public class InstructionsTable : IEnumerable<TuringMachineInstruction<string>>
         if (symbolsDict.TryGetValue(fuzzyKey, out action))
             return true;
 
-        return symbolsDict.TryGetValue(FuzzyKey<string>.Any, out action);
+        if (symbolsDict.TryGetValue(FuzzyKey<string>.Any, out action)) 
+            return true;
+
+        action = TuringMachineAction.Halt;
+        return false;
+
     }
     
     /// <summary>Returns enumerator that outputs through all states and their instructions one by one.</summary>
@@ -200,7 +207,7 @@ public class InstructionsTable : IEnumerable<TuringMachineInstruction<string>>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator(); 
     
     
-    private void ValidateSymbols(in FuzzyKey<string> symbol, in TuringMachineAction<string> action)
+    private void ValidateSymbols(in FuzzyKey<string> symbol, in TuringMachineAction action)
     {
         if (isAutoAlphabet)
         {

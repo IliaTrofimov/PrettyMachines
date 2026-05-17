@@ -1,19 +1,26 @@
 namespace PrettyMachines.Algorithms.Turing;
 
-public readonly struct TuringMachineAction<TSymbol>
+public readonly struct TuringMachineAction
 {
-    public static TuringMachineAction<TSymbol> Halt { get; } = new(TuringMachineState.Halt);
-    
     public TuringMachineState NextState { get; } = TuringMachineState.Halt;
 
-    public TSymbol? PrintedSymbol { get; } = default;
+    public string? PrintedSymbol { get; } = default;
 
     public TapeMovement Movement { get; } = TapeMovement.None;
     
     public bool ShouldPrintSymbol => PrintedSymbol != null;
+
+
+    public static TuringMachineAction Halt { get; } = new(TuringMachineState.Halt);
+
+    public static TuringMachineAction CreateHalt(string? printedSymbol, TapeMovement movement = TapeMovement.None)
+    {
+        return printedSymbol == null 
+            ? new(TuringMachineState.Halt, movement) 
+            : new(TuringMachineState.Halt, printedSymbol, movement);
+    }
     
-    
-    public TuringMachineAction(TuringMachineState nextState, TSymbol printedSymbol, TapeMovement movement = TapeMovement.None)
+    public TuringMachineAction(TuringMachineState nextState, string printedSymbol, TapeMovement movement = TapeMovement.None)
     {
         NextState = nextState;
         PrintedSymbol = printedSymbol;

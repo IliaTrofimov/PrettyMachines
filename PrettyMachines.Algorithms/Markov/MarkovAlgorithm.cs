@@ -157,6 +157,7 @@ public class MarkovAlgorithm : IAlgorithm<string>
         }
     }
 
+    #region Builder class
     
     private sealed class MarkovAlgorithmBuilder : IMarkovSubstitutionBuilder, IMarkovAlgorithmBuilder
     {
@@ -280,4 +281,6 @@ public class MarkovAlgorithm : IAlgorithm<string>
                 comments.Add(null);
         }
     }
+    
+    #endregion
 }
