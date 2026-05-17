@@ -31,7 +31,7 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
     /// Indicates that this Turing machine uses restricted alphabet and
     /// all unknown symbols will cause algorithm to fail.
     /// </summary>
-    public bool HasStrictAlphabet { get; }
+    public bool HasStrictAlphabet { get; init; }
 
 
     /// <summary>Creates a new builder instance for constructing Turing machines.</summary>
@@ -39,6 +39,7 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
     /// <returns>A builder for fluent configuration.</returns>
     public static ITuringMachineBuilder Create(string? name = null) => new TuringMachineBuilder(name);
 
+    
     /// <summary>
     /// Initialize new algorithm defined by Turing machine with given set of instructions and initial state.
     /// </summary>
@@ -58,10 +59,17 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
     public TuringMachine(string? name, InstructionsTable instructions, bool strictAlphabet = false, TuringMachineState? initialState = null)
     {
         ArgumentNullException.ThrowIfNull(instructions);
+        if (instructions.RulesCount == 0)
+            throw new ArgumentException("Turing machine must have at least 1 rule.", nameof(instructions));
+       
         Name = name;
         this.instructions = instructions;
         HasStrictAlphabet = strictAlphabet;
-        _initialState = initialState ?? this.instructions.States.OrderBy(s => s.Id).First();
+        
+        if (initialState == null)
+            _initialState = this.instructions.States.OrderBy(s => s.Id).First();
+        else
+            InitialState = initialState;
     }
     
     
@@ -110,7 +118,7 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
         {
             var symbol = input.CurrentSymbol;
             
-            if (HasStrictAlphabet && instructions.Alphabet.Contains(symbol))
+            if (HasStrictAlphabet && !instructions.Alphabet.Contains(symbol))
             {
                 status = TerminationStatus.InvalidInput;
                 trace?.Add(CreateErrorTrace(traceBuilder!, currentState, symbol));
@@ -209,6 +217,13 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
         {
             if (isInitial && isTerminal)
                 throw new ArgumentException("State cannot be both initial and terminal.");
+
+            if (string.IsNullOrEmpty(name))
+            {
+                state = new TuringMachineState(_states.Count, null, isTerminal);
+                _states.Add(state);
+                return this;
+            }
             
             state = _states.Find(s => s.Name == name);
             if (state == null)
@@ -225,17 +240,26 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
             }
             else
             {
-                throw new ArgumentException($"State '{name} is already exists.");
+                throw new ArgumentException($"State '{name}' is already added.");
             }
         }
 
 
         public TuringMachine BuildRules(Action<ITuringMachineRuleBuilder> builderFunc)
         {
-            var isStrictAlphabet = _alphabet == null;
-            var instructions = new InstructionsTable(_alphabet, _markers, _blankSymbol, _stringComparison);
-            builderFunc(new TuringMachineRuleBuilder(instructions));
-            return new TuringMachine(algorithmName, instructions, isStrictAlphabet, _initialState ?? _states[0]);
+            try
+            {
+                var isStrictAlphabet = _alphabet != null;
+                var instructions = new InstructionsTable(_alphabet, _markers, _blankSymbol, _stringComparison);
+                foreach (var state in _states)
+                    instructions.AddState(state);
+                builderFunc(new TuringMachineRuleBuilder(instructions));
+                return new TuringMachine(algorithmName, instructions, isStrictAlphabet, _initialState ?? _states[0]);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error occured while building rules for the {nameof(TuringMachine)}: {ex.Message}", ex);
+            }
         }
     }
 
@@ -271,7 +295,7 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
 
         private void ValidateState(TuringMachineState state, [CallerArgumentExpression("state")] string paramName = "")
         {
-            if (!instructions.States.Any(s => ReferenceEquals(state, s)))
+            if (!state.Equals(TuringMachineState.Halt) && !instructions.States.Any(s => ReferenceEquals(state, s)))
                 throw new ArgumentException($"State '{state}' does not exist.", paramName);
         }
     }

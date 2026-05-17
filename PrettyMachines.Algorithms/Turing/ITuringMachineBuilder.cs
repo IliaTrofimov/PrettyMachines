@@ -38,7 +38,7 @@ public interface ITuringMachineBuilder
     /// <summary>
     /// Builds the transition rules using a nested fluent builder.
     /// </summary>
-    /// <param name="builderFunc">Action that configures rules via ITuringMachineRuleBuilder.</param>
+    /// <param name="builderFunc">Action that configures rules via <see cref="ITuringMachineRuleBuilder"/>.</param>
     /// <returns>The fully constructed Turing machine.</returns>
     public TuringMachine BuildRules(Action<ITuringMachineRuleBuilder> builderFunc);
 }
