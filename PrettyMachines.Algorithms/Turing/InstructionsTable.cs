@@ -219,7 +219,7 @@ public class InstructionsTable : IEnumerable<TuringMachineInstruction<string>>
         }
         else
         {
-            if (symbol.Match == SymbolMatch.Exact && !Alphabet.Contains(symbol.Value))
+            if (symbol.Match == SymbolMatch.Exact && !Alphabet.Contains(symbol.Value!) && !(Markers?.Contains(symbol.Value!) ?? false))
                 throw new SymbolIsNotAllowedException(symbol.Value!, "invalid scanned symbol");
 
             if (action.PrintedSymbol is not null && !Alphabet.Contains(action.PrintedSymbol) && !(Markers?.Contains(action.PrintedSymbol) ?? false))

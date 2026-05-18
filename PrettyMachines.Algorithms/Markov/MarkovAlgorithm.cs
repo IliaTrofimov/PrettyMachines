@@ -95,13 +95,13 @@ public class MarkovAlgorithm : IAlgorithm<string>
         if (!ValidateInput(input))
             return new AlgorithmResult<string>(TerminationStatus.InvalidInput, input);
         
-        uint steps = 0;
+        uint steps;
         var result = input;
         var status = TerminationStatus.Aborted;
         List<string>? trace = verbose ? [] : null;
         trace?.Add(CreateFirstTrace(input));
         
-        while (cancellation.ShouldContinue(steps++))
+        for (steps = 1; cancellation.ShouldContinue(steps + 1); steps++)
         {
             result = NextStep(result, out var matchedRule);
             trace?.Add(CreateTrace(result, matchedRule));
@@ -177,20 +177,10 @@ public class MarkovAlgorithm : IAlgorithm<string>
             return this;
         }
         
-        public IMarkovAlgorithmBuilder WithAlphabet(params char[] alphabetCharacters)
-        {
-            return WithAlphabet((IEnumerable<char>)alphabetCharacters);
-        }
-        
         public IMarkovAlgorithmBuilder WithMarkers(IEnumerable<char> makerCharacters)
         {
             markers = [..makerCharacters];
             return this;
-        }
-        
-        public IMarkovAlgorithmBuilder WithMarkers(params char[] makerCharacters)
-        {
-            return WithMarkers((IEnumerable<char>)makerCharacters);
         }
         
         public IMarkovSubstitutionBuilder AddRule(Substitution rule)
@@ -211,26 +201,6 @@ public class MarkovAlgorithm : IAlgorithm<string>
             InitializeComments();
             comments[^1] = comment;
             return this;
-        }
-
-        public IMarkovSubstitutionBuilder AddRule(string pattern, string replacement, bool isTerminal = false)
-        {
-            return AddRule(new Substitution(pattern, replacement, isTerminal));
-        }
-        
-        public IMarkovSubstitutionBuilder AddRule(char pattern, string replacement, bool isTerminal = false)
-        {
-            return AddRule(new Substitution(pattern.ToString(), replacement, isTerminal));
-        }
-        
-        public IMarkovSubstitutionBuilder AddRule(string pattern, char replacement, bool isTerminal = false)
-        {
-            return AddRule(new Substitution(pattern, replacement.ToString(), isTerminal));
-        }
-        
-        public IMarkovSubstitutionBuilder AddRule(char pattern, char replacement, bool isTerminal = false)
-        {
-            return AddRule(new Substitution(pattern.ToString(), replacement.ToString(), isTerminal));
         }
         
         public MarkovAlgorithm Build(string? name = null)

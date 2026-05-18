@@ -45,6 +45,9 @@ public class Substitution : IEquatable<Substitution>
             return true;
         }
         
+        if (Pattern.Length > text.Length)
+            return false;
+        
         var startIndex = text.IndexOf(Pattern, stringComparison);
         if (startIndex == -1)
             return false;
@@ -73,7 +76,11 @@ public class Substitution : IEquatable<Substitution>
     /// <returns><c>True</c> if pattern is empty or found in text.</returns>
     public bool Matches(string text)
     {
-        return string.IsNullOrEmpty(Pattern) || text.Contains(Pattern, stringComparison);
+        if (string.IsNullOrEmpty(Pattern))
+            return true;
+        if (Pattern.Length > text.Length)
+            return false;
+        return text.Contains(Pattern, stringComparison);
     }
     
     public override string ToString()
