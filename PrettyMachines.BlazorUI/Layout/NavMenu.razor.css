@@ -1,0 +1,78 @@
+.navigation {
+    width: 12vw;
+    padding: 16px 8px;
+}
+
+.navigation h1 {
+    margin-bottom: 24px;
+}
+
+.nav-item {
+    margin-bottom: 8px;
+}
+
+.nav-item h4 {
+    cursor: pointer;
+    user-select: none;
+    padding: 8px 12px;
+    margin: 0;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-item h4:hover {
+    background-color: #e0e0e0;
+}
+
+/* Индикатор раскрытия */
+.nav-item h4::before {
+    content: "▼";
+    font-size: 12px;
+    transition: transform 0.2s ease;
+    display: inline-block;
+}
+
+.nav-item h4.collapsed::before {
+    transform: rotate(-90deg);
+}
+
+.nav-item h4.expanded::before {
+    transform: rotate(0deg);
+}
+
+.nav-subitem {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding-left: 32px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Состояния видимости */
+.nav-subitem.show {
+    display: block;
+    opacity: 1;
+    max-height: 500px; /* Достаточно для любого содержимого */
+}
+
+.nav-subitem.hide {
+    display: none;
+    opacity: 0;
+    max-height: 0;
+}
+
+.nav-subitem li {
+    padding: 6px 12px;
+    margin: 2px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+}
+
+.nav-subitem li:hover {
+    background-color: #e8e8e8;
+}

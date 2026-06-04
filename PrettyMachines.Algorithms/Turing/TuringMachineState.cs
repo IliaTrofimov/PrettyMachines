@@ -1,7 +1,7 @@
 namespace PrettyMachines.Algorithms.Turing;
 
 /// <summary>Turing machine's state.</summary>
-public class TuringMachineState : IEquatable<TuringMachineState>
+public class TuringMachineState
 {
     /// <summary>Unique identifier of the state.</summary>
     public int Id { get; private init; }
@@ -11,20 +11,14 @@ public class TuringMachineState : IEquatable<TuringMachineState>
 
     /// <summary>Optional state's name.</summary>
     public string? Name { get; }
-        
-    /// <summary>Reference to the Turing machine that defines this state. State can be attached only once.</summary>
-    public TuringMachine? Machine { get; private set; }
-
-
     
-    /// <summary>Default terminating state.</summary>
+    
+    /// <summary>Get the default terminating state.</summary>
     public static TuringMachineState Halt { get; } = new() { Id = int.MinValue };
     
     private TuringMachineState() {}
     
-    public TuringMachineState(int id, bool isTerminal) : this(id, null, isTerminal) { }
-    
-    /// <summary>Turing machine's state.</summary>
+    /// <summary>Initializes new state with id, optional name and terminal flag.</summary>
     public TuringMachineState(int id, string? stateName = null, bool isTerminal = false)
     {
         if (id == Halt.Id)
@@ -35,41 +29,16 @@ public class TuringMachineState : IEquatable<TuringMachineState>
         Name = stateName;
     }
     
-    
-    /// <summary>Attach this state to given Turing machine. State can be attached only once.</summary>
-    /// <exception cref="InvalidOperationException">State can be attached only once.</exception>
-    public void Attach(TuringMachine machine)
-    {
-        if (Id == Halt.Id) 
-            return;
-        if (Machine != null && !ReferenceEquals(Machine, machine))
-            throw new InvalidOperationException($"State '{this}' is already attached to other Turing machine.");
-        Machine = machine;
-    }
-    
-    
-    public bool Equals(TuringMachineState? other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Id == other.Id && ReferenceEquals(Machine, other.Machine);
-    }
-
-    public override bool Equals(object? obj) => obj is TuringMachineState state && Equals(state);
-
-    public override int GetHashCode() => HashCode.Combine(Id);
-
-    
     public override string ToString() => ToString(false);
+    
     public string ToString(bool shortString)
     {
-        if (Id == Halt.Id) 
-            return "!";
+        if (Id == Halt.Id) return "!";
         
-        const string shortTerminalFmt = "!Q_{0}";
-        const string longTerminalFmt = "!Q_{0} '{1}'";
-        const string shortFmt = "Q_{0}";
-        const string longFmt = "Q_{0} '{1}'"; 
+        const string shortTerminalFmt = "!q{0:D2}";
+        const string longTerminalFmt = "!q{0:D2} '{1}'";
+        const string shortFmt = "q{0:D2}";
+        const string longFmt = "q{0:D2} '{1}'"; 
         
         return shortString || string.IsNullOrWhiteSpace(Name)
             ? string.Format(IsTerminal ? shortTerminalFmt : shortFmt, Id)

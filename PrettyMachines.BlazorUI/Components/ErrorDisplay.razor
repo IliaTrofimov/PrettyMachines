@@ -1,0 +1,58 @@
+<div class="container">
+    @if (IsProduction)
+    {
+        <h3>Error happened</h3>
+        <hr/>
+        <div>
+            @Error.Message
+        </div>
+    }
+    else
+    {
+        <h3>
+            Error happened:
+            @if (Error.GetType().Name.Contains("Exception"))
+            {
+                <text>unhandled</text>
+                <u>@Error.GetType().Name</u>
+            }
+            else
+            {
+                <text>unhandled exception</text>
+                <u>@Error.GetType().Name</u>
+            }
+        </h3>
+        <div>
+            @Error.Message
+        </div>
+        <hr/>
+        <pre class="mono stack-trace">
+            @stackTrace
+        </pre>
+        <hr/>
+        <div>
+            <a href=".">Reload page</a>
+        </div>
+    }
+</div>
+
+
+@code {
+
+    private string stackTrace = "";
+    
+    [Parameter]
+    public required Exception Error { get; set; }
+   
+    [Parameter]
+    public bool IsProduction { get; set; }
+
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(Error.StackTrace) && !IsProduction)
+        {
+            stackTrace = Error.StackTrace.Replace(" in ", "\n\tin");      
+        }
+    }
+}

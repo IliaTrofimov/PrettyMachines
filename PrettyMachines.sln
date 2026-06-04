@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrettyMachines.Tests", "Pre
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrettyMachines.Algorithms", "PrettyMachines.Algorithms\PrettyMachines.Algorithms.csproj", "{D5688CAF-9C45-4D1F-AD8C-2C6727E36204}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorApp1", "BlazorApp1\BlazorApp1.csproj", "{2414BCAC-2E34-4275-A7FA-52B2DA6136B4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrettyMachines.BlazorUI", "PrettyMachines.BlazorUI\PrettyMachines.BlazorUI.csproj", "{2414BCAC-2E34-4275-A7FA-52B2DA6136B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

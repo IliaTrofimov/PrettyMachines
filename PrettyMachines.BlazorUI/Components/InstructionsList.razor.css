@@ -1,0 +1,79 @@
+.help-box{
+    margin: 0 6px;
+    color: grey;
+    font-size: smaller;
+    cursor: help;
+    text-align: center;
+    user-select: none;
+    font-style: italic;
+}
+
+ol.panel-content {
+    counter-reset: instruction-counter;
+    list-style: none;
+}
+
+ol.panel-content > li:not(.no-highlight) {
+    counter-increment: instruction-counter;
+    display: flex;
+    padding: 2px 2px;
+    flex-direction: row;
+    position: relative; /* для позиционирования номера, если нужно */
+}
+
+ol.panel-content > li:not(.no-highlight)::before {
+    content: counter(instruction-counter, decimal-leading-zero) ".";
+    margin-right: 8px;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: grey;
+    font-family: Monaco, 'Cascadia Code', 'Roboto Mono', monospace;;
+}
+
+li {
+    display: flex;
+    gap: 0 5px;
+    padding: 2px 2px;
+    flex-direction: row;
+}
+li:hover {
+    background-color: lightgray;
+}
+li:active {
+    background-color: rgba(224, 255, 255, 0.74);
+}
+li.selected {
+    background-color: #e8e8e8;
+}
+
+li span {
+    flex-grow: 1;
+    padding: 3px 4px;
+    min-width: 200px;
+}
+
+.x {
+    flex-grow: 1;
+    padding: 3px 4px;
+    min-width: 200px;
+    background-color: rebeccapurple;
+}
+
+li input {
+    flex-grow: 1;
+}
+
+li.no-highlight:focus,
+li.no-highlight {
+    background-color: inherit !important;
+}
+li.no-highlight button {
+    background-color: inherit !important;
+}
+
+button {
+    border-radius: 0.25em;
+    min-width: 30px;
+    user-select: none;
+}

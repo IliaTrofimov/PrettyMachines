@@ -1,0 +1,19 @@
+<div class="@(Traces.Count > 0 ? "mono" : "") panel-content">
+    @foreach (var trace in Traces)
+    {
+        @trace<br/>
+    }
+    @if (Traces.Count == 0)
+    {
+        <i>Empty</i>
+    }
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<string> Traces { get; set; } = []; 
+
+    private void Clear()
+    {
+        Traces = [];
+    }
+}

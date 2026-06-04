@@ -1,0 +1,129 @@
+@using PrettyMachines.BlazorUI.Helpers
+@using PrettyMachines.BlazorUI.Models
+<div class="help-box">
+    Double click to edit instruction
+</div>
+<ol class="panel-content">
+    <li class="no-highlight">
+        @if (currentIndex < 0)
+        {
+        <input type="text"
+               class="mono"
+               placeholder="New instruction..."
+               @bind="currentInput"
+               @bind:event="oninput"
+               @onkeydown="ApplyInput"/>
+        <button class="btn-add" @onclick="AddNew" title="Save new instruction">
+            +
+        </button>
+        }
+        else
+        {
+        <button class="link-button btn-add" @onclick="Unselect">
+            Add new instruction
+        </button>
+        }
+    </li>
+    @for (var index = 0; index < Instructions.Count; index++)
+    {
+        var localIndex = index;
+        var selected = currentIndex == index;
+
+        <li class="@(selected ? "selected mono" : "mono")">
+            <SpanInput @bind-Value="Instructions[index]"
+                       Placeholder="Instruction..."
+                       DisplayClass="x"/>
+    
+            <button @onclick="() => Delete(localIndex)" title="Delete this instruction">
+                -
+            </button>
+        </li>
+    }
+</ol>
+
+
+@code {
+    private int currentIndex = -1;
+    private string? currentInput;
+
+    [Parameter] 
+    public bool OnlyUnique { get; set; } = true;
+    
+    [Parameter] 
+    public List<string> Instructions { get; set; } = 
+    [
+        "() -> x",
+        "()x -> x",
+        "x() -> x",
+        "(x => R",
+        ")x => R",
+        "x( => R",
+        "x) => R",
+        ") => R",
+        "( => R",
+        "x ->",
+        "-> A"
+    ];
+    
+    [Parameter]
+    public Func<string, InstructionType> InstructionValidator { get; set; } = DefaultValidator;
+    
+    private void AddNew()
+    {
+        if (string.IsNullOrEmpty(currentInput))
+            return;
+
+        if (OnlyUnique && Instructions.Contains(currentInput))
+            return;
+
+        Instructions.Add(currentInput);
+        currentInput = "";
+        Unselect();
+    }
+
+    private void Delete(int index)
+    {
+        if (index < 0 || index >= Instructions.Count)
+            return;
+
+        Instructions.RemoveAt(index);
+        Unselect();
+    }
+
+    private void ApplyInput(KeyboardEventArgs args)
+    {
+        if (args.Code != "Enter")
+            return;
+        
+        if (currentIndex < 0) AddNew();
+        else Unselect();
+    }
+
+    private void Unselect() => Select(-1);
+
+    private void Select(int index)
+    {
+        if (currentIndex == index || index >= Instructions.Count)
+            return;
+
+        if (currentIndex >= 0)
+            Instructions[currentIndex] = currentInput ?? "";
+        
+        currentIndex = index;
+        currentInput = index >= 0 ? Instructions[index] : null;
+        StateHasChanged();
+    }
+
+    private string SelectInstructionClass(string instruction)
+    {
+        return InstructionValidator(instruction) switch
+        {
+            InstructionType.Default  => "",
+            InstructionType.Terminal => "terminal-instruction",
+            InstructionType.Invalid  => "invalid-instruction",
+            _                        => ""
+        };
+    }
+    
+    private static InstructionType DefaultValidator(string instruction) => InstructionType.Default;
+}

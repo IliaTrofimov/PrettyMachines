@@ -7,7 +7,7 @@ namespace PrettyMachines.Algorithms.Turing;
 /// Represents special dictionary key that supports fuzzy matching. It can match exact values or any empty or not empty.
 /// </summary>
 /// <typeparam name="T">Type of the value.</typeparam>
-[DebuggerDisplay("${Match,nq} {typeof(TSymbol)}{(Match)}")]
+[DebuggerDisplay("DebugString()")]
 public readonly struct FuzzyKey<T>
 {
     public readonly SymbolMatch Match;
@@ -37,6 +37,11 @@ public readonly struct FuzzyKey<T>
 
     public override string ToString()
     {
-        return $"{Match} '{typeof(T)}'" + (Match == SymbolMatch.Exact ? $"{{{Value}}}" : "");
+        return Match == SymbolMatch.Exact ? Value?.ToString() ?? "" : Match.ToString();
+    }
+
+    private string DebugString()
+    {
+        return Match == SymbolMatch.Exact ? $"{Match} '{Value}'" : $"{Match} {typeof(T)}";
     }
 }

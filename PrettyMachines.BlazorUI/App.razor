@@ -1,0 +1,16 @@
+﻿@using PrettyMachines.BlazorUI.Components
+@using PrettyMachines.BlazorUI.Layout
+
+<ErrorBoundary>
+    <ChildContent>
+        <Router AppAssembly="@typeof(App).Assembly" >
+            <Found Context="routeData">
+                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+                <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
+            </Found>
+        </Router>
+    </ChildContent>
+    <ErrorContent Context="caughtException">
+        <ErrorDisplay Error="caughtException" IsProduction="false"/>
+    </ErrorContent>
+</ErrorBoundary>

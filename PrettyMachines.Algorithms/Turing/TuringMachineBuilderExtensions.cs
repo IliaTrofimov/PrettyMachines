@@ -20,12 +20,6 @@ public static class TuringMachineBuilderExtensions
     {
         return b.WithAlphabet(alphabetSymbols).WithBlankSymbol(blankSymbol).WithStringComparer(comparison);
     }
-
-    /// <inheritdoc cref="ITuringMachineBuilder.WithMarkers(IEnumerable{string})"/> 
-    public static ITuringMachineBuilder WithMarkers(this ITuringMachineBuilder b, params string[] markerSymbols)
-    {
-        return b.WithMarkers(markerSymbols.AsEnumerable());
-    }
     
     // ------------------
 

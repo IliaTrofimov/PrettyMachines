@@ -1,0 +1,120 @@
+@using PrettyMachines.BlazorUI.Helpers
+@using PrettyMachines.BlazorUI.Models
+
+<table class="panel-content mono">
+    <thead>
+    <tr>
+        <th></th>
+        
+        @for (var col = 0; col < ColumnNames.Count; col++)
+        {
+            <th>
+                <SpanInput @bind-Value="ColumnNames[col]"/>
+            </th>
+        }
+    </tr>
+    </thead>
+    <tbody>
+        @for (var row = 0; row < RowsNames.Count; row++)
+        {
+            <tr @key="row">
+                <th>
+                    <SpanInput @bind-Value="RowsNames[row]"/>
+                </th>
+
+                @for (var col = 0; col < ColumnNames.Count; col++)
+                {
+                    <td @key="col">
+                        @if (TryGetIndex(row, col, out var index))
+                        {
+                            <SpanInput @bind-Value="Table[index].Text"/>
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private int selectedRow = -1;
+    private int selectedColumn = -1;
+    private string? currentInput;
+
+    [Parameter] 
+    public List<string> ColumnNames { get; set; } = ["1", "2"];
+    
+    [Parameter] 
+    public List<string> RowsNames { get; set; } = ["a", "b"];
+    
+    public List<TableCell> Table { get; set; } = 
+    [
+        new TableCell(0, 0, "1a"),
+        new TableCell(0, 1, "2a"),
+        new TableCell(1, 0, "1b"),
+        new TableCell(1, 1, "2b"),
+    ];
+
+    public int RowsCount { get; set; } = 2;
+
+    public int ColumnsCount { get; set; } = 2;
+
+
+    private bool TryGetIndex(int row, int col, out int index)
+    {
+        if (!RowsNames.HasIndex(row) || !ColumnNames.HasIndex(col))
+        {
+            index = -1;
+            return false;
+        }
+        
+        index = ColumnNames.Count * row + col;
+        return true;
+    }
+
+    private void Unselect() => Select(-1, -1);
+
+    private void Select(int row, int col)
+    {
+        if (row == selectedRow && col == selectedColumn)
+            return;
+        
+        selectedRow = row;
+        selectedColumn = col;
+        
+        if (TryGetIndex(row, col, out var index))
+        {
+            currentInput = Table[index].Text;
+        }
+        else if (row >= 0)
+        {
+            currentInput = RowsNames[row];
+        }
+        else if (col >= 0)
+        {
+            currentInput = ColumnNames[row];
+        }
+        else
+        {
+            currentInput = null;
+        }
+    }
+
+    private string? GetText(int row, int col)
+    {
+        return TryGetIndex(row, col, out var index) ? Table[index].Text : null;
+    }
+    
+    private void UpdateText(int row, int col)
+    {
+        
+    }
+
+    private void Resize(int rowsCount, int columnsCount)
+    {
+        if (rowsCount <= 0 || columnsCount <= 0 || (columnsCount == ColumnsCount && rowsCount == RowsCount))
+            return;
+        
+        
+    }
+}

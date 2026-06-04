@@ -122,7 +122,7 @@ public class MachineTape : IEnumerable<string?>
         if (cells.Count == 0)
             currentCell = cells.AddFirst(BlankSymbol);
     }
-
+    
     private IEnumerable<string?> EnumerateCellsTrimmed()
     {
         var first = FindFirstFilledCell();

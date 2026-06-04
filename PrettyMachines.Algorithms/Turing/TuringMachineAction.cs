@@ -1,5 +1,11 @@
+using PrettyMachines.Algorithms.Utils;
+
+
 namespace PrettyMachines.Algorithms.Turing;
 
+/// <summary>
+/// 
+/// </summary>
 public readonly struct TuringMachineAction
 {
     public TuringMachineState NextState { get; } = TuringMachineState.Halt;
@@ -33,20 +39,14 @@ public readonly struct TuringMachineAction
         PrintedSymbol = default;
         Movement = movement;
     }
+
+
+    public override string ToString() => ToString(false);
     
-    
-    public override string ToString()
+    public string ToString(bool shortString)
     {
-        var movementChar = Movement switch
-        {
-            TapeMovement.None  => 'N',
-            TapeMovement.Left  => 'L',
-            TapeMovement.Right => 'R',
-            _                  => '?'
-        };
-        
         return ShouldPrintSymbol 
-            ? $"'{PrintedSymbol}' {movementChar} {NextState.ToString(true)}" 
-            : $"{movementChar} {NextState.ToString(true)}";
+            ? $"'{PrintedSymbol}', {Movement.ToChar()}, {NextState.ToString(shortString)}" 
+            : $"{Movement.ToChar()}, {NextState.ToString(shortString)}";
     }
 }

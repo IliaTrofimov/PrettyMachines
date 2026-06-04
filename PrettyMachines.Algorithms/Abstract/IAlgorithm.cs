@@ -15,6 +15,11 @@ public interface IAlgorithm<TData>
     /// <param name="verbose">If <c>true</c>, includes full execution trace.</param>
     /// <returns>Result containing final status, output, and optional trace.</returns>
     public AlgorithmResult<TData> Execute(TData input, AlgorithmCancellation cancellation, bool verbose = false);
+    
+    /// <summary>Verifies that given input is correct.</summary>
+    /// <param name="input">Input object.</param>
+    /// <returns><c>True</c> if object can be used as input for this algorithm.</returns>
+    public bool ValidateInput(TData input);
 }
 
 

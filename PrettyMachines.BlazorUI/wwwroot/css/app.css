@@ -1,0 +1,155 @@
+* {
+    margin: 0;
+}
+
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    padding: 0;
+}
+
+/* Blazor special */
+#blazor-error-ui {
+    display: none;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 24px;
+}
+
+/* App Container */
+.page-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 16px;
+    padding: 16px;
+    box-sizing: border-box;
+    height: 100vh;
+    width: 80vw;
+    margin: 0 auto ;
+}
+
+.wide-panel, .panel {
+    background-color: #fafafa;
+    padding: 0;
+}
+
+.wide-panel {
+    grid-column: 1 / -1;
+}
+
+.wide-panel input {
+    width: 100%;
+    font-size: 18px;
+    overflow-x: visible;
+    white-space: nowrap;
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-header {
+    background-color: wheat;
+    border-bottom: black 2px solid;
+    padding: 6px 8px;
+    user-select: none;
+    margin: 0;
+}
+
+.panel-content{
+    padding: 5px 10px;
+    overflow-y: auto;
+}
+
+.input-group {
+    margin-top: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+}
+
+.mono{
+    font-family: Monaco, 'Cascadia Code', 'Roboto Mono', monospace;;
+}
+
+.btn-add {
+    background-color: limegreen;
+}
+
+.btn-delete {
+    background-color: indianred;
+}
+
+/* Scrollbar Styling */
+.panel-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.panel-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 10px;
+}
+
+.panel-content::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+.link-button {
+    background: none;
+    border: none;
+    color: #0066cc;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font: inherit; /* наследует шрифт от родителя */
+}
+.link-button:hover {
+    color: #0050a3;
+    text-decoration: underline;
+}
+.link-button:active {
+    color: #003366;
+}
+.link-button:focus {
+    outline: 1px solid #0066cc;
+    outline-offset: 2px;
+}
+
+.terminal-instruction{
+    font-weight: bold;
+    color: darkmagenta;
+}
+
+.invalid-instruction{
+    text-decoration: crimson wavy underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .bottom-panels {
+        flex-direction: column;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .code-input {
+        width: 100%;
+    }
+}

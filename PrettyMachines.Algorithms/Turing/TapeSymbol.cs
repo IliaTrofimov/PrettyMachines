@@ -1,2 +1,0 @@
-namespace PrettyMachines.Algorithms.Turing;
-

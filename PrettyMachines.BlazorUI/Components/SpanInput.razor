@@ -1,0 +1,125 @@
+
+@if (IsEditing)
+{
+    <input type="text"
+           @ref="inputReference"
+           class="@InputClass"
+           value="@CurrentValue"
+           @oninput="(e) => CurrentValue = e.Value?.ToString() ?? string.Empty"
+           @onkeydown="OnKeyDown"
+           @onblur="StopEditing"
+           placeholder="@Placeholder"
+           @attributes="AdditionalAttributes" />
+}
+else
+{
+    <span class="@DisplayClass"
+          @ondblclick="StartEditing"
+          title="Double click to edit">
+        @CurrentValue
+    </span>
+}
+
+@code {
+    private bool IsEditing = false;
+    private ElementReference inputReference;
+    private string CurrentValue { get; set; } = string.Empty;
+    
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
+    
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+    
+    [Parameter]
+    public string? Placeholder { get; set; }
+    
+    [Parameter]
+    public string InputClass { get; set; } = string.Empty;
+    
+    [Parameter]
+    public string DisplayClass { get; set; } = string.Empty;
+    
+    [Parameter]
+    public bool TrimWhitespace { get; set; } = true;
+    
+    [Parameter]
+    public bool AutoFocus { get; set; } = true;
+    
+    [Parameter]
+    public bool SelectAllOnEdit { get; set; } = true;
+    
+    [Parameter]
+    public EventCallback<string> OnSubmit { get; set; }
+    
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+    
+    [Parameter]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        CurrentValue = Value;
+    }
+    
+    protected override void OnParametersSet()
+    {
+        if (!IsEditing && CurrentValue != Value)
+        {
+            CurrentValue = Value;
+        }
+    }
+    
+    private async Task StartEditing()
+    {
+        IsEditing = true;
+        CurrentValue = Value;
+        StateHasChanged();
+        
+        if (AutoFocus)
+        {
+            await Task.Delay(50); // Небольшая задержка для рендеринга
+            await inputReference.FocusAsync();
+            
+            if (SelectAllOnEdit)
+            {
+                await inputReference.FocusAsync();
+                //await JS.InvokeVoidAsync("selectAllText", inputReference);
+            }
+        }
+    }
+    
+    private async Task StopEditing()
+    {
+        if (!IsEditing) return;
+        
+        var newValue = TrimWhitespace ? CurrentValue.Trim() : CurrentValue;
+        
+        if (newValue != Value)
+        {
+            await ValueChanged.InvokeAsync(newValue);
+            await OnSubmit.InvokeAsync(newValue);
+        }
+        
+        IsEditing = false;
+        CurrentValue = newValue;
+        StateHasChanged();
+    }
+    
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Code)
+        {
+            case "Enter":
+                await StopEditing();
+                break;
+            case "Escape":
+                CurrentValue = Value;
+                IsEditing = false;
+                await OnCancel.InvokeAsync();
+                StateHasChanged();
+                break;
+        }
+    }
+}

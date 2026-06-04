@@ -14,13 +14,11 @@ public class InstructionsTableTests
     public void Constructor_WithAlphabetSymbols()
     {
         var alphabet = new[] { "0", "1" };
-        var markers = new[] { "$", "#" };
-        var table = new InstructionsTable(alphabet, markers, DefaultBlank);
+        var table = new InstructionsTable(alphabet, DefaultBlank);
         
         table.Alphabet.Should().Contain(alphabet);
         table.Alphabet.Should().Contain(DefaultBlank);
         table.Alphabet.Should().HaveCount(3);
-        table.Markers.Should().BeEquivalentTo(markers);
         table.RulesCount.Should().Be(0);
         table.BlankSymbol.Should().Be(DefaultBlank);
     }
@@ -28,7 +26,7 @@ public class InstructionsTableTests
     [Fact]
     public void Constructor_WithEmptyAlphabet_ThrowsArgumentException()
     {
-        Action act = () => new InstructionsTable(Array.Empty<string>(), null, DefaultBlank);
+        Action act = () => new InstructionsTable(Array.Empty<string>(), DefaultBlank);
         
         act.Should().Throw<ArgumentException>().WithMessage("*Alphabet cannot be empty*");
     }
@@ -40,7 +38,6 @@ public class InstructionsTableTests
         
         table.Alphabet.Should().Contain(DefaultBlank);
         table.Alphabet.Should().HaveCount(1);
-        table.Markers.Should().BeNull();
         table.BlankSymbol.Should().Be(DefaultBlank);
     }
     
@@ -111,7 +108,7 @@ public class InstructionsTableTests
     [Fact]
     public void AddRule_WithExactMatch_AddsRule()
     {
-        var table = new InstructionsTable(["0", "1"], null, DefaultBlank);
+        var table = new InstructionsTable(["0", "1"], DefaultBlank);
         var initialState = new TuringMachineState(0, "q0");
         var nextState = new TuringMachineState(1, "q1");
         var action = new TuringMachineAction(nextState, "1", TapeMovement.Right);
@@ -151,7 +148,7 @@ public class InstructionsTableTests
     [Fact]
     public void AddRule_WithDisallowedScannedSymbol_ThrowsSymbolIsNotAllowedException()
     {
-        var table = new InstructionsTable(["0", "1"], null, DefaultBlank);
+        var table = new InstructionsTable(["0", "1"], DefaultBlank);
         var state = new TuringMachineState(0, "q0");
         
         Action act = () => table.AddRule(state, FuzzyKey<string>.Exact("2"), TuringMachineAction.Halt);
@@ -163,7 +160,7 @@ public class InstructionsTableTests
     [Fact]
     public void AddRule_WithDisallowedPrintedSymbol_ThrowsSymbolIsNotAllowedException()
     {
-        var table = new InstructionsTable(["0", "1"], null, DefaultBlank);
+        var table = new InstructionsTable(["0", "1"], DefaultBlank);
         var state = new TuringMachineState(0, "q0");
         
         Action act = () => table.AddRule(state, FuzzyKey<string>.Exact("0"), TuringMachineAction.CreateHalt("2"));
@@ -175,7 +172,7 @@ public class InstructionsTableTests
     [Fact]
     public void AddRule_WithAllowedMarkerSymbol_DoesNotThrow()
     {
-        var table = new InstructionsTable(["0", "1"], [ "#" ], DefaultBlank);
+        var table = new InstructionsTable(["0", "1", "#"], DefaultBlank);
         var state = new TuringMachineState(0, "q0");
         var action = TuringMachineAction.CreateHalt("#");
         
@@ -210,7 +207,7 @@ public class InstructionsTableTests
         
         table.RulesCount.Should().Be(1);
         
-        table.TryFindRule(state, "0", out var foundAction).Should().BeTrue();
+        table.TryFindAction(state, "0", out var foundAction).Should().BeTrue();
         foundAction.PrintedSymbol.Should().Be("x");
     }
 
@@ -226,7 +223,7 @@ public class InstructionsTableTests
         var expectedAction = TuringMachineAction.CreateHalt("1");
         table.AddRule(state, FuzzyKey<string>.Exact("0"), expectedAction);
         
-        var result = table.TryFindRule(state, "0", out var action);
+        var result = table.TryFindAction(state, "0", out var action);
         
         result.Should().BeTrue();
         action.Should().Be(expectedAction);
@@ -240,7 +237,7 @@ public class InstructionsTableTests
         var expectedAction = TuringMachineAction.CreateHalt("1");
         table.AddRule(state, FuzzyKey<string>.Empty, expectedAction);
         
-        var result = table.TryFindRule(state, DefaultBlank, out var action);
+        var result = table.TryFindAction(state, DefaultBlank, out var action);
         
         result.Should().BeTrue();
         action.Should().Be(expectedAction);
@@ -254,7 +251,7 @@ public class InstructionsTableTests
         var expectedAction = TuringMachineAction.CreateHalt("1");
         table.AddRule(state, FuzzyKey<string>.NotEmpty, expectedAction);
         
-        var result = table.TryFindRule(state, "any_non_blank", out var action);
+        var result = table.TryFindAction(state, "any_non_blank", out var action);
         
         result.Should().BeTrue();
         action.Should().Be(expectedAction);
@@ -268,7 +265,7 @@ public class InstructionsTableTests
         var expectedAction = TuringMachineAction.CreateHalt("1");
         table.AddRule(state, FuzzyKey<string>.Any, expectedAction);
         
-        var result = table.TryFindRule(state, "X", out var action);
+        var result = table.TryFindAction(state, "X", out var action);
         
         result.Should().BeTrue();
         action.Should().Be(expectedAction);
@@ -280,7 +277,7 @@ public class InstructionsTableTests
         var table = new InstructionsTable(blankSymbol: DefaultBlank);
         var state = new TuringMachineState(0, "q0");
         
-        var result = table.TryFindRule(state, "0", out var action);
+        var result = table.TryFindAction(state, "0", out var action);
         
         result.Should().BeFalse();
         action.Should().Be(TuringMachineAction.Halt);
@@ -295,7 +292,7 @@ public class InstructionsTableTests
         var action = TuringMachineAction.CreateHalt("1");
         table.AddRule(state, FuzzyKey<string>.Exact("0"), action);
         
-        var result = table.TryFindRule(otherState, "0", out var foundAction);
+        var result = table.TryFindAction(otherState, "0", out var foundAction);
         
         result.Should().BeFalse();
         foundAction.Should().Be(TuringMachineAction.Halt);
@@ -312,7 +309,7 @@ public class InstructionsTableTests
         table.AddRule(state, FuzzyKey<string>.Exact("0"), exactAction);
         table.AddRule(state, FuzzyKey<string>.Any, anyAction);
         
-        var result = table.TryFindRule(state, "0", out var action);
+        var result = table.TryFindAction(state, "0", out var action);
         
         result.Should().BeTrue();
         action.Should().Be(exactAction);

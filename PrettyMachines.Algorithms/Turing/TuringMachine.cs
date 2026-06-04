@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 using PrettyMachines.Algorithms.Abstract;
+using PrettyMachines.Algorithms.Utils;
 
 
 namespace PrettyMachines.Algorithms.Turing;
@@ -33,6 +34,9 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
     /// </summary>
     public bool HasStrictAlphabet { get; init; }
 
+    /// <summary>Gets readonly version of the instructions used for this machine.</summary>
+    public IReadOnlyInstructionsTable Instructions => instructions;
+    
 
     /// <summary>Creates a new builder instance for constructing Turing machines.</summary>
     /// <param name="name">Optional name for the algorithm.</param>
@@ -80,7 +84,7 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
     /// <returns><c>True</c> if Turing machine defines an action for given state and input.</returns>
     public bool NextStep(TuringMachineState state, MachineTape tape, out TuringMachineAction action)
     {
-        if (!instructions.TryFindRule(state, tape.CurrentSymbol, out action))
+        if (!instructions.TryFindAction(state, tape.CurrentSymbol, out action))
             return false;
 
         if (action.PrintedSymbol is not null)
@@ -95,7 +99,8 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
     {
         var tape = new MachineTape(input);
         var result = Execute(tape, cancellation, verbose);
-        return new AlgorithmResult<string>(result.Termination, "tape.Print()", result.Steps, result.Trace);
+        var resultString = MachineTapePrinter.Print(tape);
+        return new AlgorithmResult<string>(result.Termination, resultString, result.Steps, result.Trace);
     }
 
     /// <inheritdoc cref="IAlgorithm{TData}.Execute"/>
@@ -141,39 +146,36 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
         return new AlgorithmResult<MachineTape>(status, input, steps, trace);
     }
 
-    private string CreateTrace(StringBuilder traceBuilder, TuringMachineState state, string? symbol, in TuringMachineAction action)
+    /// <inheritdoc/> 
+    public bool ValidateInput(string input)
     {
-        traceBuilder.Clear();
-        traceBuilder.AppendFormat("Q_{0:D2}, '", state.Id);
-        traceBuilder.Append(symbol);
-        traceBuilder.Append("' -> ");
+        return input.Length == 0 || input.All(c => instructions.Alphabet.Contains(c.ToString()));
+    }
+    
+    /// <inheritdoc/> 
+    public bool ValidateInput(MachineTape input)
+    {
+        return input.Length == 0 || input.All(c => instructions.Alphabet.Contains(c));
+    }
 
-        if (action.NextState.Equals(TuringMachineState.Halt))
-            traceBuilder.Append("HALT, ");
-        else
-            traceBuilder.AppendFormat("Q_{0:D2}, ", action.NextState.Id);
-
-        if (action.PrintedSymbol is not null)
-            traceBuilder.AppendFormat("'{0}', ", action.PrintedSymbol);
-        else
-            traceBuilder.Append("none, ");
-        
-        traceBuilder.Append(action.Movement switch
-        {
-            TapeMovement.None => 'N',
-            TapeMovement.Left => 'L',
-            TapeMovement.Right => 'R',
-        });
-        
+    private static string CreateTrace(StringBuilder traceBuilder, TuringMachineState state, string? symbol, in TuringMachineAction action)
+    {
+        traceBuilder.Clear()
+            .Append(state.ToString(true))
+            .Append(", '")
+            .Append(symbol)
+            .Append("' -> ")
+            .Append(action.ToString(true));
         return traceBuilder.ToString();
     }
     
-    private string CreateErrorTrace(StringBuilder traceBuilder, TuringMachineState state, string? symbol)
+    private static string CreateErrorTrace(StringBuilder traceBuilder, TuringMachineState state, string? symbol)
     {
-        traceBuilder.Clear();
-        traceBuilder.AppendFormat("Q_{0:D2}, '", state.Id);
-        traceBuilder.Append(symbol);
-        traceBuilder.Append("' -> HALT, none, N");
+        traceBuilder.Clear()
+            .Append(state.Id)
+            .Append(", '")
+            .Append(symbol)
+            .Append("' -> ???");
         return traceBuilder.ToString();
     }
 
@@ -183,7 +185,6 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
     {
         private string? _blankSymbol;
         private IEnumerable<string>? _alphabet;
-        private IEnumerable<string>? _markers;
         private StringComparison _stringComparison = StringComparison.Ordinal;
         private TuringMachineState? _initialState;
         private readonly List<TuringMachineState> _states = [];
@@ -203,12 +204,6 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
         public ITuringMachineBuilder WithAlphabet(IEnumerable<string> alphabetSymbols)
         {
             _alphabet = alphabetSymbols;
-            return this;
-        }
-
-        public ITuringMachineBuilder WithMarkers(IEnumerable<string> markerSymbols)
-        {
-            _markers = markerSymbols;
             return this;
         }
 
@@ -240,7 +235,7 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
             }
             else
             {
-                throw new ArgumentException($"State '{name}' is already added.");
+                throw new ArgumentException($"State with name '{name}' is already added.");
             }
         }
 
@@ -250,7 +245,7 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
             try
             {
                 var isStrictAlphabet = _alphabet != null;
-                var instructions = new InstructionsTable(_alphabet, _markers, _blankSymbol, _stringComparison);
+                var instructions = new InstructionsTable(_alphabet, _blankSymbol, _stringComparison);
                 foreach (var state in _states)
                     instructions.AddState(state);
                 builderFunc(new TuringMachineRuleBuilder(instructions));
@@ -271,7 +266,7 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
             {
                 var state = instructions.States.FirstOrDefault(s => s.Name == name);
                 if (state == null)
-                    throw new ArgumentException($"State '{name}' does not exist.");
+                    throw new ArgumentException($"State with name '{name}' does not exist.");
                 return state;   
             }
         }
@@ -296,7 +291,7 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
         private void ValidateState(TuringMachineState state, [CallerArgumentExpression("state")] string paramName = "")
         {
             if (!state.Equals(TuringMachineState.Halt) && !instructions.States.Any(s => ReferenceEquals(state, s)))
-                throw new ArgumentException($"State '{state}' does not exist.", paramName);
+                throw new ArgumentException($"State {state} does not exist.", paramName);
         }
     }
     

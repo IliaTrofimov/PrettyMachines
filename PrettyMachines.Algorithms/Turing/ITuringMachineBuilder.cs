@@ -20,13 +20,6 @@ public interface ITuringMachineBuilder
     /// <returns>The builder instance for chaining.</returns>
     public ITuringMachineBuilder WithAlphabet(IEnumerable<string> alphabetSymbols);
     
-    /// <summary>
-    /// Defines special marker symbols used for tape positioning or control.
-    /// </summary>
-    /// <param name="markerSymbols">Collection of marker symbols.</param>
-    /// <returns>The builder instance for chaining.</returns>
-    public ITuringMachineBuilder WithMarkers(IEnumerable<string> markerSymbols);
-    
     /// <summary>Adds new state.</summary>
     /// <param name="name">Name of the state or <c>null</c> if state is unnamed.</param>
     /// <param name="isInitial">Indicates that state is starting.</param>

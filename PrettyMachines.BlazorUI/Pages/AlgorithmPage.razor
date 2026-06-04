@@ -1,0 +1,123 @@
+@page "/"
+
+@using PrettyMachines.Algorithms.Abstract
+@using PrettyMachines.BlazorUI.Helpers
+@using PrettyMachines.BlazorUI.Models
+@using PrettyMachines.BlazorUI.Components
+
+<div class="page-container">
+    <div class="wide-panel">
+        <h4 class="panel-header">Input / output</h4>
+        
+        <div class="panel-content">
+            <input type="text"
+                   class="mono"
+                   placeholder="Enter algorithm input..."
+                   @bind="inputOutput"
+                   @bind:event="oninput" />
+
+            <div class="input-group">
+                <button class="btn-run" @onclick="RunAlgorithm">▶ Run</button>
+                <button class="btn-step" @onclick="StepAlgorithm">⏯ Step</button>
+                @if (terminationStatus != TerminationStatus.Unknown)
+                {
+                    <div>
+                        Execution result: 
+                        <u>
+                            @terminationStatus after @steps step@(steps != 1 ? "s" : "")
+                        </u>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Panels -->
+    <div class="panel">
+        <h4 class="panel-header">
+            Instructions
+        </h4>
+        <InstructionsList></InstructionsList>
+        <InstructionsTable></InstructionsTable>
+    </div>
+
+    <div class="panel">
+        <h4 class="panel-header">
+            Trace
+        </h4>
+        <AlgorithmTraces @ref="tracesComponent"/>
+    </div>
+</div>
+
+@code{
+    [Inject] 
+    private ILogger<AlgorithmPage> logger { get; set; } = null!;
+    private AlgorithmTraces tracesComponent;
+    
+    private IAlgorithm<string> algorithm;
+    
+    private bool mustClearTrace;
+    private string inputOutput = "";
+    private TerminationStatus terminationStatus;
+    private long steps;
+    
+    
+    private void RunAlgorithm()
+    {
+        mustClearTrace = true;
+        terminationStatus = HandleAlgorithm(() => 
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+            return algorithm.Execute(inputOutput, new AlgorithmCancellation(200, cts.Token), verbose: true);
+        });
+    }
+    
+    private void StepAlgorithm()
+    {
+        terminationStatus = HandleAlgorithm(() => 
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+            return algorithm.Execute(inputOutput, new AlgorithmCancellation(1, cts.Token), verbose: true);
+        });
+
+        mustClearTrace = false;
+        
+        if (terminationStatus == TerminationStatus.Aborted)
+            terminationStatus = TerminationStatus.Success;
+    }
+
+    private TerminationStatus HandleAlgorithm(Func<AlgorithmResult<string>> action)
+    {
+        try
+        {
+            ShouldRender();
+            var result = action();
+            
+            tracesComponent.Traces = mustClearTrace 
+                ? result.Trace 
+                : tracesComponent.Traces.Concat(result.Trace).ToList();
+
+            steps = result.Steps;
+            inputOutput = result.Output;
+            return result.Termination;
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Algorithm execution has failed with unhandled exception");
+            tracesComponent.Traces = [];
+            mustClearTrace = false;
+            return TerminationStatus.Aborted;
+        }
+    }
+    
+    private static InstructionType ValidateInstruction(string instructionText)
+    {
+        var isTerminal = instructionText.ContainsOne("=>");
+        var isNotTerminal = instructionText.ContainsOne("->");
+
+        if (isTerminal && isNotTerminal || !isTerminal && !isNotTerminal)
+            return InstructionType.Invalid;
+        
+        return isTerminal ? InstructionType.Terminal : InstructionType.Default;
+    }
+}

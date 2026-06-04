@@ -121,7 +121,8 @@ public class MarkovAlgorithm : IAlgorithm<string>
         return new AlgorithmResult<string>(status, result, steps, trace);
     }
 
-    private bool ValidateInput(string input)
+    /// <inheritdoc /> 
+    public bool ValidateInput(string input)
     {
         return alphabet == null || string.IsNullOrEmpty(input) || input.All(alphabet.Contains);
     }

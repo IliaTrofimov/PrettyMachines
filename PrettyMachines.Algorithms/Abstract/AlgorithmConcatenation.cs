@@ -85,6 +85,11 @@ public class AlgorithmConcatenation<TAlg, TData> : IAlgorithm<TData>
         return new AlgorithmResult<TData>(termination, tempOutput, steps, trace);
     }
 
+    public bool ValidateInput(TData input)
+    {
+        return algorithms.All(a => a.ValidateInput(input));
+    }
+
     private string CreateAlgorithmStartTrace(int index)
     {
         var algorithm = algorithms[index];

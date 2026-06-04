@@ -1,0 +1,90 @@
+﻿@using PrettyMachines.BlazorUI.Helpers
+@using PrettyMachines.BlazorUI.Models
+
+<div class="navigation">
+    <h1>Pretty Machines</h1>
+    <div>
+        @foreach(var item in navItems)
+        {
+            <div class="nav-item">
+                <h4 @onclick="() => ToggleItem(item)"
+                    class="@(item.IsExpanded ? "expanded" : "collapsed")">
+                    @item.Title
+                </h4>
+                <ol class="nav-subitem @(item.IsExpanded ? "show" : "hide")">
+                    <li @onclick="() => NavigateToPage(item.Title, null)">
+                        <i>
+                            Create new...
+                        </i>
+                    </li>
+                    @foreach (var subItem in item.SubItems)
+                    {
+                        <li @onclick="() => NavigateToPage(item.Title, subItem)">
+                            @subItem
+                        </li>
+                    }
+                </ol>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Inject]
+    private NavigationManager Navigation { get; set; } = default!;
+    
+    private List<NavItem> navItems = [];
+
+    protected override void OnInitialized()
+    {
+        navItems =
+        [
+            new NavItem("Turing machines", true)
+            {
+                SubItems =
+                [
+                    "Binary increment",
+                    "Brackets",
+                    "Palindrome check",
+                    "Binary addition"
+                ]
+            },
+            new NavItem("Markov Algorithms")
+            {
+                SubItems =
+                [
+                    "Brackets",
+                    "Binary to unary",
+                    "String reversal"
+                ]
+            }
+        ];
+    }
+
+    private void ToggleItem(int index)
+    {
+        if (navItems.TryGetAt(index, out var item))
+        {
+            item!.IsExpanded = !item.IsExpanded;
+        }
+    }
+    
+    private void ToggleItem(NavItem item)
+    {
+        item.IsExpanded = !item.IsExpanded;
+    }
+    
+    private void NavigateToPage(string title, string? subItem)
+    {
+        var encodedTitle = Uri.EscapeDataString(title);
+        if (subItem == null)
+        {
+            Navigation.NavigateTo( $"./{encodedTitle}");
+        }
+        else
+        {
+            var encodedSubItem = Uri.EscapeDataString(subItem);
+            Navigation.NavigateTo( $"./{encodedTitle}?default={encodedSubItem}");   
+        }
+    }
+}
