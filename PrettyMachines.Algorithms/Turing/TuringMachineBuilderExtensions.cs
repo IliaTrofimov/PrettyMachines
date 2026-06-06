@@ -7,6 +7,12 @@ public static class TuringMachineBuilderExtensions
     {
         return b.WithAlphabet(alphabetSymbols.AsEnumerable());
     }
+    
+    /// <inheritdoc cref="ITuringMachineBuilder.WithAlphabet(IEnumerable{string})"/> 
+    public static ITuringMachineBuilder WithSingleCharAlphabet(this ITuringMachineBuilder b, string alphabetSymbols)
+    {
+        return b.WithAlphabet(alphabetSymbols.Select(c => c.ToString()).ToArray());
+    }
 
     /// <summary>Defines the alphabet with blank symbol and comparison mode in one call.</summary>
     /// <param name="alphabetSymbols">Collection of alphabet symbols.</param>

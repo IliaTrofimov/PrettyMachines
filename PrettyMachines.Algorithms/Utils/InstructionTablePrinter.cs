@@ -1,209 +1,274 @@
 using System.Text;
 using PrettyMachines.Algorithms.Turing;
+using PrettyMachines.Algorithms.Utils.Printing;
 
 
 namespace PrettyMachines.Algorithms.Utils;
 
 /// <summary>
-/// Set of methods for printing <see cref="IReadOnlyInstructionsTable"/> as text.
+/// Set of methods for printing <see cref="TuringMachine "/> as text.
 /// </summary>
 public static class InstructionTablePrinter
 {
-    /// <summary>Prints given instructions as formatted text table.</summary>
-    public static string PrintTable(IReadOnlyInstructionsTable table)
+    public const char DefaultQuote = '\"';
+    public const char DefaultCsvSeparator = ',';
+    
+    /// <summary>Prints given instructions as formatted text machine .</summary>
+    public static string PrintTable(TuringMachine machine, char quote = DefaultQuote)
     {
-        var cellWidth = table.Alphabet.Max(s => s?.Length ?? 0);
-        var size = cellWidth * (table.Alphabet.Count + 1) * (table.States.Count + 1);
+        var cellWidth = machine.Instructions.Alphabet.Max(s => s?.Length ?? 0);
+        var size = cellWidth * (machine.Instructions.Alphabet.Count + 1) * (machine.Instructions.States.Count + 1);
         var builder = new StringBuilder(size);
-        PrintTable(builder, table);
+        PrintTable(builder, machine );
         return builder.ToString();
     }
     
-    /// <summary>Prints given instructions as formatted text table into the <see cref="StringBuilder"/> object.</summary>
-    public static void PrintTable(StringBuilder builder, IReadOnlyInstructionsTable table)
+    /// <summary>Prints given instructions as formatted text machine  into the <see cref="StringBuilder"/> object.</summary>
+    public static void PrintTable(StringBuilder builder, TuringMachine  machine , char quote = DefaultQuote)
     {
-        PrintTable(table, 
-            printLn:  () => builder.AppendLine(),
-            printTxt: (s) => builder.Append(s),
-            printFmt: (fmt, s) => builder.AppendFormat(fmt, s)
-        );
+        PrintTable(machine , new StringBuilderOutput(builder), quote);
     }
     
-    /// <summary>Prints given instructions as formatted text table into the stream object.</summary>
-    public static void PrintTable(Stream stream, IReadOnlyInstructionsTable table)
+    /// <summary>Prints given instructions as formatted text machine  into the stream object.</summary>
+    public static void PrintTable(Stream stream, TuringMachine  machine , char quote = DefaultQuote, Encoding? encoding = null)
     {
-        using (var writer = new StreamWriter(stream, leaveOpen: true))
-        {
-            PrintTable(table, 
-                printLn:  () => writer.WriteLine(),
-                printTxt: (s) => writer.Write(s),
-                printFmt: (fmt, s) => writer.Write(fmt, s)
-            );   
-        }
+        using var output = new StreamOutput(stream, leaveOpen: true, encoding: encoding);
+        PrintTable(machine , output, quote);
     }
     
     /// <summary>Prints given instructions as formatted list.</summary>
-    public static string PrintList(IReadOnlyInstructionsTable table)
+    public static string PrintList(TuringMachine machine, char quote = DefaultQuote)
     {
-        var cellWidth = table.Alphabet.Max(s => s?.Length ?? 0);
-        var size = cellWidth * (table.Alphabet.Count + 1) * (table.States.Count + 1);
+        var cellWidth = machine.Instructions.Alphabet.Max(s => s?.Length ?? 0);
+        var size = cellWidth * (machine.Instructions.Alphabet.Count + 1) * (machine.Instructions.States.Count + 1);
         var builder = new StringBuilder(size);
-        PrintList(builder, table);
+        PrintList(builder, machine , quote);
         return builder.ToString();
     }
-    
+
     /// <summary>Prints given instructions as formatted list into the <see cref="StringBuilder"/> object.</summary>
-    public static void PrintList(StringBuilder builder, IReadOnlyInstructionsTable table)
+    public static void PrintList(StringBuilder builder, TuringMachine machine, char quote = DefaultQuote)
     {
-        PrintList(table, 
-            printLn:  () => builder.AppendLine(),
-            printTxt: (s) => builder.Append(s),
-            printFmt: (fmt, s) => builder.AppendFormat(fmt, s)
-        );
+        PrintList(machine , new StringBuilderOutput(builder), quote);
     }
-    
+
     /// <summary>Prints given instructions as formatted list into the stream object.</summary>
-    public static void PrintList(Stream stream, IReadOnlyInstructionsTable table)
+    public static void PrintList(Stream stream, TuringMachine machine, char quote = DefaultQuote, Encoding? encoding = null)
     {
-        using (var writer = new StreamWriter(stream, leaveOpen: true))
-        {
-            PrintList(table, 
-                printLn:  () => writer.WriteLine(),
-                printTxt: (s) => writer.Write(s),
-                printFmt: (fmt, s) => writer.Write(fmt, s)
-            );   
-        }
+        using var output = new StreamOutput(stream, leaveOpen: true, encoding: encoding);
+        PrintList(machine , output, quote);
     }
     
     /// <summary>Prints given instructions as CSV string.</summary>
-    public static string PrintCsv(IReadOnlyInstructionsTable table)
+    public static string PrintCsv(TuringMachine machine, char quote = DefaultQuote, char sep = DefaultCsvSeparator)
     {
-        var cellWidth = table.Alphabet.Max(s => s?.Length ?? 0);
-        var size = cellWidth * (table.Alphabet.Count + 1) * (table.States.Count + 1);
-        var builder = new StringBuilder(size);
-        PrintCsv(builder, table);
+        var builder = new StringBuilder();
+        PrintCsv(builder, machine );
         return builder.ToString();
     }
     
     /// <summary>Prints given instructions as CSV into the <see cref="StringBuilder"/> object.</summary>
-    public static void PrintCsv(StringBuilder builder, IReadOnlyInstructionsTable table)
+    public static void PrintCsv(StringBuilder builder, TuringMachine machine, char quote = DefaultQuote, char sep = DefaultCsvSeparator)
     {
-        PrintCsv(table, s => builder.Append(s));
+        PrintCsv(machine , new StringBuilderOutput(builder), quote, sep);
     }
     
     /// <summary>Prints given instructions as CSV into the stream object.</summary>
-    public static void PrintCsv(Stream stream, IReadOnlyInstructionsTable table)
+    public static void PrintCsv(Stream stream, TuringMachine machine, char quote = DefaultQuote, char sep = DefaultCsvSeparator, Encoding? encoding = null)
     {
-        using var writer = new StreamWriter(stream, leaveOpen: true);
-        PrintCsv(table, s => writer.Write(s));
+        using var output = new StreamOutput(stream, leaveOpen: true, encoding: encoding);
+        PrintCsv(machine , output, quote, sep);
     }
     
-    private static void PrintTable(IReadOnlyInstructionsTable table, 
-                                   Action printLn, 
-                                   Action<string?> printTxt, 
-                                   Action<string, string?> printFmt)
+    private static void PrintTable(TuringMachine machine, TextOutput output, char quote = DefaultQuote)
     {
-        var hasNotEmptyMatch = table.Any(x => x.ScannedSymbol.Match == SymbolMatch.NotEmpty);
-        var hasEmptyMatch = table.Any(x => x.ScannedSymbol.Match == SymbolMatch.Empty);
-        var hasAnyMatch = table.Any(x => x.ScannedSymbol.Match == SymbolMatch.Any);
+        var hasNotEmptyMatch = machine.Instructions.Any(x => x.ScannedSymbol.Match == SymbolMatch.NotEmpty);
+        var hasEmptyMatch = machine.Instructions.Any(x => x.ScannedSymbol.Match == SymbolMatch.Empty);
+        var hasAnyMatch = machine.Instructions.Any(x => x.ScannedSymbol.Match == SymbolMatch.Any);
         
-        var maxSymbolLen = table.Alphabet.Max(s => s?.Length ?? 0);
+        var maxSymbolLen = machine.Instructions.Alphabet.Max(s => s?.Length ?? 0);
         var columnWidth = maxSymbolLen + 4 + 6 + 1;
-        var columnFmt = $"|{{0,{columnWidth}}}";
+       
+        PrintHeader(machine, output, quote);
+
+        var columnWriter = new ColumnWriter(output, quoteChar: quote);
         
-        printTxt("----");
-        foreach (var symbol in table.Alphabet)
-            printFmt(columnFmt, symbol ?? "<null>");
+        output.Print('|');
+        columnWriter.Print(" ", 4);
+        output.Print('|');
+
+        foreach (var symbol in machine.Instructions.Alphabet)
+        {
+            columnWriter.Print(symbol ?? "<null>", columnWidth, Alignment.Center);
+            output.Print('|');
+        }
 
         if (hasNotEmptyMatch)
-            printFmt(columnFmt, SymbolMatch.NotEmpty.ToString());
-        if (hasEmptyMatch)
-            printFmt(columnFmt, SymbolMatch.Empty.ToString());
-        if (hasAnyMatch)
-            printFmt(columnFmt, SymbolMatch.Any.ToString());
-        
-        printLn();
-
-        foreach (var state in table.States)
         {
-            printFmt("{0,4}", state.ToString(true));
-            
-            foreach (var symbol in table.Alphabet)
+            columnWriter.Print(SymbolMatch.NotEmpty.ToString(), columnWidth, Alignment.Center);
+            output.Print('|');
+        }
+        if (hasEmptyMatch)
+        {
+            columnWriter.Print(SymbolMatch.Empty.ToString(), columnWidth, Alignment.Center);
+            output.Print('|');
+        }
+        if (hasAnyMatch)
+        {
+            columnWriter.Print(SymbolMatch.Any.ToString(), columnWidth, Alignment.Center);
+            output.Print('|');
+        }
+        
+        output.PrintLine();
+
+        var i = 0;
+        foreach (var state in machine.Instructions.States)
+        {
+            output.Print('|');
+            columnWriter.Print(state.ToString(true), 4);
+            output.Print('|');
+
+            foreach (var symbol in machine.Instructions.Alphabet)
             {
-                var action = table[state, FuzzyKey<string>.Exact(symbol!)];
-                printFmt(columnFmt, action?.ToString(true) ?? "-");
+                var action = machine.Instructions[state, FuzzyKey<string>.Exact(symbol!)];
+                columnWriter.Print(action?.ToString(true) ?? "-", columnWidth);
+                output.Print('|');
             }   
             
             if (hasNotEmptyMatch)
             {
-                var specialAction = table[state, FuzzyKey<string>.NotEmpty];
-                printFmt(columnFmt, specialAction?.ToString(true) ?? "-");
+                var specialAction = machine.Instructions[state, FuzzyKey<string>.NotEmpty];
+                columnWriter.Print(specialAction?.ToString(true) ?? "-", columnWidth);
+                output.Print('|');
             }
             if (hasEmptyMatch)
             {
-                var specialAction = table[state, FuzzyKey<string>.Empty];
-                printFmt(columnFmt, specialAction?.ToString(true) ?? "-");
+                var specialAction = machine.Instructions[state, FuzzyKey<string>.Empty];
+                columnWriter.Print(specialAction?.ToString(true) ?? "-", columnWidth);
+                output.Print('|');
             }
             if (hasAnyMatch)
             {
-                var specialAction = table[state, FuzzyKey<string>.Any];
-                printFmt(columnFmt, specialAction?.ToString(true) ?? "-");
+                var specialAction = machine.Instructions[state, FuzzyKey<string>.Any];
+                columnWriter.Print(specialAction?.ToString(true) ?? "-", columnWidth);
+                output.Print('|');
             }
 
-            printLn();
+            if (i < machine.Instructions.States.Count - 1)
+            {
+                output.PrintLine();
+            }
+
+            i++;
         }
     }
     
-    private static void PrintList(IReadOnlyInstructionsTable table,
-                                       Action printLn,
-                                       Action<string?> printTxt,
-                                       Action<string, string?> printFmt)
+    private static void PrintList(TuringMachine  machine , TextOutput output, char quote)
     {
-        var maxLeft = table.Max(x =>
+        /*
+        var maxLeft = machine .Max(x =>
         {
             var symbolLen = x.ScannedSymbol.Match == SymbolMatch.Exact
                 ? x.ScannedSymbol.Value?.Length ?? 0
                 : 9;
             return symbolLen + 4 + 1;
         });
-        var maxRight = table.Max(x =>
+        var maxRight = machine .Max(x =>
         {
             var symbolLen = x.PrintedSymbol?.Length ?? 4;
             return symbolLen + 4 + 1 + 2;
         });
+        */
+        PrintHeader(machine, output, quote);
 
-        var leftFmt = $"{{0,-{maxLeft}}}";
-        var rightFmt = $"{{0,{maxRight}}}";
-        
-        foreach (var x in table)
+        var i = 0;
+        foreach (var instruction in machine.Instructions)
         {
-            printFmt(leftFmt, x.InitialState.ToString(false) + " \'" + x.ScannedSymbol + "\'");
-            printTxt(" -> ");
-            if (x.PrintedSymbol is null)
-                printFmt(rightFmt, x.NextState.ToString(false) + " none " + x.Movement.ToChar());
+            output.Print(instruction.InitialState.ToString(true));
+            output.Print(' ');
+            
+            if (instruction.ScannedSymbol.Match == SymbolMatch.Exact)
+                output.PrintQuoted(instruction.ScannedSymbol.Value, quote);
             else
-                printFmt(rightFmt, x.NextState.ToString(false) + " \'" + x.PrintedSymbol + "\' " + x.Movement.ToChar());
+                output.Print(instruction.ScannedSymbol.ToString());
+            
+            output.Print(" -> ");
+            
+            output.Print(instruction.NextState.ToString(true));
+            output.Print(' ');
 
-            printLn();
+            if (instruction.PrintedSymbol != null)
+            {
+                output.PrintQuoted(instruction.PrintedSymbol, quote);
+                output.Print(' ');
+            }
+            
+            output.Print(instruction.Movement.ToChar());
+            
+            if (i < machine.Instructions.RulesCount - 1)
+            {
+                output.PrintLine();
+            }
+
+            i++;
         }
     }
     
-    private static void PrintCsv(IReadOnlyInstructionsTable table,
-                                Action<string?> printTxt)
+    private static void PrintCsv(TuringMachine machine, TextOutput output, char quote, char sep)
     {
-        foreach (var instruction in table)
+        PrintHeader(machine, output, quote);
+        
+        var i = 0;
+        foreach (var instruction in machine.Instructions)
         {
-            printTxt("\"");
-            printTxt(instruction.InitialState.ToString(true));
-            printTxt("\", \"");
-            printTxt(instruction.ScannedSymbol.ToString());
-            printTxt("\", \"");
-            printTxt(instruction.NextState.ToString(true));
-            printTxt("\", \""); 
-            printTxt(instruction.PrintedSymbol ?? "<none>");
-            printTxt("\", \"");
-            printTxt(instruction.Movement.ToString());
-            printTxt("\"\n");
+            output.PrintQuoted(instruction.InitialState.ToString(true), quote);
+            output.Print(sep);
+            output.PrintQuoted(instruction.ScannedSymbol.ToString(), quote);
+            output.Print(sep);
+            output.PrintQuoted(instruction.NextState.ToString(true), quote);
+            output.Print(sep);
+            output.PrintQuoted(instruction.PrintedSymbol ?? "<none>", quote);
+            output.Print(sep);
+            output.PrintQuoted(instruction.Movement.ToString(), quote);
+            
+            if (i != machine.Instructions.RulesCount - 1)
+            {
+                output.PrintLine();
+            }
+
+            i++;
+        }
+    }
+    
+    private static void PrintHeader(TuringMachine machine, TextOutput output, char quote)
+    {
+        if (quote == default)
+            quote = DefaultQuote;
+        
+        if (!string.IsNullOrWhiteSpace(machine.Name))
+        {
+            output.Print("//name: ");
+            output.PrintQuoted(machine.Name, quote);
+            output.PrintLine();
+        }
+        
+        if (machine.Instructions.Alphabet.Count > 0)
+        {
+            if (machine.Instructions.Alphabet.All(c => (c?.Length ?? 0) <= 1))
+            {
+                output.Print("//alphabet-simple: ");
+                output.PrintQuoted(string.Join("", machine.Instructions.Alphabet), quote);
+            }
+            else
+            {
+                output.Print("//alphabet: ");
+                foreach (var c in machine.Instructions.Alphabet)
+                {
+                    output.PrintQuoted(c, quote);
+                    output.Print(' ');
+                }
+            }
+            output.PrintLine();   
         }
     }
 }

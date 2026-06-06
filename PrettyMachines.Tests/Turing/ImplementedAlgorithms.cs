@@ -24,11 +24,6 @@ public class ImplementedAlgorithms(ITestOutputHelper output) : BaseAlgorithmTest
                 .AddRule(q2, SymbolMatch.NotEmpty, q3, "_", TapeMovement.None)
                 .AddRule(q2, SymbolMatch.Empty, q3, "_", TapeMovement.None)
             );
-        
-        output.WriteLine(InstructionTablePrinter.PrintTable(algorithm.Instructions));
-        output.WriteLine(InstructionTablePrinter.PrintList(algorithm.Instructions));
-        output.WriteLine(InstructionTablePrinter.PrintCsv(algorithm.Instructions));
-
     }
     
     [Theory]
