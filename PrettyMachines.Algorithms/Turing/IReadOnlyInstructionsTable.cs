@@ -3,7 +3,7 @@ namespace PrettyMachines.Algorithms.Turing;
 /// <summary>
 /// Allows readonly access for the instructions of the Turing machine.
 /// </summary>
-public interface IReadOnlyInstructionsTable : IEnumerable<TuringMachineInstruction>
+public interface IReadOnlyInstructionsTable : IEnumerable<TuringInstruction>
 {
     /// <summary>Gets collection of allowed symbols. Blank symbol is always included.</summary>
     IReadOnlySet<string?> Alphabet { get; }

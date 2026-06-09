@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using PrettyMachines.Algorithms.Abstract;
 using PrettyMachines.Algorithms.Utils;
+using PrettyMachines.Algorithms.Utils.Printing;
 
 
 namespace PrettyMachines.Algorithms.Turing;
@@ -161,21 +162,19 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
     private static string CreateTrace(StringBuilder traceBuilder, TuringMachineState state, string? symbol, in TuringMachineAction action)
     {
         traceBuilder.Clear()
-            .Append(state.ToString(true))
-            .Append(", '")
-            .Append(symbol)
-            .Append("' -> ")
-            .Append(action.ToString(true));
+            .Append(state)
+            .AppendQuoted(symbol, '\'')
+            .Append(" -> ")
+            .Append(action.ToFormattedString('\''));
         return traceBuilder.ToString();
     }
     
     private static string CreateErrorTrace(StringBuilder traceBuilder, TuringMachineState state, string? symbol)
     {
         traceBuilder.Clear()
-            .Append(state.Id)
-            .Append(", '")
-            .Append(symbol)
-            .Append("' -> ???");
+            .Append(state)
+            .AppendQuoted(symbol, '\'')
+            .Append(" -> ???");
         return traceBuilder.ToString();
     }
 

@@ -187,13 +187,13 @@ public class InstructionsTable : IReadOnlyInstructionsTable
         }
     }
     
-    public IEnumerator<TuringMachineInstruction> GetEnumerator()
+    public IEnumerator<TuringInstruction> GetEnumerator()
     {
         foreach (var (state, symbolsDict) in statesDict)
         {
             foreach (var (key, action) in symbolsDict)
             {
-                yield return new TuringMachineInstruction
+                yield return new TuringInstruction
                 {
                     InitialState = state,
                     ScannedSymbol = key,

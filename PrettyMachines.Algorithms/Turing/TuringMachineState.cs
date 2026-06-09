@@ -3,6 +3,8 @@ namespace PrettyMachines.Algorithms.Turing;
 /// <summary>Turing machine's state.</summary>
 public class TuringMachineState
 {
+    private string? stringView;
+    
     /// <summary>Unique identifier of the state.</summary>
     public int Id { get; private init; }
 
@@ -29,19 +31,15 @@ public class TuringMachineState
         Name = stateName;
     }
     
-    public override string ToString() => ToString(false);
-    
-    public string ToString(bool shortString)
+    /// <inheritdoc cref="object.ToString()"/>
+    /// <remarks>
+    /// <c>!</c> for the <see cref="Halt"/> state;<br/>
+    /// <c>qO1</c> for non-terminal states;<br/>
+    /// <c>!qO1</c> for terminal states.
+    /// </remarks>
+    public override string ToString()
     {
         if (Id == Halt.Id) return "!";
-        
-        const string shortTerminalFmt = "!q{0:D2}";
-        const string longTerminalFmt = "!q{0:D2} '{1}'";
-        const string shortFmt = "q{0:D2}";
-        const string longFmt = "q{0:D2} '{1}'"; 
-        
-        return shortString || string.IsNullOrWhiteSpace(Name)
-            ? string.Format(IsTerminal ? shortTerminalFmt : shortFmt, Id)
-            : string.Format(IsTerminal ? longTerminalFmt : longFmt, Id, Name);
+        return stringView ??= IsTerminal ? $"!q{Id:D2}" : $"q{Id:D2}";
     }
 }
