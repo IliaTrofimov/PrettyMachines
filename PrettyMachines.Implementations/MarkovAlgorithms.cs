@@ -1,4 +1,5 @@
 using PrettyMachines.Algorithms.Markov;
+using PrettyMachines.Algorithms.Utils;
 
 
 namespace PrettyMachines.Implementations;

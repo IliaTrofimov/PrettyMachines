@@ -80,4 +80,21 @@ public static class TuringMachines
                 .AddHalt(q2, SymbolMatch.Empty)
             );
     }
+
+    public static TuringMachine Create_BusyBeaver()
+    {
+        return TuringMachine.Create("Busy beaver")
+            .WithAlphabet("0", "1")
+            .AddState("A", out var a)
+            .AddState("B", out var b)
+            .AddState("C", out var c)
+            .BuildRules(builder => builder
+                .AddRule(a, "0", b, "1", TapeMovement.Right)
+                .AddRule(a, "1", b, "1", TapeMovement.Left)
+                .AddRule(b, "0", b, "1", TapeMovement.Left)
+                .AddRule(b, "1", b, "1", TapeMovement.Right)
+                .AddRule(c, "0", b, "1", TapeMovement.Left)
+                .AddHalt(c, "1")
+            );
+    }
 }
