@@ -1,12 +1,10 @@
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using FluentAssertions.Execution;
-using PrettyMachines.Algorithms.Abstract;
 using PrettyMachines.Algorithms.Markov;
 using PrettyMachines.Algorithms.Turing;
 using PrettyMachines.Algorithms.Utils;
-using PrettyMachines.Implementations;
+using PrettyMachines.Algorithms.Utils.Printing;
 using Xunit.Abstractions;
 
 
@@ -112,15 +110,12 @@ public class AlgorithmPrintersTests(ITestOutputHelper output)
     }
     
     [Theory]
-    [InlineData(true, PrinterTarget.String)]
-    [InlineData(false, PrinterTarget.String)]
-    [InlineData(true, PrinterTarget.StringBuilder)]
-    [InlineData(false, PrinterTarget.StringBuilder)]
-    [InlineData(true, PrinterTarget.Stream)]
-    [InlineData(false, PrinterTarget.Stream)]
-    public void Turing_FormatedList(bool hasHeader, PrinterTarget target)
+    [InlineData(PrinterTarget.String)]
+    [InlineData(PrinterTarget.StringBuilder)]
+    [InlineData(PrinterTarget.Stream)]
+    public void Turing_FormatedList(PrinterTarget target)
     {
-        var algorithm = GetTuringMachine(hasHeader);
+        var algorithm = GetTuringMachine(true);
         string? additionalText = null;
         string printedText = null!;
         
@@ -147,15 +142,12 @@ public class AlgorithmPrintersTests(ITestOutputHelper output)
     }
     
     [Theory]
-    [InlineData(true, PrinterTarget.String)]
-    [InlineData(false, PrinterTarget.String)]
-    [InlineData(true, PrinterTarget.StringBuilder)]
-    [InlineData(false, PrinterTarget.StringBuilder)]
-    [InlineData(true, PrinterTarget.Stream)]
-    [InlineData(false, PrinterTarget.Stream)]
-    public void Turing_FormatedTable(bool hasHeader, PrinterTarget target)
+    [InlineData(PrinterTarget.String)]
+    [InlineData(PrinterTarget.StringBuilder)]
+    [InlineData(PrinterTarget.Stream)]
+    public void Turing_FormatedTable(PrinterTarget target)
     {
-        var algorithm = GetTuringMachine(hasHeader);
+        var algorithm = GetTuringMachine(true);
         string? additionalText = null;
         string printedText = null!;
         
@@ -182,15 +174,12 @@ public class AlgorithmPrintersTests(ITestOutputHelper output)
     }
     
     [Theory]
-    [InlineData(true, PrinterTarget.String)]
-    [InlineData(false, PrinterTarget.String)]
-    [InlineData(true, PrinterTarget.StringBuilder)]
-    [InlineData(false, PrinterTarget.StringBuilder)]
-    [InlineData(true, PrinterTarget.Stream)]
-    [InlineData(false, PrinterTarget.Stream)]
-    public void Turing_CSV(bool hasHeader, PrinterTarget target)
+    [InlineData(PrinterTarget.String)]
+    [InlineData(PrinterTarget.StringBuilder)]
+    [InlineData(PrinterTarget.Stream)]
+    public void Turing_CSV(PrinterTarget target)
     {
-        var algorithm = GetTuringMachine(hasHeader);
+        var algorithm = GetTuringMachine(true);
         string? additionalText = null;
         string printedText = null!;
         
@@ -270,9 +259,9 @@ public class AlgorithmPrintersTests(ITestOutputHelper output)
             foreach (var rule in instructions)
             {
                 printText.Should()
-                    .Contain(rule.InitialState.ToString(true), "output must contain initial state")
+                    .Contain(rule.InitialState.ToString(), "output must contain initial state")
                     .And
-                    .Contain(rule.NextState.ToString(true), "output must contain next state")
+                    .Contain(rule.NextState.ToString(), "output must contain next state")
                     .And
                     .Contain(rule.ScannedSymbol.ToString(), "output must scanned symbol")
                     .And
@@ -285,7 +274,10 @@ public class AlgorithmPrintersTests(ITestOutputHelper output)
             if (algorithm.Name != null)
                 printText.Should().Contain($"//name: \"{algorithm.Name}\"");
             if (instructions.Alphabet.Count > 0)
-                printText.Should().Contain($"//alphabet-simple: \"{string.Join("", algorithm.Instructions.Alphabet)}\"");
+                printText.Should().Contain($"//alphabet-characters: \"{string.Join("", algorithm.Instructions.Alphabet)}\"");
+            
+            printText.Should().Contain($"//alphabet-strict: \"{algorithm.HasStrictAlphabet}\"");
+
         }
 
         if (additionalText.Length > 0)

@@ -2,7 +2,7 @@ using System.Text;
 using PrettyMachines.Algorithms.Turing;
 
 
-namespace PrettyMachines.Algorithms.Utils;
+namespace PrettyMachines.Algorithms.Utils.Printing;
 
 /// <summary>
 /// Set of methods for printing <see cref="MachineTape"/> as text.

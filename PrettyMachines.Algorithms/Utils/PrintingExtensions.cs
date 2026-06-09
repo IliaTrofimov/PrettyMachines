@@ -1,3 +1,4 @@
+using System.Text;
 using PrettyMachines.Algorithms.Turing;
 
 
@@ -13,4 +14,12 @@ public static class PrintingExtensions
         TapeMovement.Right => 'R',
         _                  => '?'
     };
+
+    /// <summary>
+    /// Appends given value surrounded with quotes.
+    /// </summary>
+    internal static StringBuilder AppendQuoted(this StringBuilder builder, string? value, char quote)
+    {
+        return builder.Append(quote).Append(value).Append(quote);
+    }
 }

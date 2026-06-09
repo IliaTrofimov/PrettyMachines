@@ -1,9 +1,8 @@
 using System.Text;
 using PrettyMachines.Algorithms.Turing;
-using PrettyMachines.Algorithms.Utils.Printing;
 
 
-namespace PrettyMachines.Algorithms.Utils;
+namespace PrettyMachines.Algorithms.Utils.Printing;
 
 /// <summary>
 /// Set of methods for printing <see cref="TuringMachine "/> as text.
@@ -87,7 +86,7 @@ public static class InstructionTablePrinter
         var hasAnyMatch = machine.Instructions.Any(x => x.ScannedSymbol.Match == SymbolMatch.Any);
         
         var maxSymbolLen = machine.Instructions.Alphabet.Max(s => s?.Length ?? 0);
-        var columnWidth = maxSymbolLen + 4 + 6 + 1;
+        var columnWidth = maxSymbolLen + 4 + 6;
        
         PrintHeader(machine, output, quote);
 
@@ -125,32 +124,32 @@ public static class InstructionTablePrinter
         foreach (var state in machine.Instructions.States)
         {
             output.Print('|');
-            columnWriter.Print(state.ToString(true), 4);
+            columnWriter.Print(state.ToString(), 4, Alignment.Right);
             output.Print('|');
 
             foreach (var symbol in machine.Instructions.Alphabet)
             {
                 var action = machine.Instructions[state, FuzzyKey<string>.Exact(symbol!)];
-                columnWriter.Print(action?.ToString(true) ?? "-", columnWidth);
+                columnWriter.Print(action?.ToFormattedString(quote) ?? "-", columnWidth);
                 output.Print('|');
             }   
             
             if (hasNotEmptyMatch)
             {
                 var specialAction = machine.Instructions[state, FuzzyKey<string>.NotEmpty];
-                columnWriter.Print(specialAction?.ToString(true) ?? "-", columnWidth);
+                columnWriter.Print(specialAction?.ToFormattedString(quote) ?? "-", columnWidth);
                 output.Print('|');
             }
             if (hasEmptyMatch)
             {
                 var specialAction = machine.Instructions[state, FuzzyKey<string>.Empty];
-                columnWriter.Print(specialAction?.ToString(true) ?? "-", columnWidth);
+                columnWriter.Print(specialAction?.ToFormattedString(quote) ?? "-", columnWidth);
                 output.Print('|');
             }
             if (hasAnyMatch)
             {
                 var specialAction = machine.Instructions[state, FuzzyKey<string>.Any];
-                columnWriter.Print(specialAction?.ToString(true) ?? "-", columnWidth);
+                columnWriter.Print(specialAction?.ToFormattedString(quote) ?? "-", columnWidth);
                 output.Print('|');
             }
 
@@ -184,7 +183,7 @@ public static class InstructionTablePrinter
         var i = 0;
         foreach (var instruction in machine.Instructions)
         {
-            output.Print(instruction.InitialState.ToString(true));
+            output.Print(instruction.InitialState.ToString());
             output.Print(' ');
             
             if (instruction.ScannedSymbol.Match == SymbolMatch.Exact)
@@ -194,7 +193,7 @@ public static class InstructionTablePrinter
             
             output.Print(" -> ");
             
-            output.Print(instruction.NextState.ToString(true));
+            output.Print(instruction.NextState.ToString());
             output.Print(' ');
 
             if (instruction.PrintedSymbol != null)
@@ -221,11 +220,11 @@ public static class InstructionTablePrinter
         var i = 0;
         foreach (var instruction in machine.Instructions)
         {
-            output.PrintQuoted(instruction.InitialState.ToString(true), quote);
+            output.PrintQuoted(instruction.InitialState.ToString(), quote);
             output.Print(sep);
             output.PrintQuoted(instruction.ScannedSymbol.ToString(), quote);
             output.Print(sep);
-            output.PrintQuoted(instruction.NextState.ToString(true), quote);
+            output.PrintQuoted(instruction.NextState.ToString(), quote);
             output.Print(sep);
             output.PrintQuoted(instruction.PrintedSymbol ?? "<none>", quote);
             output.Print(sep);
@@ -254,14 +253,18 @@ public static class InstructionTablePrinter
         
         if (machine.Instructions.Alphabet.Count > 0)
         {
+            output.Print("//alphabet-strict: ");
+            output.PrintQuoted(machine.HasStrictAlphabet.ToString(), quote);
+            output.PrintLine();
+            
             if (machine.Instructions.Alphabet.All(c => (c?.Length ?? 0) <= 1))
             {
-                output.Print("//alphabet-simple: ");
+                output.Print("//alphabet-characters: ");
                 output.PrintQuoted(string.Join("", machine.Instructions.Alphabet), quote);
             }
             else
             {
-                output.Print("//alphabet: ");
+                output.Print("//alphabet-tokens: ");
                 foreach (var c in machine.Instructions.Alphabet)
                 {
                     output.PrintQuoted(c, quote);
