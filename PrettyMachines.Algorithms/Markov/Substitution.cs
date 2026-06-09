@@ -92,20 +92,6 @@ public class Substitution : IEquatable<Substitution>
         }
         return stringView;
     }
-    
-    public string ToString(MarkovSubstitutionParsingFlags options)
-    {
-        if (options == MarkovSubstitutionParsingFlags.Default)
-            return ToString();
-        
-        var arrow = IsTerminal 
-            ? (options.HasFlag(MarkovSubstitutionParsingFlags.UseDottedArrow) ? "->." : "=>") 
-            : "->";
-
-        return options.HasFlag(MarkovSubstitutionParsingFlags.QuoteStrings) 
-            ? $"'{Pattern}'{arrow}'{Replacement}'" 
-            : Pattern + arrow + Replacement;
-    }
 
     /// <summary>Two rules are considered equal if their <see cref="Pattern"/>s are equal.</summary> 
     public static bool operator==(Substitution left, Substitution right) => Equals(left, right);
