@@ -10,6 +10,12 @@ namespace PrettyMachines.Algorithms.Turing;
 [DebuggerDisplay("Rules: {RulesCount}, stats: {States.Count}, symbols: {Alphabet.Count}")]
 public class InstructionsTable : IReadOnlyInstructionsTable
 {
+    private static readonly EqualityComparer<TuringMachineState> StateComparer =
+        EqualityComparer<TuringMachineState>.Create(
+            (x, y) => x?.Id == y?.Id,
+            (x) => x.Id.GetHashCode()
+        );
+
     private readonly bool isAutoAlphabet;
     private readonly HashSet<string?> alphabet;
     private readonly FuzzyKeyComparer<string> fuzzySymbolsComparer;
@@ -83,7 +89,7 @@ public class InstructionsTable : IReadOnlyInstructionsTable
         }
         
         alphabet.Add(blankSymbol);
-        statesDict = [];
+        statesDict = new(StateComparer);
         BlankSymbol = blankSymbol;
         fuzzySymbolsComparer = new FuzzyKeyComparer<string>(comparer);
     }
@@ -95,7 +101,10 @@ public class InstructionsTable : IReadOnlyInstructionsTable
         isAutoAlphabet = other.isAutoAlphabet;
         alphabet = new HashSet<string?>(other.alphabet, other.alphabet.Comparer);
         fuzzySymbolsComparer = other.fuzzySymbolsComparer;
-        statesDict = new Dictionary<TuringMachineState, Dictionary<FuzzyKey<string>, TuringMachineAction>>(other.statesDict.Count);
+        statesDict = new Dictionary<TuringMachineState, Dictionary<FuzzyKey<string>, TuringMachineAction>>(
+            other.statesDict.Count,
+            StateComparer
+        );
         
         foreach (var (state, symbolsDict) in other.statesDict)
             statesDict[state] = symbolsDict.ToDictionary(x => x.Key, x => x.Value, fuzzySymbolsComparer);
