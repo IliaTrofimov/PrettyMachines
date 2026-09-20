@@ -11,5 +11,10 @@ public sealed class FuzzyKeyComparer<T>(IEqualityComparer<T> valueComparer) : Eq
         return x.Match != SymbolMatch.Exact || valueComparer.Equals(x.Value!, y.Value!);
     }
 
-    public override int GetHashCode(FuzzyKey<T> obj) => obj.Hash;
+    public override int GetHashCode(FuzzyKey<T> obj)
+    {
+        return obj.Match == SymbolMatch.Exact && obj.Value is not null
+            ? HashCode.Combine(valueComparer.GetHashCode(obj.Value), obj.Match)
+            : HashCode.Combine(obj.Match);
+    }
 }

@@ -11,6 +11,7 @@
 *.suo
 *.user
 *.sln.docstates
+.kilo/
 
 # Build results
 [Dd]ebug/

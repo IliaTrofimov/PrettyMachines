@@ -95,14 +95,15 @@ public class MarkovAlgorithm : IAlgorithm<string>
         if (!ValidateInput(input))
             return new AlgorithmResult<string>(TerminationStatus.InvalidInput, input);
         
-        uint steps;
+        uint steps = 0;
         var result = input;
         var status = TerminationStatus.Aborted;
         List<string>? trace = verbose ? [] : null;
         trace?.Add(CreateFirstTrace(input));
         
-        for (steps = 1; cancellation.ShouldContinue(steps + 1); steps++)
+        while (cancellation.ShouldContinue(steps + 1))
         {
+            steps++;
             result = NextStep(result, out var matchedRule);
             trace?.Add(CreateTrace(result, matchedRule));
             

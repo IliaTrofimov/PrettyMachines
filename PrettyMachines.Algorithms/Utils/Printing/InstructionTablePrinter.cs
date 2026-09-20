@@ -18,7 +18,7 @@ public static class InstructionTablePrinter
         var cellWidth = machine.Instructions.Alphabet.Max(s => s?.Length ?? 0);
         var size = cellWidth * (machine.Instructions.Alphabet.Count + 1) * (machine.Instructions.States.Count + 1);
         var builder = new StringBuilder(size);
-        PrintTable(builder, machine );
+        PrintTable(builder, machine, quote);
         return builder.ToString();
     }
     
@@ -41,7 +41,7 @@ public static class InstructionTablePrinter
         var cellWidth = machine.Instructions.Alphabet.Max(s => s?.Length ?? 0);
         var size = cellWidth * (machine.Instructions.Alphabet.Count + 1) * (machine.Instructions.States.Count + 1);
         var builder = new StringBuilder(size);
-        PrintList(builder, machine , quote);
+        PrintList(builder, machine, quote);
         return builder.ToString();
     }
 
@@ -62,7 +62,7 @@ public static class InstructionTablePrinter
     public static string PrintCsv(TuringMachine machine, char quote = DefaultQuote, char sep = DefaultCsvSeparator)
     {
         var builder = new StringBuilder();
-        PrintCsv(builder, machine );
+        PrintCsv(builder, machine, quote, sep);
         return builder.ToString();
     }
     

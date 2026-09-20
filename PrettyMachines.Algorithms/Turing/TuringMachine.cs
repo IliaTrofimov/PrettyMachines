@@ -98,7 +98,7 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
     /// <inheritdoc/> 
     public AlgorithmResult<string> Execute(string input, AlgorithmCancellation cancellation, bool verbose = false)
     {
-        var tape = new MachineTape(input);
+        var tape = new MachineTape(input.Select(c => c.ToString()), instructions.BlankSymbol);
         var result = Execute(tape, cancellation, verbose);
         var resultString = MachineTapePrinter.Print(tape);
         return new AlgorithmResult<string>(result.Termination, resultString, result.Steps, result.Trace);
@@ -120,7 +120,7 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
         var currentState = InitialState;
         var status = TerminationStatus.Aborted;
 
-        while (cancellation.ShouldContinue(steps++) && !currentState.IsTerminal)
+        while (!currentState.IsTerminal && cancellation.ShouldContinue(steps + 1))
         {
             var symbol = input.CurrentSymbol;
             
@@ -137,6 +137,7 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
                 break;
             }
 
+            steps++;
             trace?.Add(CreateTrace(traceBuilder!, currentState, symbol, in action));
             currentState = action.NextState;
         }

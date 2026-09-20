@@ -12,13 +12,11 @@ public readonly struct FuzzyKey<T>
 {
     public readonly SymbolMatch Match;
     public readonly T? Value;
-    public readonly int Hash;
 
     internal FuzzyKey(T? value, SymbolMatch match = SymbolMatch.Exact)
     {
         Value = value;
         Match = match;
-        Hash = HashCode.Combine(value, match);
     }
     
     /// <summary>Creates new key that matches exact value.</summary>

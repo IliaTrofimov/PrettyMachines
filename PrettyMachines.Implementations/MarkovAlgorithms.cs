@@ -66,18 +66,14 @@ public static class MarkovAlgorithms
     {
         return MarkovAlgorithm.Create("Binary decrement")
             .WithAlphabet('0', '1')
-            .WithMarkers('*', '$', '%')
-            // decrement
-            .AddRule("00*", "*11")
-            .AddRule("10*", "*11")
-            .AddRule("01*", "00", true)
-            .AddRule("10*", "01", true)
-            .AddRule("11*", "10", true)
-            .AddRule("0*", "0", true)
+            .WithMarkers('*', '$')
             .AddRule("$0", "0$").WithComment("Move right")
             .AddRule("$1", "1$").WithComment("Move right")
-            .AddRule("$", "*").WithComment("Last digit")
-            //
+            .AddRule("$", "*").WithComment("Reached the last digit")
+            .AddRule("0*", "*1").WithComment("Borrow from the next digit")
+            .AddRule("1*", "0", true).WithComment("Flip one and stop")
+            .AddRule("*1", "0", true).WithComment("Underflow, result is zero")
+            .AddRule("*", "0", true).WithComment("Input was zero")
             .AddRule("", "$").WithComment("Place marker")
             .Build();
     }
@@ -89,7 +85,7 @@ public static class MarkovAlgorithms
     /// </summary>
     public static MarkovAlgorithm Create_LeadingZerosTrim()
     {
-        var builder = MarkovAlgorithm.Create("Binary decrement")
+        var builder = MarkovAlgorithm.Create("Leading zeros trim")
             .WithAlphabet("0123456789")
             .WithMarkers('|');
         
@@ -111,14 +107,15 @@ public static class MarkovAlgorithms
     public static MarkovAlgorithm Create_UnaryToBinaryConverter()
     {
         return MarkovAlgorithm.Create("Unary to binary number converter")
-            .WithAlphabet("|01")
-            .WithMarkers('#', '*')
-            .AddRule("1#", "#0")
-            .AddRule("0#", "1")
-            .AddRule("#", "1")
-            .AddRule("*|", "#*")
-            .AddRule("$", "", true)
-            .AddRule("", "0*")
+            .WithAlphabet('|')
+            .WithMarkers('0', '1', '#', '^')
+            .AddRule("0^", "1").WithComment("Add one: 0 -> 1")
+            .AddRule("1^", "^0").WithComment("Carry left: 1 -> 0")
+            .AddRule("^0", "10").WithComment("Carry out of the number")
+            .AddRule("^#", "1#").WithComment("Carry out of empty number")
+            .AddRule("#|", "^#").WithComment("Consume one unary digit")
+            .AddRule("#", "", true).WithComment("Strip separator")
+            .AddRule("", "0#").WithComment("Place accumulator")
             .Build();
     }
     
@@ -130,15 +127,16 @@ public static class MarkovAlgorithms
     public static MarkovAlgorithm Create_UnaryToTernaryConverter()
     {
         return MarkovAlgorithm.Create("Unary to ternary number converter")
-            .WithAlphabet("|01")
-            .WithMarkers('#', '*')
-            .AddRule("2#", "#0")
-            .AddRule("1#", "#0")
-            .AddRule("0#", "1")
-            .AddRule("#", "1")
-            .AddRule("*|", "#*")
-            .AddRule("$", "", true)
-            .AddRule("", "0*")
+            .WithAlphabet('|')
+            .WithMarkers('0', '1', '2', '#', '^')
+            .AddRule("0^", "1").WithComment("Add one: 0 -> 1")
+            .AddRule("1^", "2").WithComment("Add one: 1 -> 2")
+            .AddRule("2^", "^0").WithComment("Carry left: 2 -> 0")
+            .AddRule("^0", "10").WithComment("Carry out of the number")
+            .AddRule("^#", "1#").WithComment("Carry out of empty number")
+            .AddRule("#|", "^#").WithComment("Consume one unary digit")
+            .AddRule("#", "", true).WithComment("Strip separator")
+            .AddRule("", "0#").WithComment("Place accumulator")
             .Build();
     }
 }
