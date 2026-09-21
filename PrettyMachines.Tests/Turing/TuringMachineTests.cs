@@ -173,7 +173,7 @@ public class TuringMachineTests
         var result = machine.Execute(tape, AlgorithmCancellation.Default);
         
         result.Termination.Should().Be(TerminationStatus.Success);
-        result.Output.Should().BeSameAs(tape);
+        result.Output.Should().NotBeSameAs(tape);
         result.Output.Should().BeEquivalentTo(["1"]);
     }
 

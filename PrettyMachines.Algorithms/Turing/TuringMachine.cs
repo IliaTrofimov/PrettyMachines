@@ -13,6 +13,7 @@ public class TuringMachine : IAlgorithm, IAlgorithm<IReadOnlyTape, IReadOnlyTape
     private TuringMachineState? _initialState;
     private readonly InstructionsTable instructions;
 
+
     /// <inheritdoc cref="IAlgorithm{TInput,TOutput}"/> 
     public string? Name { get; }
 
@@ -37,13 +38,13 @@ public class TuringMachine : IAlgorithm, IAlgorithm<IReadOnlyTape, IReadOnlyTape
     /// <summary>Gets readonly version of the instructions used for this machine.</summary>
     public IReadOnlyInstructionsTable Instructions => instructions;
     
+    #region Constructors
 
     /// <summary>Creates a new builder instance for constructing Turing machines.</summary>
     /// <param name="name">Optional name for the algorithm.</param>
     /// <returns>A builder for fluent configuration.</returns>
     public static ITuringMachineBuilder Create(string? name = null) => new TuringMachineBuilder(name);
 
-    
     /// <summary>
     /// Initialize new algorithm defined by Turing machine with given set of instructions and initial state.
     /// </summary>
@@ -76,7 +77,26 @@ public class TuringMachine : IAlgorithm, IAlgorithm<IReadOnlyTape, IReadOnlyTape
             InitialState = initialState;
     }
     
+    #endregion
+
+    #region Validation
+
+    /// <inheritdoc/> 
+    public bool ValidateInput(string input)
+    {
+        return input.Length == 0 || input.All(c => instructions.Alphabet.Contains(c.ToString()));
+    }
     
+    /// <inheritdoc/> 
+    public bool ValidateInput(IReadOnlyTape input)
+    {
+        return input.Length == 0 || input.All(c => instructions.Alphabet.Contains(c));
+    }
+
+    #endregion
+
+    #region Execution
+
     /// <summary>Applies single step of this algorithm to the current cell of given tape.</summary>
     /// <param name="state">Current state of this machine.</param>
     /// <param name="tape">Tape with input data.</param>
@@ -98,8 +118,8 @@ public class TuringMachine : IAlgorithm, IAlgorithm<IReadOnlyTape, IReadOnlyTape
     public IEnumerable<IAlgorithmSnapshot> Run(string input, AlgorithmCancellation cancellation, bool verbose = false)
     {
         ArgumentNullException.ThrowIfNull(input);
-        var tape = new MachineTape(input.Select(c => c.ToString()), instructions.BlankSymbol);
-        return Run((IReadOnlyTape)tape, cancellation, verbose);
+        var tape = MachineTape.FromString(input, instructions.BlankSymbol);
+        return RunIterator(tape, cancellation, verbose);
     }
 
     /// <inheritdoc/>
@@ -123,18 +143,9 @@ public class TuringMachine : IAlgorithm, IAlgorithm<IReadOnlyTape, IReadOnlyTape
         return AlgorithmRunner.Execute(Run(input, cancellation, verbose));
     }
 
-    /// <inheritdoc/> 
-    public bool ValidateInput(string input)
-    {
-        return input.Length == 0 || input.All(c => instructions.Alphabet.Contains(c.ToString()));
-    }
-    
-    /// <inheritdoc/> 
-    public bool ValidateInput(IReadOnlyTape input)
-    {
-        return input.Length == 0 || input.All(c => instructions.Alphabet.Contains(c));
-    }
+    #endregion
 
+    #region Private methods
 
     private IEnumerable<IAlgorithmSnapshot<IReadOnlyTape>> RunIterator(IReadOnlyTape input, AlgorithmCancellation cancellation, bool verbose)
     {
@@ -143,7 +154,7 @@ public class TuringMachine : IAlgorithm, IAlgorithm<IReadOnlyTape, IReadOnlyTape
         var traceBuilder = verbose ? new StringBuilder(30) : null;
 
         var initialTermination = state.IsTerminal ? TerminationStatus.Success : TerminationStatus.Unknown;
-        yield return new TuringMachineSnapshot(tape.Clone(), 0, initialTermination, null);
+        yield return new TuringMachineSnapshot(tape, 0, initialTermination, null);
 
         if (state.IsTerminal)
             yield break;
@@ -197,6 +208,8 @@ public class TuringMachine : IAlgorithm, IAlgorithm<IReadOnlyTape, IReadOnlyTape
             .Append(" -> ???");
         return traceBuilder.ToString();
     }
+
+    #endregion
 
     #region Builder classes
 

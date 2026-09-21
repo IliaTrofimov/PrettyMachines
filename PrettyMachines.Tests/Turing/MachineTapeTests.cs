@@ -247,4 +247,175 @@ public class MachineTapeTests
         tape.MoveHead(TapeMovement.Right);
         tape.IsCurrentEmpty.Should().BeFalse("second cell is not empty");
     }
+
+    [Fact]
+    public void Constructor_WithCells_StartsWithHeadAtIndexZero()
+    {
+        var tape = new MachineTape(["a", "b", "c"], DefaultBlank);
+        
+        tape.HeadIndex.Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData("R", 1)]
+    [InlineData("RR", 2)]
+    [InlineData("RRR", 3)]
+    [InlineData("RL", 0)]
+    [InlineData("RLR", 1)]
+    [InlineData("LRLR", 1)]
+    [InlineData("LLRR", 2)]
+    public void MoveHead_UpdatesHeadIndex(string movements, int expectedHeadIndex)
+    {
+        var tape = new MachineTape(["a", "b", "c"], DefaultBlank);
+
+        foreach (var movement in movements)
+            tape.MoveHead(movement == 'L' ? TapeMovement.Left : TapeMovement.Right);
+
+        tape.HeadIndex.Should().Be(expectedHeadIndex);
+    }
+
+    [Fact]
+    public void MoveHead_LeftAtStart_KeepsHeadIndexAtZero()
+    {
+        var tape = new MachineTape(["a", "b"], DefaultBlank);
+        
+        tape.MoveHead(TapeMovement.Left);
+        
+        tape.Length.Should().Be(3);
+        tape.HeadIndex.Should().Be(0);
+        tape.CurrentSymbol.Should().Be(DefaultBlank);
+    }
+
+    [Fact]
+    public void MoveHead_RightAtEnd_SetsHeadIndexToLastCell()
+    {
+        var tape = new MachineTape(["a", "b"], DefaultBlank);
+        
+        tape.MoveHead(TapeMovement.Right);
+        tape.MoveHead(TapeMovement.Right);
+        
+        tape.HeadIndex.Should().Be(2);
+        tape.HeadIndex.Should().Be(tape.Length - 1);
+    }
+
+    [Fact]
+    public void MoveHead_ManyMoves_HeadIndexMatchesEnumeratedPosition()
+    {
+        var tape = new MachineTape(["a", "b", "c", "d"], DefaultBlank);
+        var expectedIndex = 0;
+        
+        tape.MoveHead(TapeMovement.Right);
+        expectedIndex++;
+        tape.MoveHead(TapeMovement.Right);
+        expectedIndex++;
+        tape.MoveHead(TapeMovement.Left);
+        expectedIndex--;
+        tape.MoveHead(TapeMovement.Right);
+        expectedIndex++;
+        
+        tape.EnumerateCells(trimEmptyCells: false).ElementAt(tape.HeadIndex).Should().Be(tape.CurrentSymbol);
+        tape.HeadIndex.Should().Be(expectedIndex);
+    }
+
+    [Theory]
+    [InlineData("R", 1)]
+    [InlineData("RR", 2)]
+    [InlineData("RL", 0)]
+    [InlineData("L", 0)]
+    public void CopyConstructor_PreservesHeadIndex(string movements, int expectedHeadIndex)
+    {
+        var source = new MachineTape(["a", "b", "c"], DefaultBlank);
+
+        foreach (var movement in movements)
+            source.MoveHead(movement == 'L' ? TapeMovement.Left : TapeMovement.Right);
+
+        var copy = new MachineTape(source);
+        
+        copy.HeadIndex.Should().Be(expectedHeadIndex);
+        copy.HeadIndex.Should().Be(source.HeadIndex);
+        copy.CurrentSymbol.Should().Be(source.CurrentSymbol);
+        copy.Length.Should().Be(source.Length);
+    }
+
+    [Fact]
+    public void Clone_PreservesHeadIndex()
+    {
+        var tape = new MachineTape(["a", "b", "c"], DefaultBlank);
+        tape.MoveHead(TapeMovement.Right);
+        tape.MoveHead(TapeMovement.Right);
+        
+        var clone = tape.Clone();
+        
+        clone.HeadIndex.Should().Be(2);
+    }
+
+    [Fact]
+    public void TrimEmptyCells_WithHeadOnLeadingBlank_MovesHeadToFirstFilledCell()
+    {
+        var tape = new MachineTape([DefaultBlank, DefaultBlank, "a", "b"], DefaultBlank);
+        tape.HeadIndex.Should().Be(0);
+        
+        tape.TrimEmptyCells();
+        
+        tape.Length.Should().Be(2);
+        tape.HeadIndex.Should().Be(0);
+        tape.CurrentSymbol.Should().Be("a");
+    }
+
+    [Fact]
+    public void TrimEmptyCells_WithHeadOnTrailingBlank_MovesHeadToLastFilledCell()
+    {
+        var tape = new MachineTape(["a", "b", DefaultBlank, DefaultBlank], DefaultBlank);
+        tape.MoveHead(TapeMovement.Right);
+        tape.MoveHead(TapeMovement.Right);
+        tape.HeadIndex.Should().Be(2);
+        
+        tape.TrimEmptyCells();
+        
+        tape.Length.Should().Be(2);
+        tape.HeadIndex.Should().Be(1);
+        tape.CurrentSymbol.Should().Be("b");
+    }
+
+    [Fact]
+    public void TrimEmptyCells_WithHeadOnFilledCell_ShiftsHeadIndexByRemovedLeadingBlanks()
+    {
+        var tape = new MachineTape([DefaultBlank, "a", DefaultBlank, "b", DefaultBlank], DefaultBlank);
+        tape.MoveHead(TapeMovement.Right);
+        tape.MoveHead(TapeMovement.Right);
+        tape.MoveHead(TapeMovement.Right);
+        tape.CurrentSymbol.Should().Be("b");
+        
+        tape.TrimEmptyCells();
+        
+        tape.EnumerateCells(trimEmptyCells: false).Should().Equal("a", DefaultBlank, "b");
+        tape.HeadIndex.Should().Be(2);
+        tape.CurrentSymbol.Should().Be("b");
+    }
+
+    [Fact]
+    public void TrimEmptyCells_OnAllBlankTape_ResetsHeadIndexToZero()
+    {
+        var tape = new MachineTape([DefaultBlank, DefaultBlank, DefaultBlank], DefaultBlank);
+        tape.MoveHead(TapeMovement.Right);
+        tape.HeadIndex.Should().Be(1);
+        
+        tape.TrimEmptyCells();
+        
+        tape.Length.Should().Be(1);
+        tape.HeadIndex.Should().Be(0);
+        tape.CurrentSymbol.Should().Be(DefaultBlank);
+    }
+
+    [Fact]
+    public void TrimEmptyCells_ThenMoveHead_KeepsHeadIndexConsistent()
+    {
+        var tape = new MachineTape([DefaultBlank, "a", "b", DefaultBlank], DefaultBlank);
+        
+        tape.TrimEmptyCells();
+        tape.MoveHead(TapeMovement.Right);
+        
+        tape.HeadIndex.Should().Be(1);
+        tape.CurrentSymbol.Should().Be("b");
+    }
 }

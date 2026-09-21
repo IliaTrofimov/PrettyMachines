@@ -8,11 +8,12 @@ namespace PrettyMachines.Algorithms.Turing;
 /// <summary>
 /// Represents an infinite Turing machine tape with head that can move left or right.
 /// </summary>
-[DebuggerDisplay("Current {currentCell.Value,nq}, length {Length,nq}, filled {filledCellsCount,nq}}")]
+[DebuggerDisplay("Current {currentCell.Value,nq}, index {headIndex,nq}, length {Length,nq}, filled {filledCellsCount,nq}}")]
 public class MachineTape : IReadOnlyTape
 {
     private readonly LinkedList<string?> cells;
     private LinkedListNode<string?> currentCell;
+    private int headIndex;
     private int filledCellsCount;
     
     
@@ -32,16 +33,7 @@ public class MachineTape : IReadOnlyTape
     public bool IsCurrentEmpty => currentCell.Value == BlankSymbol;
 
     /// <summary>Gets the zero-based index of the cell currently under the tape head.</summary>
-    public int HeadIndex
-    {
-        get
-        {
-            var index = 0;
-            for (var node = cells.First; node is not null && !ReferenceEquals(node, currentCell); node = node.Next)
-                index++;
-            return index;
-        }
-    }
+    public int HeadIndex => headIndex;
 
     
     /// <summary>Initializes a new tape from given cell values.</summary>
@@ -64,6 +56,7 @@ public class MachineTape : IReadOnlyTape
         
         BlankSymbol = blankSymbol;
         currentCell = cells.First!;
+        headIndex = 0;
         filledCellsCount = cells.Count(c => BlankSymbol != c);
     }
 
@@ -78,13 +71,17 @@ public class MachineTape : IReadOnlyTape
         if (cells.Count == 0)
             cells.AddFirst(BlankSymbol);
 
-        var headIndex = source.HeadIndex;
+        headIndex = Math.Clamp(source.HeadIndex, 0, cells.Count - 1);
         currentCell = cells.First!;
-        for (var i = 0; i < headIndex && currentCell.Next is not null; i++)
-            currentCell = currentCell.Next;
+        for (var i = 0; i < headIndex; i++)
+            currentCell = currentCell.Next!;
 
         filledCellsCount = cells.Count(c => BlankSymbol != c);
     }
+
+    /// <summary>Creates new tape from given string. Each character will be placed in separate cell.</summary>
+    public static MachineTape FromString(string input, string? blankSymbol = null) => 
+        new(input.Select(c => c.ToString()), blankSymbol);
 
     /// <summary>Creates an independent copy of this tape.</summary>
     public MachineTape Clone() => new(this);
@@ -100,6 +97,8 @@ public class MachineTape : IReadOnlyTape
                 if (currentCell.Previous == null) 
                     cells.AddFirst(BlankSymbol);
                 currentCell = currentCell.Previous!;
+                if (headIndex > 0)
+                    headIndex--;
                 break;
             }
             case TapeMovement.Right:
@@ -107,6 +106,7 @@ public class MachineTape : IReadOnlyTape
                 if (currentCell.Next == null) 
                     cells.AddLast(BlankSymbol);
                 currentCell = currentCell.Next!;
+                headIndex++;
                 break;
             }
         }
@@ -147,14 +147,28 @@ public class MachineTape : IReadOnlyTape
         var first = FindFirstFilledCell();
         var last = FindLastFilledCell();
 
+        if (first is null || last is null)
+        {
+            cells.Clear();
+            currentCell = cells.AddFirst(BlankSymbol);
+            headIndex = 0;
+            return;
+        }
+
         while (!ReferenceEquals(cells.First, first))
+        {
             cells.RemoveFirst();
+            if (headIndex > 0)
+                headIndex--;
+        }
         
         while (!ReferenceEquals(cells.Last, last))
             cells.RemoveLast();
-        
-        if (cells.Count == 0)
-            currentCell = cells.AddFirst(BlankSymbol);
+
+        if (currentCell.List is null)
+            currentCell = headIndex > 0 ? cells.Last! : cells.First!;
+
+        headIndex = Math.Clamp(headIndex, 0, cells.Count - 1);
     }
     
     private IEnumerable<string?> EnumerateCellsTrimmed()
