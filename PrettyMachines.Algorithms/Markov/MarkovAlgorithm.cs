@@ -9,7 +9,7 @@ namespace PrettyMachines.Algorithms.Markov;
 /// </summary>
 /// <seealso href="https://en.wikipedia.org/wiki/Markov_algorithm"/>
 [DebuggerDisplay("MarkovAlgorithm '{(Name ?? \"_unnamed_\")}', rules: {rules.Count}")]
-public class MarkovAlgorithm : IAlgorithm<string>
+public class MarkovAlgorithm : IAlgorithm<string, string>, IAlgorithm
 {
     private string? traceFormat, longTraceFormat;  
         
@@ -58,14 +58,7 @@ public class MarkovAlgorithm : IAlgorithm<string>
         alphabet = other.alphabet != null ? [..other.alphabet] : null;
         markers = other.markers != null ? [..other.markers] : null;
     }
-    
-    /// <summary>Creates new concatenation of two algorithms.</summary>
-    /// <returns>New instance of <see cref="AlgorithmConcatenation{MarkovAlgorithm, T}"/> object with 2 added algorithms.</returns>
-    public static AlgorithmConcatenation<MarkovAlgorithm, string> operator+(MarkovAlgorithm a, MarkovAlgorithm b)
-    {
-        return new AlgorithmConcatenation<MarkovAlgorithm, string>(a, b);
-    }
-    
+
 
     /// <summary>Finds the first rule that matches the given input string.</summary>
     /// <param name="input">The string to test.</param>
@@ -90,42 +83,62 @@ public class MarkovAlgorithm : IAlgorithm<string>
     }
 
     /// <inheritdoc/> 
+    public IEnumerable<IAlgorithmSnapshot<string>> Run(string input, AlgorithmCancellation cancellation, bool verbose = false)
+    {
+        ArgumentNullException.ThrowIfNull(input);
+        return RunIterator(input, cancellation, verbose);
+    }
+
+    IEnumerable<IAlgorithmSnapshot> IAlgorithm.Run(string input, AlgorithmCancellation cancellation, bool verbose)
+    {
+        return Run(input, cancellation, verbose);
+    }
+
+    /// <inheritdoc/> 
     public AlgorithmResult<string> Execute(string input, AlgorithmCancellation cancellation, bool verbose = false)
     {
-        if (!ValidateInput(input))
-            return new AlgorithmResult<string>(TerminationStatus.InvalidInput, input);
-        
-        uint steps = 0;
-        var result = input;
-        var status = TerminationStatus.Aborted;
-        List<string>? trace = verbose ? [] : null;
-        trace?.Add(CreateFirstTrace(input));
-        
-        while (cancellation.ShouldContinue(steps + 1))
-        {
-            steps++;
-            result = NextStep(result, out var matchedRule);
-            trace?.Add(CreateTrace(result, matchedRule));
-            
-            if (matchedRule is null)
-            {
-                status = TerminationStatus.Stuck;
-                break;
-            }
-            if (matchedRule.IsTerminal)
-            {
-                status = TerminationStatus.Success;
-                break;
-            }
-        }
-
-        return new AlgorithmResult<string>(status, result, steps, trace);
+        return AlgorithmRunner.Execute(Run(input, cancellation, verbose));
     }
 
     /// <inheritdoc /> 
     public bool ValidateInput(string input)
     {
         return alphabet == null || string.IsNullOrEmpty(input) || input.All(alphabet.Contains);
+    }
+
+
+    private IEnumerable<IAlgorithmSnapshot<string>> RunIterator(string input, AlgorithmCancellation cancellation, bool verbose)
+    {
+        if (!ValidateInput(input))
+        {
+            yield return new MarkovAlgorithmSnapshot(input, 0, TerminationStatus.InvalidInput, null);
+            yield break;
+        }
+
+        yield return new MarkovAlgorithmSnapshot(input, 0, TerminationStatus.Unknown, verbose ? CreateFirstTrace(input) : null);
+
+        var result = input;
+        long steps = 0;
+        while (cancellation.ShouldContinue((uint)steps + 1))
+        {
+            steps++;
+            result = NextStep(result, out var matchedRule);
+            var traceLine = verbose ? CreateTrace(result, matchedRule) : null;
+
+            if (matchedRule is null)
+            {
+                yield return new MarkovAlgorithmSnapshot(result, steps, TerminationStatus.Stuck, traceLine);
+                yield break;
+            }
+
+            if (matchedRule.IsTerminal)
+            {
+                yield return new MarkovAlgorithmSnapshot(result, steps, TerminationStatus.Success, traceLine);
+                yield break;
+            }
+
+            yield return new MarkovAlgorithmSnapshot(result, steps, TerminationStatus.Unknown, traceLine);
+        }
     }
     
     private string CreateFirstTrace(string input)

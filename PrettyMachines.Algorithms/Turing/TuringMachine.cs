@@ -2,25 +2,24 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using PrettyMachines.Algorithms.Abstract;
 using PrettyMachines.Algorithms.Utils;
-using PrettyMachines.Algorithms.Utils.Printing;
 
 
 namespace PrettyMachines.Algorithms.Turing;
 
 /// <summary>Implementation of the Turing machine with single tape.</summary>
 /// <seealso href="https://en.wikipedia.org/wiki/Turing_machine"/>
-public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
+public class TuringMachine : IAlgorithm, IAlgorithm<IReadOnlyTape, IReadOnlyTape>
 {
-    private TuringMachineState _initialState;
+    private TuringMachineState? _initialState;
     private readonly InstructionsTable instructions;
 
-    /// <inheritdoc cref="IAlgorithm{TData}"/> 
+    /// <inheritdoc cref="IAlgorithm{TInput,TOutput}"/> 
     public string? Name { get; }
 
     /// <summary>Gets or sets the starting state of this algorithm.</summary>
     public TuringMachineState InitialState
     {
-        get => _initialState;
+        get => _initialState!;
         set
         {
             if (!instructions.States.Contains(value))
@@ -96,56 +95,32 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
     }
     
     /// <inheritdoc/> 
-    public AlgorithmResult<string> Execute(string input, AlgorithmCancellation cancellation, bool verbose = false)
+    public IEnumerable<IAlgorithmSnapshot> Run(string input, AlgorithmCancellation cancellation, bool verbose = false)
     {
+        ArgumentNullException.ThrowIfNull(input);
         var tape = new MachineTape(input.Select(c => c.ToString()), instructions.BlankSymbol);
-        var result = Execute(tape, cancellation, verbose);
-        var resultString = MachineTapePrinter.Print(tape);
-        return new AlgorithmResult<string>(result.Termination, resultString, result.Steps, result.Trace);
+        return Run((IReadOnlyTape)tape, cancellation, verbose);
     }
 
-    /// <inheritdoc cref="IAlgorithm{TData}.Execute"/>
-    /// <remarks>Tape object will be modified during execution.</remarks>
-    public AlgorithmResult<MachineTape> Execute(MachineTape input, AlgorithmCancellation cancellation, bool verbose = false)
+    /// <inheritdoc/>
+    /// <remarks>The caller's tape is never mutated; each yielded snapshot owns a private copy.</remarks>
+    public IEnumerable<IAlgorithmSnapshot<IReadOnlyTape>> Run(IReadOnlyTape input, AlgorithmCancellation cancellation, bool verbose = false)
     {
-        List<string>? trace = null;
-        StringBuilder? traceBuilder = null;
-        if (verbose)
-        {
-            trace = [];
-            traceBuilder = new StringBuilder(30);
-        }
+        ArgumentNullException.ThrowIfNull(input);
+        return RunIterator(input, cancellation, verbose);
+    }
 
-        uint steps = 0;
-        var currentState = InitialState;
-        var status = TerminationStatus.Aborted;
+    /// <inheritdoc/> 
+    public AlgorithmResult<string> Execute(string input, AlgorithmCancellation cancellation, bool verbose = false)
+    {
+        return AlgorithmRunner.Execute(Run(input, cancellation, verbose));
+    }
 
-        while (!currentState.IsTerminal && cancellation.ShouldContinue(steps + 1))
-        {
-            var symbol = input.CurrentSymbol;
-            
-            if (HasStrictAlphabet && !instructions.Alphabet.Contains(symbol))
-            {
-                status = TerminationStatus.InvalidInput;
-                trace?.Add(CreateErrorTrace(traceBuilder!, currentState, symbol));
-                break;
-            }
-            if (!NextStep(currentState, input, out var action))
-            {
-                status = TerminationStatus.Stuck;
-                trace?.Add(CreateErrorTrace(traceBuilder!, currentState, symbol));
-                break;
-            }
-
-            steps++;
-            trace?.Add(CreateTrace(traceBuilder!, currentState, symbol, in action));
-            currentState = action.NextState;
-        }
-
-        if (currentState.IsTerminal)
-            status = TerminationStatus.Success;
-        
-        return new AlgorithmResult<MachineTape>(status, input, steps, trace);
+    /// <inheritdoc/>
+    /// <remarks>The caller's tape is never mutated.</remarks>
+    public AlgorithmResult<IReadOnlyTape> Execute(IReadOnlyTape input, AlgorithmCancellation cancellation, bool verbose = false)
+    {
+        return AlgorithmRunner.Execute(Run(input, cancellation, verbose));
     }
 
     /// <inheritdoc/> 
@@ -155,9 +130,53 @@ public class TuringMachine : IAlgorithm<MachineTape>, IAlgorithm<string>
     }
     
     /// <inheritdoc/> 
-    public bool ValidateInput(MachineTape input)
+    public bool ValidateInput(IReadOnlyTape input)
     {
         return input.Length == 0 || input.All(c => instructions.Alphabet.Contains(c));
+    }
+
+
+    private IEnumerable<IAlgorithmSnapshot<IReadOnlyTape>> RunIterator(IReadOnlyTape input, AlgorithmCancellation cancellation, bool verbose)
+    {
+        var tape = new MachineTape(input);
+        var state = InitialState;
+        var traceBuilder = verbose ? new StringBuilder(30) : null;
+
+        var initialTermination = state.IsTerminal ? TerminationStatus.Success : TerminationStatus.Unknown;
+        yield return new TuringMachineSnapshot(tape.Clone(), 0, initialTermination, null);
+
+        if (state.IsTerminal)
+            yield break;
+
+        long steps = 0;
+        while (cancellation.ShouldContinue((uint)steps + 1))
+        {
+            var symbol = tape.CurrentSymbol;
+
+            if (HasStrictAlphabet && !instructions.Alphabet.Contains(symbol))
+            {
+                var line = traceBuilder is null ? null : CreateErrorTrace(traceBuilder, state, symbol);
+                yield return new TuringMachineSnapshot(tape.Clone(), steps, TerminationStatus.InvalidInput, line);
+                yield break;
+            }
+
+            if (!NextStep(state, tape, out var action))
+            {
+                var line = traceBuilder is null ? null : CreateErrorTrace(traceBuilder, state, symbol);
+                yield return new TuringMachineSnapshot(tape.Clone(), steps, TerminationStatus.Stuck, line);
+                yield break;
+            }
+
+            steps++;
+            var traceLine = traceBuilder is null ? null : CreateTrace(traceBuilder, state, symbol, in action);
+            state = action.NextState;
+
+            var termination = state.IsTerminal ? TerminationStatus.Success : TerminationStatus.Unknown;
+            yield return new TuringMachineSnapshot(tape.Clone(), steps, termination, traceLine);
+
+            if (state.IsTerminal)
+                yield break;
+        }
     }
 
     private static string CreateTrace(StringBuilder traceBuilder, TuringMachineState state, string? symbol, in TuringMachineAction action)

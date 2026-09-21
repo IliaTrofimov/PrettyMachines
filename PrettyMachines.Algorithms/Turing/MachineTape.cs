@@ -9,7 +9,7 @@ namespace PrettyMachines.Algorithms.Turing;
 /// Represents an infinite Turing machine tape with head that can move left or right.
 /// </summary>
 [DebuggerDisplay("Current {currentCell.Value,nq}, length {Length,nq}, filled {filledCellsCount,nq}}")]
-public class MachineTape : IEnumerable<string?>
+public class MachineTape : IReadOnlyTape
 {
     private readonly LinkedList<string?> cells;
     private LinkedListNode<string?> currentCell;
@@ -30,6 +30,18 @@ public class MachineTape : IEnumerable<string?>
     
     /// <summary>Indicates whether the current cell contains the blank symbol.</summary>
     public bool IsCurrentEmpty => currentCell.Value == BlankSymbol;
+
+    /// <summary>Gets the zero-based index of the cell currently under the tape head.</summary>
+    public int HeadIndex
+    {
+        get
+        {
+            var index = 0;
+            for (var node = cells.First; node is not null && !ReferenceEquals(node, currentCell); node = node.Next)
+                index++;
+            return index;
+        }
+    }
 
     
     /// <summary>Initializes a new tape from given cell values.</summary>
@@ -54,6 +66,28 @@ public class MachineTape : IEnumerable<string?>
         currentCell = cells.First!;
         filledCellsCount = cells.Count(c => BlankSymbol != c);
     }
+
+    /// <summary>Creates an independent copy of another tape, preserving cells, head position and blank symbol.</summary>
+    /// <param name="source">Tape to copy.</param>
+    public MachineTape(IReadOnlyTape source)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        BlankSymbol = source.BlankSymbol;
+        cells = new LinkedList<string?>(source.EnumerateCells(trimEmptyCells: false));
+        if (cells.Count == 0)
+            cells.AddFirst(BlankSymbol);
+
+        var headIndex = source.HeadIndex;
+        currentCell = cells.First!;
+        for (var i = 0; i < headIndex && currentCell.Next is not null; i++)
+            currentCell = currentCell.Next;
+
+        filledCellsCount = cells.Count(c => BlankSymbol != c);
+    }
+
+    /// <summary>Creates an independent copy of this tape.</summary>
+    public MachineTape Clone() => new(this);
 
     /// <summary>Moves the tape head left or right, extending the tape with blank cells if needed.</summary>
     /// <param name="movement">Direction to move the head.</param>

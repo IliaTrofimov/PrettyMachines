@@ -6,7 +6,7 @@ namespace PrettyMachines.Tests;
 
 public abstract class BaseAlgorithmTest(ITestOutputHelper output)
 {
-    protected void CheckAlgorithm(string? expectedOutput, TerminationStatus? expectedStatus, IAlgorithm<string> algorithm, string input, AlgorithmCancellation? cancellation = null)
+    protected void CheckAlgorithm(string? expectedOutput, TerminationStatus? expectedStatus, IAlgorithm algorithm, string input, AlgorithmCancellation? cancellation = null)
     {
         cancellation ??= new AlgorithmCancellation(50);
         var result = algorithm.Execute(input, cancellation.Value, verbose: true);
@@ -38,7 +38,7 @@ public abstract class BaseAlgorithmTest(ITestOutputHelper output)
         );
     }
     
-    protected void CheckAlgorithm(TerminationStatus? expectedStatus, IAlgorithm<string> algorithm, string input, AlgorithmCancellation? cancellation = null)
+    protected void CheckAlgorithm(TerminationStatus? expectedStatus, IAlgorithm algorithm, string input, AlgorithmCancellation? cancellation = null)
     {
         cancellation ??= new AlgorithmCancellation(50);
         var result = algorithm.Execute(input, cancellation.Value, verbose: true);
