@@ -1,12 +1,16 @@
 # PrettyMachines
 
-A .NET 10 library for defining, executing and printing formal algorithms — currently Turing machines and
-normal Markov algorithms — with an immutable, step-observable execution model and a Blazor WebAssembly UI.
+[![Tests](https://github.com/IliaTrofimov/PrettyMachines/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/IliaTrofimov/PrettyMachines/actions/workflows/ci.yml)
+
+A .NET 10 library for defining, executing and printing formal algorithms like Turing machines and
+normal Markov algorithm.
 
 The project represents algorithms as computable (effectively calculable) functions: a finite set of exact
 instructions that always terminates and always produces the expected answer for the class of problems it
 was built for. Algorithms are defined with fluent builders, executed step by step, and can be rendered as
 text/CSV.
+
+You can try this library with this [demo application](https://iliatrofimov.github.io/PrettyMachines/).
 
 ## Table of contents
 
@@ -20,8 +24,6 @@ text/CSV.
 - [Execution results](#execution-results)
 - [Built-in algorithms](#built-in-algorithms)
 - [Printing and parsing](#printing-and-parsing)
-- [Blazor UI](#blazor-ui)
-- [Roadmap](#roadmap)
 
 ## Features
 
@@ -49,13 +51,6 @@ text/CSV.
 | `PrettyMachines.Implementations` | Ready-to-use algorithms built on the core library. |
 | `PrettyMachines.BlazorUI` | Blazor WebAssembly app for building and executing algorithms. |
 | `PrettyMachines.Tests` | xUnit tests for the core library and implementations. |
-
-Inside the core project:
-
-- `Abstract/` — algorithm contracts, cancellation, snapshots, results and termination statuses.
-- `Turing/` — Turing machine, tape, states, instructions table and builders.
-- `Markov/` — Markov algorithm, substitutions and builders.
-- `Utils/` — printing and parsing helpers.
 
 ## Building and testing
 
@@ -276,36 +271,3 @@ Markov algorithm from scratch.
   `Substitution` rules; `=>` marks a terminal rule.
 
 Each printer overload accepts a `StringBuilder`, a `Stream`, or returns a `string`.
-
-## Blazor UI
-
-`PrettyMachines.BlazorUI` is a WebAssembly playground for the libraries. It lists every built-in algorithm,
-lets you enter input, run or step through execution, and inspect both the structured definition and the
-per-step trace. Start it with:
-
-```bash
-dotnet run --project PrettyMachines.BlazorUI
-```
-
-## Roadmap
-
-- [x] Turing machine
-  - [x] Infinite tape simulation
-  - [x] Builder class
-  - [x] Unit tests
-  - [ ] More example algorithms
-- [x] Markov algorithm
-  - [x] Builder class
-  - [x] Unit tests
-  - [ ] More example algorithms
-- [ ] Finite state machines
-  - [ ] Builder class
-  - [ ] Unit tests
-  - [ ] Examples
-- [ ] Base algorithm class refinements
-- [ ] Blazor UI WebAssembly application for all algorithms
-
-## Contributing
-
-See [`AGENTS.md`](AGENTS.md) for architecture, conventions and agent guidance. Keep public interfaces in
-sync with this readme and all implementations.
