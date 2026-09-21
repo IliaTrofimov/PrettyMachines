@@ -1,0 +1,271 @@
+@if (!Editable)
+{
+    <div class="help-box">Read-only view. Press "Edit as draft" to change this algorithm.</div>
+}
+
+<div class="structure-form">
+    <div class="field-row">
+        <label>Name</label>
+        <input type="text" class="mono" disabled="@(!Editable)"
+               value="@Draft.Name"
+               @onchange="e => Update(() => Draft.Name = e.Value?.ToString() ?? string.Empty)" />
+    </div>
+
+    <div class="field-row">
+        <label>Blank symbol</label>
+        <span class="inline">
+            <input type="checkbox" disabled="@(!Editable)" checked="@Draft.HasBlankSymbol"
+                   @onchange="e => Update(() => Draft.HasBlankSymbol = e.Value is true)" />
+            <input type="text" class="mono narrow" disabled="@(!Editable || !Draft.HasBlankSymbol)" placeholder="(none)"
+                   value="@Draft.BlankSymbol"
+                   @onchange="e => Update(() => Draft.BlankSymbol = e.Value?.ToString() ?? string.Empty)" />
+        </span>
+        <label class="inline">
+            <input type="checkbox" disabled="@(!Editable)" checked="@Draft.StrictAlphabet"
+                   @onchange="e => Update(() => Draft.StrictAlphabet = e.Value is true)" />
+            Strict alphabet
+        </label>
+    </div>
+
+    <div class="field-row">
+        <label>Alphabet</label>
+        <div class="chip-list">
+            @foreach (var symbol in Draft.Alphabet.ToList())
+            {
+                var captured = symbol;
+                <span class="chip">
+                    <input type="text" class="mono chip-input" disabled="@(!Editable)" value="@captured"
+                           @onchange="e => Update(() => ReplaceSymbol(captured, e.Value?.ToString() ?? string.Empty))" />
+                    @if (Editable)
+                    {
+                        <button class="btn-delete" @onclick="() => Update(() => Draft.Alphabet.Remove(captured))">-</button>
+                    }
+                </span>
+            }
+            @if (Editable)
+            {
+                <span class="chip">
+                    <input type="text" class="mono chip-input" placeholder="new" value="@newSymbol"
+                           @onchange="e => newSymbol = e.Value?.ToString() ?? string.Empty" />
+                    <button class="btn-add" @onclick="AddSymbol" title="Add symbol">+</button>
+                </span>
+            }
+        </div>
+    </div>
+</div>
+
+<h5>States</h5>
+<table class="structure-table mono">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Initial</th>
+        <th>Terminal</th>
+        @if (Editable)
+        {
+            <th></th>
+        }
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var state in Draft.States.ToList())
+    {
+        var captured = state;
+        <tr>
+            <td>@Draft.States.IndexOf(captured)</td>
+            <td>
+                <input type="text" class="mono" disabled="@(!Editable)" value="@captured.Name"
+                       @onchange="e => Update(() => captured.Name = e.Value?.ToString() ?? string.Empty)" />
+            </td>
+            <td>
+                <input type="radio" name="initial-state" disabled="@(!Editable)" checked="@captured.IsInitial"
+                       @onchange="() => Update(() => SetInitial(captured))" />
+            </td>
+            <td>
+                <input type="checkbox" disabled="@(!Editable)" checked="@captured.IsTerminal"
+                       @onchange="e => Update(() => captured.IsTerminal = e.Value is true)" />
+            </td>
+            @if (Editable)
+            {
+                <td>
+                    <button class="btn-delete" @onclick="() => Update(() => RemoveState(captured))">-</button>
+                </td>
+            }
+        </tr>
+    }
+    </tbody>
+</table>
+@if (Editable)
+{
+    <button class="link-button" @onclick="AddState">+ Add state</button>
+}
+
+<h5>Transitions</h5>
+<table class="structure-table mono">
+    <thead>
+    <tr>
+        <th>State</th>
+        <th>Scan</th>
+        <th>Value</th>
+        <th>Next</th>
+        <th>Print</th>
+        <th>Move</th>
+        @if (Editable)
+        {
+            <th></th>
+        }
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var transition in Draft.Transitions.ToList())
+    {
+        var captured = transition;
+        <tr>
+            <td>
+                <select disabled="@(!Editable)" value="@captured.StateIndex"
+                        @onchange="e => Update(() => captured.StateIndex = ToInt(e.Value))">
+                    @for (var i = 0; i < Draft.States.Count; i++)
+                    {
+                        <option value="@i">@Draft.GetStateName(i)</option>
+                    }
+                </select>
+            </td>
+            <td>
+                <select disabled="@(!Editable)" value="@captured.SymbolMatch"
+                        @onchange="e => Update(() => captured.SymbolMatch = ToEnum(e.Value, SymbolMatch.Exact))">
+                    <option value="@SymbolMatch.Exact">Exact</option>
+                    <option value="@SymbolMatch.NotEmpty">Not empty</option>
+                    <option value="@SymbolMatch.Empty">Empty</option>
+                    <option value="@SymbolMatch.Any">Any</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" class="mono narrow" value="@captured.SymbolValue"
+                       disabled="@(!Editable || captured.SymbolMatch != SymbolMatch.Exact)"
+                       @onchange="e => Update(() => captured.SymbolValue = e.Value?.ToString() ?? string.Empty)" />
+            </td>
+            <td>
+                <select disabled="@(!Editable)" value="@captured.NextStateIndex"
+                        @onchange="e => Update(() => captured.NextStateIndex = ToInt(e.Value))">
+                    <option value="-1">Halt</option>
+                    @for (var i = 0; i < Draft.States.Count; i++)
+                    {
+                        <option value="@i">@Draft.GetStateName(i)</option>
+                    }
+                </select>
+            </td>
+            <td>
+                <span class="inline">
+                    <input type="checkbox" disabled="@(!Editable)" checked="@captured.Prints"
+                           @onchange="e => Update(() => captured.Prints = e.Value is true)" />
+                    <input type="text" class="mono narrow" placeholder="(none)" value="@captured.Print"
+                           disabled="@(!Editable || !captured.Prints)"
+                           @onchange="e => Update(() => captured.Print = e.Value?.ToString() ?? string.Empty)" />
+                </span>
+            </td>
+            <td>
+                <select disabled="@(!Editable)" value="@captured.Movement"
+                        @onchange="e => Update(() => captured.Movement = ToEnum(e.Value, TapeMovement.None))">
+                    <option value="@TapeMovement.None">None</option>
+                    <option value="@TapeMovement.Left">Left</option>
+                    <option value="@TapeMovement.Right">Right</option>
+                </select>
+            </td>
+            @if (Editable)
+            {
+                <td>
+                    <button class="btn-delete" @onclick="() => Update(() => Draft.Transitions.Remove(captured))">-</button>
+                </td>
+            }
+        </tr>
+    }
+    </tbody>
+</table>
+@if (Editable)
+{
+    <button class="link-button" @onclick="AddTransition">+ Add transition</button>
+}
+
+@code {
+    private string newSymbol = string.Empty;
+
+    [Parameter, EditorRequired]
+    public TuringMachineDraft Draft { get; set; } = null!;
+
+    [Parameter]
+    public bool Editable { get; set; }
+
+    [Parameter]
+    public EventCallback OnChanged { get; set; }
+
+
+    private async Task Update(Action change)
+    {
+        change();
+        await OnChanged.InvokeAsync();
+    }
+
+    private void AddSymbol()
+    {
+        if (string.IsNullOrEmpty(newSymbol))
+            return;
+
+        if (!Draft.Alphabet.Contains(newSymbol))
+            Draft.Alphabet.Add(newSymbol);
+        newSymbol = string.Empty;
+    }
+
+    private void ReplaceSymbol(string oldSymbol, string newValue)
+    {
+        var index = Draft.Alphabet.IndexOf(oldSymbol);
+        if (index < 0 || string.IsNullOrEmpty(newValue))
+            return;
+
+        Draft.Alphabet[index] = newValue;
+    }
+
+    private void SetInitial(DraftState state)
+    {
+        foreach (var other in Draft.States)
+            other.IsInitial = ReferenceEquals(other, state);
+    }
+
+    private void RemoveState(DraftState state)
+    {
+        var index = Draft.States.IndexOf(state);
+        if (index < 0)
+            return;
+
+        Draft.States.RemoveAt(index);
+
+        foreach (var transition in Draft.Transitions)
+        {
+            if (transition.StateIndex == index)
+                transition.StateIndex = 0;
+            else if (transition.StateIndex > index)
+                transition.StateIndex--;
+
+            if (transition.NextStateIndex == index)
+                transition.NextStateIndex = -1;
+            else if (transition.NextStateIndex > index)
+                transition.NextStateIndex--;
+        }
+
+        Draft.Transitions.RemoveAll(t => t.StateIndex < 0);
+    }
+
+    private void AddState() => Draft.States.Add(new DraftState { Name = $"q{Draft.States.Count:D2}" });
+
+    private void AddTransition() => Draft.Transitions.Add(new DraftTransition
+    {
+        StateIndex = Math.Max(0, Draft.States.FindIndex(s => !s.IsTerminal)),
+        NextStateIndex = -1,
+        Movement = TapeMovement.None,
+    });
+
+    private static int ToInt(object? value) => int.TryParse(value?.ToString(), out var parsed) ? parsed : -1;
+
+    private static T ToEnum<T>(object? value, T fallback) where T : struct, Enum =>
+        Enum.TryParse<T>(value?.ToString(), out var parsed) ? parsed : fallback;
+}

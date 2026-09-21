@@ -1,7 +1,7 @@
 # PrettyMachines
 
 A .NET 10 library for defining, executing and printing formal algorithms — currently Turing machines and
-normal Markov algorithms — with an immutable, step-observable execution model.
+normal Markov algorithms — with an immutable, step-observable execution model and a Blazor WebAssembly UI.
 
 The project represents algorithms as computable (effectively calculable) functions: a finite set of exact
 instructions that always terminates and always produces the expected answer for the class of problems it
@@ -19,6 +19,9 @@ text/CSV.
 - [Quick start: Markov algorithm](#quick-start-markov-algorithm)
 - [Execution results](#execution-results)
 - [Built-in algorithms](#built-in-algorithms)
+- [Printing and parsing](#printing-and-parsing)
+- [Blazor UI](#blazor-ui)
+- [Roadmap](#roadmap)
 
 ## Features
 
@@ -28,8 +31,10 @@ text/CSV.
 - Bounded execution via step limits and `CancellationToken`.
 - Infinite Turing machine tape simulation with left/right/none head movement.
 - Symbol matching by exact value, empty/not-empty, or "any" cell.
+- Text and CSV printers for machines, instruction tables and tapes.
 - Parser for Markov substitution rules (`a -> b`, `a => b`, quoted and unquoted forms).
 - Library of ready-to-use example algorithms.
+- Blazor WebAssembly playground for running algorithms and inspecting their traces.
 
 ## Requirements
 
@@ -42,7 +47,8 @@ text/CSV.
 | --- | --- |
 | `PrettyMachines.Algorithms` | Core library: abstract algorithm model, `Turing`, `Markov` and `Utils` (printing/parsing). |
 | `PrettyMachines.Implementations` | Ready-to-use algorithms built on the core library. |
-| `PrettyMachines.Tests` | xUnit tests for the core library and implementations. Use this project to get more usage examples. |
+| `PrettyMachines.BlazorUI` | Blazor WebAssembly app for building and executing algorithms. |
+| `PrettyMachines.Tests` | xUnit tests for the core library and implementations. |
 
 Inside the core project:
 
@@ -56,6 +62,12 @@ Inside the core project:
 ```bash
 dotnet build PrettyMachines.sln
 dotnet test
+```
+
+Run the Blazor WebAssembly playground:
+
+```bash
+dotnet run --project PrettyMachines.BlazorUI
 ```
 
 ## Core concepts
@@ -124,6 +136,7 @@ initial state, and a transition table.
 ```csharp
 using PrettyMachines.Algorithms.Abstract;
 using PrettyMachines.Algorithms.Turing;
+using PrettyMachines.Algorithms.Utils.Printing;
 
 var machine = TuringMachine.Create("Toggle first bit")
     .WithAlphabet("0", "1")          // strict alphabet; unknown symbols fail the machine
@@ -227,6 +240,30 @@ var adder = TuringMachines.Create_BinaryAdditionMachine();
 var sum = adder.Execute("101+11", new AlgorithmCancellation(100_000)).Output;   // "1000"
 ```
 
+### Catalog
+
+`PrettyMachines.Implementations.Catalog.AlgorithmCatalog` discovers every built-in factory by reflection and
+groups them by their declaring static class (family):
+
+```csharp
+using PrettyMachines.Implementations.Catalog;
+
+foreach (var family in AlgorithmCatalog.Discover())
+{
+    Console.WriteLine(family.Name);                       // "Turing machines", "Markov algorithms", ...
+    foreach (var descriptor in family.Algorithms)
+        Console.WriteLine($"  {descriptor.Name} ({descriptor.Id})");
+}
+
+var descriptor = AlgorithmCatalog.Find("TuringMachines", "Create_BinaryIncrementMachine");
+var algorithm = descriptor!.Create();                     // factory invoked with default optional parameters
+```
+
+The catalog has no Blazor dependency, so it is unit-testable from `PrettyMachines.Tests`. Discovered
+algorithms feed the `PrettyMachines.BlazorUI` WebAssembly app, which lists every family, runs and steps any
+built-in algorithm, and can fork a built-in into an editable draft or author a new Turing machine /
+Markov algorithm from scratch.
+
 ## Printing and parsing
 
 `PrettyMachines.Algorithms.Utils` provides text/CSV output and a rule parser.
@@ -239,3 +276,36 @@ var sum = adder.Execute("101+11", new AlgorithmCancellation(100_000)).Output;   
   `Substitution` rules; `=>` marks a terminal rule.
 
 Each printer overload accepts a `StringBuilder`, a `Stream`, or returns a `string`.
+
+## Blazor UI
+
+`PrettyMachines.BlazorUI` is a WebAssembly playground for the libraries. It lists every built-in algorithm,
+lets you enter input, run or step through execution, and inspect both the structured definition and the
+per-step trace. Start it with:
+
+```bash
+dotnet run --project PrettyMachines.BlazorUI
+```
+
+## Roadmap
+
+- [x] Turing machine
+  - [x] Infinite tape simulation
+  - [x] Builder class
+  - [x] Unit tests
+  - [ ] More example algorithms
+- [x] Markov algorithm
+  - [x] Builder class
+  - [x] Unit tests
+  - [ ] More example algorithms
+- [ ] Finite state machines
+  - [ ] Builder class
+  - [ ] Unit tests
+  - [ ] Examples
+- [ ] Base algorithm class refinements
+- [ ] Blazor UI WebAssembly application for all algorithms
+
+## Contributing
+
+See [`AGENTS.md`](AGENTS.md) for architecture, conventions and agent guidance. Keep public interfaces in
+sync with this readme and all implementations.

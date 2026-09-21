@@ -1,0 +1,16 @@
+@using PrettyMachines.Algorithms.Turing
+
+<div class="mono output-box tape-view">
+    @foreach (var (cell, index) in Tape.EnumerateCells(trimEmptyCells: false).Select((value, index) => (value, index)))
+    {
+        <span class="tape-cell @(index == Tape.HeadIndex ? "tape-head" : "")">@Symbol(cell)</span>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyTape Tape { get; set; } = null!;
+
+
+    private static string Symbol(string? cell) => string.IsNullOrEmpty(cell) ? "\u00A0" : cell;
+}

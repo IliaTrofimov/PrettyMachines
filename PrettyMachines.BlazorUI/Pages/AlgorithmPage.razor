@@ -1,123 +1,334 @@
-@page "/"
+@page "/algorithm/{FamilyId}/{AlgorithmId}"
+@page "/draft/{DraftId}"
+@page "/editor/{FamilyId}"
 
-@using PrettyMachines.Algorithms.Abstract
-@using PrettyMachines.BlazorUI.Helpers
-@using PrettyMachines.BlazorUI.Models
-@using PrettyMachines.BlazorUI.Components
+@inject AlgorithmDraftStore DraftStore
+@inject NavigationManager Navigation
 
 <div class="page-container">
-    <div class="wide-panel">
-        <h4 class="panel-header">Input / output</h4>
-        
-        <div class="panel-content">
-            <input type="text"
-                   class="mono"
-                   placeholder="Enter algorithm input..."
-                   @bind="inputOutput"
-                   @bind:event="oninput" />
-
-            <div class="input-group">
-                <button class="btn-run" @onclick="RunAlgorithm">▶ Run</button>
-                <button class="btn-step" @onclick="StepAlgorithm">⏯ Step</button>
-                @if (terminationStatus != TerminationStatus.Unknown)
+    @if (notFound)
+    {
+        <div class="wide-panel">
+            <h4 class="panel-header">Not found</h4>
+            <div class="panel-content">
+                <p>The requested algorithm or draft does not exist.</p>
+                <a href="/">Back to catalog</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="wide-panel">
+            <h4 class="panel-header">
+                @DisplayName
+                @if (isDraft)
                 {
-                    <div>
-                        Execution result: 
-                        <u>
-                            @terminationStatus after @steps step@(steps != 1 ? "s" : "")
-                        </u>
-                    </div>
+                    <span class="badge">draft</span>
+                }
+                else if (descriptor is not null)
+                {
+                    <span class="badge">@descriptor.FamilyId</span>
+                }
+            </h4>
+
+            <div class="panel-content">
+                <input type="text"
+                       class="mono"
+                       placeholder="Enter algorithm input..."
+                       @bind="input" />
+
+                <div class="input-group">
+                    <button class="btn-run" disabled="@(!CanExecute)" @onclick="RunAlgorithm">▶ Run</button>
+                    <button class="btn-step" disabled="@(!CanExecute)" @onclick="StepAlgorithm">⏯ Step</button>
+                    <button class="link-button" disabled="@(!session.IsStarted)" @onclick="ResetAlgorithm">Reset</button>
+                    <button class="link-button" disabled="@(!session.IsActive)" @onclick="StopAlgorithm">Stop</button>
+
+                    <label class="inline">
+                        max steps
+                        <input type="number" min="1" class="mono narrow" @bind="maxStepsInput" />
+                    </label>
+
+                    @if (session.IsStarted)
+                    {
+                        <div>
+                            @session.Status.ToString().ToLowerInvariant() after @session.Steps step@(session.Steps == 1 ? "" : "s")
+                        </div>
+                    }
+                </div>
+
+                @if (algorithm is not null && !algorithm.ValidateInput(input))
+                {
+                    <div class="validation-error">Input is not valid for this algorithm.</div>
+                }
+
+                @if (session.Error is not null)
+                {
+                    <div class="validation-error">@session.Error</div>
+                }
+
+                <div class="output-row">
+                    <label>Output</label>
+                    @if (session.Tape is { } tape)
+                    {
+                        <TapeView Tape="tape" />
+                        <div class="help-box">The highlighted cell is the tape head.</div>
+                    }
+                    else
+                    {
+                        <div class="mono output-box">@session.Output</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h4 class="panel-header">Definition</h4>
+            <div class="panel-content">
+                @if (!isDraft && descriptor is not null)
+                {
+                    <button class="link-button" @onclick="EditAsDraft">Edit as draft</button>
+                }
+
+                @if (structureError is not null)
+                {
+                    <div class="validation-error">@structureError</div>
+                }
+
+                @if (draft?.Turing is { } turingDraft)
+                {
+                    <TuringStructureView Draft="turingDraft" Editable="editable" OnChanged="OnStructureChanged" />
+                }
+                else if (draft?.Markov is { } markovDraft)
+                {
+                    <MarkovStructureView Draft="markovDraft" Editable="editable" OnChanged="OnStructureChanged" />
+                }
+                else if (structureError is null)
+                {
+                    <i>No structured definition is available.</i>
                 }
             </div>
         </div>
-    </div>
 
-    <!-- Bottom Panels -->
-    <div class="panel">
-        <h4 class="panel-header">
-            Instructions
-        </h4>
-        <InstructionsList></InstructionsList>
-        <InstructionsTable></InstructionsTable>
-    </div>
-
-    <div class="panel">
-        <h4 class="panel-header">
-            Trace
-        </h4>
-        <AlgorithmTraces @ref="tracesComponent"/>
-    </div>
+        <div class="panel">
+            <h4 class="panel-header">Trace</h4>
+            <AlgorithmTraces Traces="@session.Trace" />
+        </div>
+    }
 </div>
 
-@code{
-    [Inject] 
-    private ILogger<AlgorithmPage> logger { get; set; } = null!;
-    private AlgorithmTraces tracesComponent;
-    
-    private IAlgorithm algorithm;
-    
-    private bool mustClearTrace;
-    private string inputOutput = "";
-    private TerminationStatus terminationStatus;
-    private long steps;
-    
-    
-    private void RunAlgorithm()
-    {
-        mustClearTrace = true;
-        terminationStatus = HandleAlgorithm(() => 
-        {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-            return algorithm.Execute(inputOutput, new AlgorithmCancellation(200, cts.Token), verbose: true);
-        });
-    }
-    
-    private void StepAlgorithm()
-    {
-        terminationStatus = HandleAlgorithm(() => 
-        {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-            return algorithm.Execute(inputOutput, new AlgorithmCancellation(1, cts.Token), verbose: true);
-        });
+@code {
+    private readonly AlgorithmRunSession session = new();
 
-        mustClearTrace = false;
-        
-        if (terminationStatus == TerminationStatus.Aborted)
-            terminationStatus = TerminationStatus.Success;
+    private AlgorithmDescriptor? descriptor;
+    private AlgorithmDraft? draft;
+    private IAlgorithm? algorithm;
+    private bool isDraft;
+    private bool editable;
+    private bool notFound;
+    private string? structureError;
+    private string input = "";
+    private int maxStepsInput = 1000;
+    private string? loadedKey;
+
+    [Parameter] public string? FamilyId { get; set; }
+
+    [Parameter] public string? AlgorithmId { get; set; }
+
+    [Parameter] public string? DraftId { get; set; }
+
+
+    private string DisplayName => draft?.Name ?? algorithm?.Name ?? descriptor?.Name ?? "Algorithm";
+
+    private bool CanExecute => algorithm is not null;
+
+
+    protected override void OnParametersSet()
+    {
+        var path = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?')[0];
+        if (string.Equals(path, loadedKey, StringComparison.Ordinal))
+            return;
+
+        loadedKey = path;
+        Load(path);
     }
 
-    private TerminationStatus HandleAlgorithm(Func<AlgorithmResult<string>> action)
+    private void Load(string path)
     {
+        session.Reset();
+        descriptor = null;
+        draft = null;
+        algorithm = null;
+        isDraft = false;
+        editable = false;
+        notFound = false;
+        structureError = null;
+        input = "";
+
+        var segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        if (segments.Length >= 2 && segments[0] == "draft")
+        {
+            LoadDraft(Uri.UnescapeDataString(segments[1]));
+            return;
+        }
+
+        if (segments.Length >= 2 && segments[0] == "editor")
+        {
+            CreateNewDraft(Uri.UnescapeDataString(segments[1]));
+            return;
+        }
+
+        if (segments.Length >= 3 && segments[0] == "algorithm")
+        {
+            LoadBuiltIn(Uri.UnescapeDataString(segments[1]), Uri.UnescapeDataString(segments[2]));
+            return;
+        }
+
+        notFound = true;
+    }
+
+    private void LoadDraft(string id)
+    {
+        if (DraftStore.Get(id) is not { } loaded)
+        {
+            notFound = true;
+            return;
+        }
+
+        draft = loaded;
+        isDraft = true;
+        editable = true;
+        RebuildDraft();
+    }
+
+    private void LoadBuiltIn(string familyId, string algorithmId)
+    {
+        descriptor = AlgorithmCatalog.Find(familyId, algorithmId);
+        if (descriptor is null)
+        {
+            notFound = true;
+            return;
+        }
+
         try
         {
-            ShouldRender();
-            var result = action();
-            
-            tracesComponent.Traces = mustClearTrace 
-                ? result.Trace 
-                : tracesComponent.Traces.Concat(result.Trace).ToList();
-
-            steps = result.Steps;
-            inputOutput = result.Output;
-            return result.Termination;
+            algorithm = descriptor.Create();
+            draft = CreateDisplayDraft(descriptor, algorithm);
         }
         catch (Exception exception)
         {
-            logger.LogWarning(exception, "Algorithm execution has failed with unhandled exception");
-            tracesComponent.Traces = [];
-            mustClearTrace = false;
-            return TerminationStatus.Aborted;
+            structureError = exception.Message;
         }
     }
-    
-    private static InstructionType ValidateInstruction(string instructionText)
-    {
-        var isTerminal = instructionText.ContainsOne("=>");
-        var isNotTerminal = instructionText.ContainsOne("->");
 
-        if (isTerminal && isNotTerminal || !isTerminal && !isNotTerminal)
-            return InstructionType.Invalid;
-        
-        return isTerminal ? InstructionType.Terminal : InstructionType.Default;
+    private void CreateNewDraft(string familyId)
+    {
+        try
+        {
+            var created = DraftAlgorithmFactory.CreateBlank(familyId);
+            DraftStore.Add(created);
+            Navigation.NavigateTo($"/draft/{created.Id}");
+        }
+        catch (Exception exception)
+        {
+            notFound = true;
+            structureError = exception.Message;
+        }
     }
+
+    private static AlgorithmDraft? CreateDisplayDraft(AlgorithmDescriptor descriptor, IAlgorithm algorithm)
+    {
+        object? definition = algorithm switch
+        {
+            TuringMachine turing => TuringDraftAdapter.From(turing),
+            MarkovAlgorithm markov => MarkovDraftAdapter.From(markov),
+            _ => null,
+        };
+
+        if (definition is null)
+            return null;
+
+        return new AlgorithmDraft
+        {
+            FamilyId = descriptor.FamilyId,
+            Name = algorithm.Name ?? descriptor.Name,
+            SourceDescriptorId = descriptor.Id,
+            Definition = definition,
+        };
+    }
+
+    private void RebuildDraft()
+    {
+        structureError = null;
+        if (draft is null)
+            return;
+
+        try
+        {
+            algorithm = DraftAlgorithmFactory.Build(draft);
+        }
+        catch (Exception exception)
+        {
+            algorithm = null;
+            structureError = exception.Message;
+        }
+
+        session.Reset();
+    }
+
+    private void OnStructureChanged()
+    {
+        if (draft is null)
+            return;
+
+        var name = draft.Turing?.Name ?? draft.Markov?.Name;
+        if (!string.IsNullOrWhiteSpace(name))
+            draft.Name = name!;
+
+        DraftStore.NotifyChanged();
+        RebuildDraft();
+    }
+
+    private void EditAsDraft()
+    {
+        if (descriptor is null)
+            return;
+
+        try
+        {
+            var forked = DraftAlgorithmFactory.Fork(descriptor);
+            DraftStore.Add(forked);
+            Navigation.NavigateTo($"/draft/{forked.Id}");
+        }
+        catch (Exception exception)
+        {
+            structureError = exception.Message;
+        }
+    }
+
+    private void RunAlgorithm()
+    {
+        EnsureSession(restartIfFinished: true);
+        session.Run();
+    }
+
+    private void StepAlgorithm()
+    {
+        EnsureSession(restartIfFinished: false);
+        session.Step();
+    }
+
+    private void EnsureSession(bool restartIfFinished)
+    {
+        if (algorithm is null)
+            return;
+
+        var steps = (uint)Math.Max(1, maxStepsInput);
+        if (!session.IsStarted || session.Input != input || session.MaxSteps != steps || (restartIfFinished && session.IsFinished))
+            session.Start(algorithm, input, steps);
+    }
+
+    private void ResetAlgorithm() => session.Reset();
+
+    private void StopAlgorithm() => session.Stop();
 }

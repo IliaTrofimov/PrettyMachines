@@ -1,0 +1,48 @@
+@page "/"
+
+@inject NavigationManager Navigation
+
+<div class="page-container catalog-page">
+    <div class="wide-panel">
+        <h4 class="panel-header">Algorithm catalog</h4>
+        <div class="panel-content">
+            <p>
+                Every built-in algorithm from <code>PrettyMachines.Implementations</code> is discovered automatically.
+                Pick one to run and inspect it step by step, or create a new algorithm from scratch.
+            </p>
+        </div>
+    </div>
+
+    @foreach (var family in families)
+    {
+        <div class="panel">
+            <h4 class="panel-header">@family.Name</h4>
+            <div class="panel-content">
+                <ul class="catalog-list">
+                    @foreach (var algorithm in family.Algorithms)
+                    {
+                        <li>
+                            <button class="link-button" @onclick="() => OpenAlgorithm(family.Id, algorithm.Id)">
+                                @algorithm.Name
+                            </button>
+                        </li>
+                    }
+                </ul>
+                <button class="link-button" @onclick="() => CreateNew(family.Id)">
+                    + Create new...
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private IReadOnlyList<AlgorithmFamily> families = [];
+
+    protected override void OnInitialized() => families = AlgorithmCatalog.Discover();
+
+    private void OpenAlgorithm(string familyId, string algorithmId) =>
+        Navigation.NavigateTo($"/algorithm/{familyId}/{algorithmId}");
+
+    private void CreateNew(string familyId) => Navigation.NavigateTo($"/editor/{familyId}");
+}

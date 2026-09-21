@@ -1,26 +1,43 @@
-﻿@using PrettyMachines.BlazorUI.Helpers
-@using PrettyMachines.BlazorUI.Models
+﻿@inject NavigationManager Navigation
+@inject AlgorithmDraftStore DraftStore
+@implements IDisposable
 
 <div class="navigation">
-    <h1>Pretty Machines</h1>
+    <h1 class="nav-title" @onclick="OpenHome">Pretty Machines</h1>
     <div>
-        @foreach(var item in navItems)
+        @foreach (var family in families)
         {
             <div class="nav-item">
-                <h4 @onclick="() => ToggleItem(item)"
-                    class="@(item.IsExpanded ? "expanded" : "collapsed")">
-                    @item.Title
+                <h4 @onclick="() => Toggle(family.Id)"
+                    class="@(expanded.Contains(family.Id) ? "expanded" : "collapsed")">
+                    @family.Name
                 </h4>
-                <ol class="nav-subitem @(item.IsExpanded ? "show" : "hide")">
-                    <li @onclick="() => NavigateToPage(item.Title, null)">
-                        <i>
-                            Create new...
-                        </i>
+                <ol class="nav-subitem @(expanded.Contains(family.Id) ? "show" : "hide")">
+                    <li @onclick="() => OpenEditor(family.Id)">
+                        <i>Create new...</i>
                     </li>
-                    @foreach (var subItem in item.SubItems)
+                    @foreach (var algorithm in family.Algorithms)
                     {
-                        <li @onclick="() => NavigateToPage(item.Title, subItem)">
-                            @subItem
+                        <li @onclick="() => OpenAlgorithm(family.Id, algorithm.Id)">
+                            @algorithm.Name
+                        </li>
+                    }
+                </ol>
+            </div>
+        }
+
+        @if (DraftStore.Drafts.Count > 0)
+        {
+            <div class="nav-item">
+                <h4 @onclick="() => Toggle(CustomSectionId)"
+                    class="@(expanded.Contains(CustomSectionId) ? "expanded" : "collapsed")">
+                    Custom
+                </h4>
+                <ol class="nav-subitem @(expanded.Contains(CustomSectionId) ? "show" : "hide")">
+                    @foreach (var draft in DraftStore.Drafts)
+                    {
+                        <li @onclick="() => OpenDraft(draft.Id)">
+                            @draft.Name
                         </li>
                     }
                 </ol>
@@ -30,61 +47,36 @@
 </div>
 
 @code {
-    [Inject]
-    private NavigationManager Navigation { get; set; } = default!;
-    
-    private List<NavItem> navItems = [];
+    private const string CustomSectionId = "custom";
+
+    private readonly HashSet<string> expanded = [];
+    private IReadOnlyList<AlgorithmFamily> families = [];
 
     protected override void OnInitialized()
     {
-        navItems =
-        [
-            new NavItem("Turing machines", true)
-            {
-                SubItems =
-                [
-                    "Binary increment",
-                    "Brackets",
-                    "Palindrome check",
-                    "Binary addition"
-                ]
-            },
-            new NavItem("Markov Algorithms")
-            {
-                SubItems =
-                [
-                    "Brackets",
-                    "Binary to unary",
-                    "String reversal"
-                ]
-            }
-        ];
+        families = AlgorithmCatalog.Discover();
+        if (families.Count > 0)
+            expanded.Add(families[0].Id);
+
+        DraftStore.Changed += OnDraftsChanged;
     }
 
-    private void ToggleItem(int index)
+    private void OnDraftsChanged() => InvokeAsync(StateHasChanged);
+
+    private void Toggle(string id)
     {
-        if (navItems.TryGetAt(index, out var item))
-        {
-            item!.IsExpanded = !item.IsExpanded;
-        }
+        if (!expanded.Remove(id))
+            expanded.Add(id);
     }
-    
-    private void ToggleItem(NavItem item)
-    {
-        item.IsExpanded = !item.IsExpanded;
-    }
-    
-    private void NavigateToPage(string title, string? subItem)
-    {
-        var encodedTitle = Uri.EscapeDataString(title);
-        if (subItem == null)
-        {
-            Navigation.NavigateTo( $"./{encodedTitle}");
-        }
-        else
-        {
-            var encodedSubItem = Uri.EscapeDataString(subItem);
-            Navigation.NavigateTo( $"./{encodedTitle}?default={encodedSubItem}");   
-        }
-    }
+
+    private void OpenHome() => Navigation.NavigateTo("/");
+
+    private void OpenEditor(string familyId) => Navigation.NavigateTo($"/editor/{familyId}");
+
+    private void OpenAlgorithm(string familyId, string algorithmId) =>
+        Navigation.NavigateTo($"/algorithm/{familyId}/{algorithmId}");
+
+    private void OpenDraft(string draftId) => Navigation.NavigateTo($"/draft/{draftId}");
+
+    public void Dispose() => DraftStore.Changed -= OnDraftsChanged;
 }

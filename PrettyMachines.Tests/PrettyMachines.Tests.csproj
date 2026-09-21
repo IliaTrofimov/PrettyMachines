@@ -26,6 +26,7 @@
     <ItemGroup>
       <ProjectReference Include="..\PrettyMachines.Algorithms\PrettyMachines.Algorithms.csproj" />
       <ProjectReference Include="..\PrettyMachines.Implementations\PrettyMachines.Implementations.csproj" />
+      <ProjectReference Include="..\PrettyMachines.BlazorUI\PrettyMachines.BlazorUI.csproj" />
     </ItemGroup>
 
 </Project>

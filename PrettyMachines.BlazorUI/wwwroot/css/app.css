@@ -86,6 +86,166 @@ html, body {
     background-color: indianred;
 }
 
+.btn-run, .btn-step {
+    padding: 4px 12px;
+    cursor: pointer;
+}
+
+.navigation a {
+    display: block;
+    padding: 4px 0;
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.nav-title {
+    cursor: pointer;
+}
+
+.badge {
+    margin-left: 8px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    background-color: #e0e0e0;
+    font-size: 11px;
+    font-weight: normal;
+    text-transform: none;
+    vertical-align: middle;
+}
+
+.catalog-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 8px 0;
+}
+
+.catalog-list li {
+    padding: 3px 0;
+}
+
+.help-box {
+    margin: 0 0 8px 0;
+    color: grey;
+    font-size: smaller;
+    font-style: italic;
+    user-select: none;
+}
+
+.structure-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.field-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.field-row > label {
+    min-width: 110px;
+    color: #444;
+}
+
+.field-row input[type="text"] {
+    flex-grow: 1;
+}
+
+.inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.narrow {
+    max-width: 100px;
+}
+
+.chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 1px 2px;
+    background-color: #fff;
+}
+
+.chip-input {
+    width: 48px;
+}
+
+.structure-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 6px;
+}
+
+.structure-table td,
+.structure-table th {
+    border: 1px solid #ccc;
+    padding: 2px 4px;
+    text-align: left;
+}
+
+.structure-table select,
+.structure-table input[type="text"] {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.validation-error {
+    margin: 6px 0;
+    padding: 6px 8px;
+    border-left: 4px solid crimson;
+    background-color: #fdeaea;
+    color: #7a1f1f;
+}
+
+.output-row {
+    margin-top: 8px;
+}
+
+.output-box {
+    min-height: 1.4em;
+    padding: 6px 8px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.tape-view {
+    white-space: pre;
+}
+
+.tape-cell {
+    display: inline-block;
+    min-width: 1ch;
+    text-align: center;
+}
+
+.tape-head {
+    background-color: #ffd54f;
+    border-radius: 3px;
+}
+
+h5 {
+    margin: 12px 0 4px 0;
+}
+
 /* Scrollbar Styling */
 .panel-content::-webkit-scrollbar {
     width: 8px;

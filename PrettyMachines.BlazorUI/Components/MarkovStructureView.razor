@@ -1,0 +1,128 @@
+@if (!Editable)
+{
+    <div class="help-box">Read-only view. Press "Edit as draft" to change this algorithm.</div>
+}
+
+<div class="structure-form">
+    <div class="field-row">
+        <label>Name</label>
+        <input type="text" class="mono" disabled="@(!Editable)"
+               value="@Draft.Name"
+               @onchange="e => Update(() => Draft.Name = e.Value?.ToString() ?? string.Empty)" />
+    </div>
+
+    <div class="field-row">
+        <label>Alphabet</label>
+        <input type="text" class="mono" placeholder="(any)" disabled="@(!Editable)"
+               value="@AlphabetText"
+               @onchange="e => Update(() => SetChars(Draft.Alphabet, e.Value?.ToString()))" />
+    </div>
+
+    <div class="field-row">
+        <label>Markers</label>
+        <input type="text" class="mono" placeholder="(none)" disabled="@(!Editable)"
+               value="@MarkersText"
+               @onchange="e => Update(() => SetChars(Draft.Markers, e.Value?.ToString()))" />
+    </div>
+</div>
+
+@if (DuplicatePatterns.Count > 0)
+{
+    <div class="validation-error">
+        Rules must have unique patterns. Duplicated:
+        @string.Join(", ", DuplicatePatterns.Select(p => $"'{p}'"))
+    </div>
+}
+
+<h5>Rules</h5>
+<table class="structure-table mono">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Pattern</th>
+        <th>Replacement</th>
+        <th>Terminal</th>
+        <th>Comment</th>
+        @if (Editable)
+        {
+            <th></th>
+        }
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var rule in Draft.Rules.ToList())
+    {
+        var captured = rule;
+        var index = Draft.Rules.IndexOf(captured);
+        <tr class="@(DuplicatePatterns.Contains(captured.Pattern) ? "invalid-instruction" : "")">
+            <td>@index</td>
+            <td>
+                <input type="text" class="mono" value="@captured.Pattern" disabled="@(!Editable)"
+                       @onchange="e => Update(() => captured.Pattern = e.Value?.ToString() ?? string.Empty)" />
+            </td>
+            <td>
+                <input type="text" class="mono" value="@captured.Replacement" disabled="@(!Editable)"
+                       @onchange="e => Update(() => captured.Replacement = e.Value?.ToString() ?? string.Empty)" />
+            </td>
+            <td>
+                <input type="checkbox" disabled="@(!Editable)" checked="@captured.IsTerminal"
+                       @onchange="e => Update(() => captured.IsTerminal = e.Value is true)" />
+            </td>
+            <td>
+                <input type="text" class="mono" placeholder="(none)" value="@captured.Comment" disabled="@(!Editable)"
+                       @onchange="e => Update(() => captured.Comment = string.IsNullOrWhiteSpace(e.Value?.ToString()) ? null : e.Value!.ToString())" />
+            </td>
+            @if (Editable)
+            {
+                <td>
+                    <button class="btn-delete" @onclick="() => Update(() => Draft.Rules.Remove(captured))">-</button>
+                </td>
+            }
+        </tr>
+    }
+    </tbody>
+</table>
+@if (Editable)
+{
+    <button class="link-button" @onclick="AddRule">+ Add rule</button>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public MarkovAlgorithmDraft Draft { get; set; } = null!;
+
+    [Parameter]
+    public bool Editable { get; set; }
+
+    [Parameter]
+    public EventCallback OnChanged { get; set; }
+
+
+    private string AlphabetText => new(Draft.Alphabet.ToArray());
+
+    private string MarkersText => new(Draft.Markers.ToArray());
+
+    private List<string> DuplicatePatterns => Draft.Rules
+        .GroupBy(rule => rule.Pattern, StringComparer.Ordinal)
+        .Where(group => group.Count() > 1)
+        .Select(group => group.Key)
+        .ToList();
+
+
+    private async Task Update(Action change)
+    {
+        change();
+        await OnChanged.InvokeAsync();
+    }
+
+    private void SetChars(List<char> target, string? text)
+    {
+        target.Clear();
+        if (string.IsNullOrEmpty(text))
+            return;
+
+        target.AddRange(text.Distinct());
+    }
+
+    private void AddRule() => Draft.Rules.Add(new DraftRule());
+}
