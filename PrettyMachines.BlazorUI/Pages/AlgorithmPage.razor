@@ -227,7 +227,7 @@
         {
             var created = DraftAlgorithmFactory.CreateBlank(familyId);
             DraftStore.Add(created);
-            Navigation.NavigateTo($"/draft/{created.Id}");
+            Navigation.NavigateTo($"/{UrlPrefix.PREFIX}draft/{created.Id}");
         }
         catch (Exception exception)
         {
@@ -298,7 +298,7 @@
         {
             var forked = DraftAlgorithmFactory.Fork(descriptor);
             DraftStore.Add(forked);
-            Navigation.NavigateTo($"/draft/{forked.Id}");
+            Navigation.NavigateTo($"/{UrlPrefix.PREFIX}draft/{forked.Id}");
         }
         catch (Exception exception)
         {

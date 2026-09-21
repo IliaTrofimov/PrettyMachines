@@ -71,12 +71,12 @@
 
     private void OpenHome() => Navigation.NavigateTo("/");
 
-    private void OpenEditor(string familyId) => Navigation.NavigateTo($"/editor/{familyId}");
+    private void OpenEditor(string familyId) => Navigation.NavigateTo($"/{UrlPrefix.PREFIX}editor/{familyId}");
 
     private void OpenAlgorithm(string familyId, string algorithmId) =>
         Navigation.NavigateTo($"/algorithm/{familyId}/{algorithmId}");
 
-    private void OpenDraft(string draftId) => Navigation.NavigateTo($"/draft/{draftId}");
+    private void OpenDraft(string draftId) => Navigation.NavigateTo($"/{UrlPrefix.PREFIX}draft/{draftId}");
 
     public void Dispose() => DraftStore.Changed -= OnDraftsChanged;
 }
