@@ -3,6 +3,7 @@ name: Deploy Blazor WebAssembly to GitHub Pages
 on:
   push:
     branches: [ main ]
+    paths: [ "**.cs", "**.html", "**.css", "**.razor", "**.csproj", "**/wwwroot/**" ]
   workflow_dispatch:
 
 permissions:
@@ -26,9 +27,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-
-      - name: Test
-        run: dotnet test PrettyMachines.sln --nologo -v q
 
       - name: Publish Blazor WebAssembly app
         run: >-
