@@ -1,7 +1,5 @@
-@using PrettyMachines.Algorithms.Turing
-
 <div class="mono output-box tape-view">
-    @foreach (var (cell, index) in Tape.EnumerateCells(trimEmptyCells: false).Select((value, index) => (value, index)))
+    @foreach (var (cell, index) in Cells)
     {
         <span class="tape-cell @(index == Tape.HeadIndex ? "tape-head" : "")">@Symbol(cell)</span>
     }
@@ -11,6 +9,8 @@
     [Parameter, EditorRequired]
     public IReadOnlyTape Tape { get; set; } = null!;
 
+    private IEnumerable<(string?, int)> Cells => Tape.EnumerateCells(trimEmptyCells: false)
+                                                     .Select((value, index) => (value, index));
 
     private static string Symbol(string? cell) => string.IsNullOrEmpty(cell) ? "\u00A0" : cell;
 }

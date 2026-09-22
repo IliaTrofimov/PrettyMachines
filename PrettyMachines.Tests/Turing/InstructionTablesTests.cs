@@ -1,5 +1,5 @@
-using PrettyMachines.Algorithms.Abstract;
-using PrettyMachines.Algorithms.Turing;
+using PrettyMachines.Abstract;
+using PrettyMachines.Turing;
 
 
 namespace PrettyMachines.Tests.Turing;

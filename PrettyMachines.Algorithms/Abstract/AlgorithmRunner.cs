@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Abstract;
+namespace PrettyMachines.Abstract;
 
 /// <summary>Consumes a lazy sequence of execution snapshots and produces the final algorithm result.</summary>
 public static class AlgorithmRunner

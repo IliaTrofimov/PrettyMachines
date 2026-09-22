@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using PrettyMachines.Algorithms.Abstract;
+using PrettyMachines.Abstract;
 
 
 namespace PrettyMachines.Implementations.Catalog;

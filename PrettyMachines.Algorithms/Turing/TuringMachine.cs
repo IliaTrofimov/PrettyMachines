@@ -1,10 +1,10 @@
 using System.Runtime.CompilerServices;
 using System.Text;
-using PrettyMachines.Algorithms.Abstract;
-using PrettyMachines.Algorithms.Utils;
+using PrettyMachines.Abstract;
+using PrettyMachines.Utils;
 
 
-namespace PrettyMachines.Algorithms.Turing;
+namespace PrettyMachines.Turing;
 
 /// <summary>Implementation of the Turing machine with single tape.</summary>
 /// <seealso href="https://en.wikipedia.org/wiki/Turing_machine"/>

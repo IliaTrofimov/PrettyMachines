@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using PrettyMachines.Algorithms.Abstract;
+using PrettyMachines.Abstract;
 
-namespace PrettyMachines.Algorithms.Markov;
+namespace PrettyMachines.Markov;
 
 /// <summary>
 /// Implementation of the Normal Markov algorithm.

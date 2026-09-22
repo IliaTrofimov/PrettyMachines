@@ -1,6 +1,6 @@
-using PrettyMachines.Algorithms.Abstract;
-using PrettyMachines.Algorithms.Markov;
-using PrettyMachines.Algorithms.Turing;
+using PrettyMachines.Abstract;
+using PrettyMachines.Markov;
+using PrettyMachines.Turing;
 using PrettyMachines.BlazorUI.Models;
 using PrettyMachines.BlazorUI.Models.Drafts;
 using PrettyMachines.Implementations;

@@ -1,5 +1,5 @@
-using PrettyMachines.Algorithms.Markov;
-using PrettyMachines.Algorithms.Turing;
+using PrettyMachines.Markov;
+using PrettyMachines.Turing;
 using PrettyMachines.Implementations;
 using PrettyMachines.Implementations.Catalog;
 

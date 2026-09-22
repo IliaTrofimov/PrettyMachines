@@ -1,5 +1,5 @@
-using PrettyMachines.Algorithms.Markov;
-using PrettyMachines.Algorithms.Utils.Parsing;
+using PrettyMachines.Markov;
+using PrettyMachines.Utils.Parsing;
 using Xunit.Abstractions;
 
 

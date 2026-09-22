@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Turing;
+namespace PrettyMachines.Turing;
 
 /// <summary>
 /// Allows readonly access for the instructions of the Turing machine.

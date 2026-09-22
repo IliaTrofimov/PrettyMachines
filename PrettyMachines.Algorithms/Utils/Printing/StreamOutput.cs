@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Text;
 
 
-namespace PrettyMachines.Algorithms.Utils.Printing;
+namespace PrettyMachines.Utils.Printing;
 
 [DebuggerDisplay("Position: {_sw.BaseStream.Position,nq}, printed: {_printedLength,nq} symbols")]
 internal sealed class StreamOutput : TextOutput, IDisposable

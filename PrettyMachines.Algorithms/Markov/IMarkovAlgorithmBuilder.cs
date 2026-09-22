@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Markov;
+namespace PrettyMachines.Markov;
 
 /// <summary>Fluent builder for constructing Markov algorithms.</summary>
 public interface IMarkovAlgorithmBuilder

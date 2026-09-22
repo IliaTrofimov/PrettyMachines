@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Turing;
+namespace PrettyMachines.Turing;
 
 /// <summary>
 /// Represents single instruction from Turing machine as 5-tuple of

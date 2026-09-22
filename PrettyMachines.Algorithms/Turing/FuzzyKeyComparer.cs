@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Turing;
+namespace PrettyMachines.Turing;
 
 /// <summary>Equality comparer that used with <see cref="FuzzyKey{T}"/>.</summary>
 /// <param name="valueComparer">Underlying value comparer used to test exact values.</param>

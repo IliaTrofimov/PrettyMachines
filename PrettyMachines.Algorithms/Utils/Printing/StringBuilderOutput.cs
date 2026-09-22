@@ -1,7 +1,7 @@
 using System.Text;
 
 
-namespace PrettyMachines.Algorithms.Utils.Printing;
+namespace PrettyMachines.Utils.Printing;
 
 internal class StringBuilderOutput : TextOutput
 {

@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Turing;
+namespace PrettyMachines.Turing;
 
 /// <summary>
 /// Provides read-only access to a Turing machine tape.

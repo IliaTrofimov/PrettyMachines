@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Abstract;
+namespace PrettyMachines.Abstract;
 
 public sealed class SymbolIsNotAllowedException : AlgorithmException
 {

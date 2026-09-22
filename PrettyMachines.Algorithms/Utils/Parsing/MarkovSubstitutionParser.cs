@@ -1,7 +1,7 @@
-using PrettyMachines.Algorithms.Markov;
+using PrettyMachines.Markov;
 
 
-namespace PrettyMachines.Algorithms.Utils.Parsing;
+namespace PrettyMachines.Utils.Parsing;
 
 /// <summary>
 /// Text parser that creates <see cref="Substitution"/> objects.

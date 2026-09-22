@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Turing;
+namespace PrettyMachines.Turing;
 
 /// <summary>Turing machine's state.</summary>
 public class TuringMachineState

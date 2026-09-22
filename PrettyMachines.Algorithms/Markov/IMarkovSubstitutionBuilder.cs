@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Markov;
+namespace PrettyMachines.Markov;
 
 /// <summary>Builder that allows adding a comment to the most recently added rule.</summary>
 public interface IMarkovSubstitutionBuilder : IMarkovAlgorithmBuilder

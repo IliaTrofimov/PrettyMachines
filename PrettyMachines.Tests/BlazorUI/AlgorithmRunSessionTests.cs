@@ -1,4 +1,4 @@
-using PrettyMachines.Algorithms.Abstract;
+using PrettyMachines.Abstract;
 using PrettyMachines.BlazorUI.Services;
 using PrettyMachines.Implementations;
 

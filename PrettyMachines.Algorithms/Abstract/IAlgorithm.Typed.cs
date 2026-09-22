@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Abstract;
+namespace PrettyMachines.Abstract;
 
 /// <summary>
 /// Defines an algorithm that transforms input objects of type <typeparamref name="TInput"/>

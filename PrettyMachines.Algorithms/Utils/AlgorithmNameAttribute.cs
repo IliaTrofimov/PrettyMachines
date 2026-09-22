@@ -1,7 +1,7 @@
 using System.Diagnostics;
 
 
-namespace PrettyMachines.Algorithms.Utils;
+namespace PrettyMachines.Utils;
 
 [AttributeUsage(AttributeTargets.Method|AttributeTargets.Property)]
 [DebuggerDisplay("AlgorithmName = {Name}")]

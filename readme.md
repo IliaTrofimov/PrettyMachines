@@ -128,9 +128,9 @@ foreach (var snapshot in machine.Run("101", new AlgorithmCancellation(10_000)))
 A [Turing machine](https://en.wikipedia.org/wiki/Turing_machine) is a mathematical model of computation describing an abstract machine that manipulates symbols on a strip of tape according to a table of rules.[ Despite the model's simplicity, it is capable of implementing any computer algorithm. Machine is defined by an alphabet (optionally strict), a blank symbol, a set of states with one initial state, and a transition table.
 
 ```csharp
-using PrettyMachines.Algorithms.Abstract;
-using PrettyMachines.Algorithms.Turing;
-using PrettyMachines.Algorithms.Utils.Printing;
+using PrettyMachines.Abstract;
+using PrettyMachines.Turing;
+using PrettyMachines.Utils.Printing;
 
 var machine = TuringMachine.Create("Toggle first bit")
     .WithAlphabet("0", "1")          // strict alphabet; unknown symbols fail the machine
@@ -151,7 +151,7 @@ Rules can also reference states by name (`rules.AddRule("scan", "0", "done", ...
 `SymbolMatch.Empty`, `SymbolMatch.NotEmpty` or `SymbolMatch.Any` matches a whole class of cells:
 
 ```csharp
-using PrettyMachines.Algorithms.Turing;
+using PrettyMachines.Turing;
 
 rules.AddRule(q0, SymbolMatch.NotEmpty, q0, null, TapeMovement.Right)
      .AddHalt(q0, SymbolMatch.Empty, "1");   // AddHalt targets TuringMachineState.Halt
@@ -169,8 +169,8 @@ AlgorithmResult<IReadOnlyTape> tapeResult = machine.Execute(tape, new AlgorithmC
 A [Markov algorithm](https://en.wikipedia.org/wiki/Markov_algorithm) is a string rewriting system that uses grammar-like rules to operate on strings of symbols. Markov algorithms have been shown to be Turing-complete, which means that they are suitable as a general model of computation and can represent any mathematical expression from its simple notation. Markov algorithms are named after the Soviet mathematician Andrey Markov, Jr. Algorithm applies the first matching substitution rule, replacing the leftmost occurrence of its pattern. A rule marked terminal stops the algorithm after it is applied.
 
 ```csharp
-using PrettyMachines.Algorithms.Abstract;
-using PrettyMachines.Algorithms.Markov;
+using PrettyMachines.Abstract;
+using PrettyMachines.Markov;
 
 var algorithm = MarkovAlgorithm.Create("Capitalize")
     .WithAlphabet('a', 'b', 'c')

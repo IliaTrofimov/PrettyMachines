@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Abstract;
+namespace PrettyMachines.Abstract;
 
 /// <summary>
 /// Controls the execution bounds of an algorithm, combining step limits and external cancellation.

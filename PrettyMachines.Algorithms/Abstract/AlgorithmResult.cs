@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Abstract;
+namespace PrettyMachines.Abstract;
 
 /// <summary>Represents the outcome of an algorithm execution.</summary>
 public class AlgorithmResult<T>

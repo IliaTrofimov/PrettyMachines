@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Abstract;
+namespace PrettyMachines.Abstract;
 
 /// <summary>Algorithm termination reasons.</summary>
 public enum TerminationStatus

@@ -1,5 +1,5 @@
-using PrettyMachines.Algorithms.Abstract;
-using PrettyMachines.Algorithms.Markov;
+using PrettyMachines.Abstract;
+using PrettyMachines.Markov;
 using PrettyMachines.BlazorUI.Models.Drafts;
 
 

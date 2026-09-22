@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Markov;
+namespace PrettyMachines.Markov;
 
 public static class MarkovAlgorithmBuilderExtensions
 {

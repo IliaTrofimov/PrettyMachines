@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Markov;
+namespace PrettyMachines.Markov;
 
 /// <summary>Represents a single rewrite rule (pattern - replacement) in a Markov algorithm.</summary>
 public class Substitution : IEquatable<Substitution>

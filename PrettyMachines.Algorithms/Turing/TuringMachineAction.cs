@@ -1,7 +1,7 @@
-using PrettyMachines.Algorithms.Utils;
+using PrettyMachines.Utils;
 
 
-namespace PrettyMachines.Algorithms.Turing;
+namespace PrettyMachines.Turing;
 
 /// <summary>
 /// Represents single action that Turing machine takes executing some instruction.   

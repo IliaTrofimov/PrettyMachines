@@ -1,4 +1,4 @@
-using PrettyMachines.Algorithms.Turing;
+using PrettyMachines.Turing;
 
 
 namespace PrettyMachines.BlazorUI.Models.Drafts;

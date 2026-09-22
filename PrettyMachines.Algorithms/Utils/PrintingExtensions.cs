@@ -1,8 +1,8 @@
 using System.Text;
-using PrettyMachines.Algorithms.Turing;
+using PrettyMachines.Turing;
 
 
-namespace PrettyMachines.Algorithms.Utils;
+namespace PrettyMachines.Utils;
 
 public static class PrintingExtensions
 {

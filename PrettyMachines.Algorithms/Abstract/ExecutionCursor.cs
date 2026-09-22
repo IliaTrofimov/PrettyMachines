@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 
 
-namespace PrettyMachines.Algorithms.Abstract;
+namespace PrettyMachines.Abstract;
 
 /// <summary>
 /// Forward-and-backward cursor over a lazily produced snapshot sequence.

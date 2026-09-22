@@ -1,4 +1,4 @@
-using PrettyMachines.Algorithms.Abstract;
+using PrettyMachines.Abstract;
 using Xunit.Abstractions;
 
 

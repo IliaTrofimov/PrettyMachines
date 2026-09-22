@@ -1,7 +1,7 @@
 using System.Diagnostics;
 
 
-namespace PrettyMachines.Algorithms.Turing;
+namespace PrettyMachines.Turing;
 
 /// <summary>
 /// Represents special dictionary key that supports fuzzy matching. It can match exact values or any empty or not empty.

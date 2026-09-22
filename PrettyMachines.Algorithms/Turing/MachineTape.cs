@@ -2,7 +2,7 @@ using System.Collections;
 using System.Diagnostics;
 
 
-namespace PrettyMachines.Algorithms.Turing;
+namespace PrettyMachines.Turing;
 
 
 /// <summary>

@@ -1,10 +1,10 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using FluentAssertions.Execution;
-using PrettyMachines.Algorithms.Markov;
-using PrettyMachines.Algorithms.Turing;
-using PrettyMachines.Algorithms.Utils;
-using PrettyMachines.Algorithms.Utils.Printing;
+using PrettyMachines.Markov;
+using PrettyMachines.Turing;
+using PrettyMachines.Utils;
+using PrettyMachines.Utils.Printing;
 using Xunit.Abstractions;
 
 

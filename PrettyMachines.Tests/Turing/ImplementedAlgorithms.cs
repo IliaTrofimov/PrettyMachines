@@ -1,7 +1,7 @@
 using System.Text;
-using PrettyMachines.Algorithms.Abstract;
-using PrettyMachines.Algorithms.Turing;
-using PrettyMachines.Algorithms.Utils;
+using PrettyMachines.Abstract;
+using PrettyMachines.Turing;
+using PrettyMachines.Utils;
 using PrettyMachines.Implementations;
 using Xunit.Abstractions;
 

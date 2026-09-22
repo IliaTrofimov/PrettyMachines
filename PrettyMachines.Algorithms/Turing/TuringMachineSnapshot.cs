@@ -1,8 +1,8 @@
-using PrettyMachines.Algorithms.Abstract;
-using PrettyMachines.Algorithms.Utils.Printing;
+using PrettyMachines.Abstract;
+using PrettyMachines.Utils.Printing;
 
 
-namespace PrettyMachines.Algorithms.Turing;
+namespace PrettyMachines.Turing;
 
 /// <summary>Immutable snapshot of a single Turing machine execution state.</summary>
 internal sealed class TuringMachineSnapshot : IAlgorithmSnapshot<IReadOnlyTape>

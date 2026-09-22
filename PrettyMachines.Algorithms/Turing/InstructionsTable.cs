@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Diagnostics;
-using PrettyMachines.Algorithms.Abstract;
+using PrettyMachines.Abstract;
 
-namespace PrettyMachines.Algorithms.Turing;
+namespace PrettyMachines.Turing;
 
 /// <summary>
 /// Set of conditions and corresponding actions that define Turing machine instructions.

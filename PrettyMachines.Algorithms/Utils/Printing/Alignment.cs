@@ -1,4 +1,4 @@
-namespace PrettyMachines.Algorithms.Utils.Printing;
+namespace PrettyMachines.Utils.Printing;
 
 internal enum Alignment
 {

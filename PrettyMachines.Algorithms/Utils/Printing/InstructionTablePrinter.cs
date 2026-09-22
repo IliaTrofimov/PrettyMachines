@@ -1,8 +1,8 @@
 using System.Text;
-using PrettyMachines.Algorithms.Turing;
+using PrettyMachines.Turing;
 
 
-namespace PrettyMachines.Algorithms.Utils.Printing;
+namespace PrettyMachines.Utils.Printing;
 
 /// <summary>
 /// Set of methods for printing <see cref="TuringMachine "/> as text.

@@ -1,4 +1,4 @@
-using PrettyMachines.Algorithms.Markov;
+using PrettyMachines.Markov;
 
 namespace PrettyMachines.Tests.Markov;
 

@@ -1,7 +1,7 @@
-using PrettyMachines.Algorithms.Abstract;
+using PrettyMachines.Abstract;
 
 
-namespace PrettyMachines.Algorithms.Markov;
+namespace PrettyMachines.Markov;
 
 /// <summary>Immutable snapshot of a single Markov algorithm execution state.</summary>
 internal sealed class MarkovAlgorithmSnapshot : IAlgorithmSnapshot<string>
