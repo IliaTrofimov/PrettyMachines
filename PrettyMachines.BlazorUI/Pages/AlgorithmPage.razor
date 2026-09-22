@@ -41,8 +41,9 @@
                     <button class="btn-run" disabled="@(!CanExecute)" @onclick="RunAlgorithm">▶ Run</button>
                     <button class="btn-step" disabled="@(!CanExecute)" @onclick="StepAlgorithm">⏯ Step</button>
                     <button class="link-button" disabled="@(!session.IsStarted)" @onclick="ResetAlgorithm">Reset</button>
+                    <!--
                     <button class="link-button" disabled="@(!session.IsActive)" @onclick="StopAlgorithm">Stop</button>
-
+                    -->
                     <label class="inline">
                         max steps
                         <input type="number" min="1" class="mono narrow" @bind="maxStepsInput" />
@@ -50,9 +51,18 @@
 
                     @if (session.IsStarted)
                     {
-                        <div>
-                            @session.Status.ToString().ToLowerInvariant() after @session.Steps step@(session.Steps == 1 ? "" : "s")
-                        </div>
+                        @if (session.Status == TerminationStatus.Unknown)
+                        {
+                            <div>
+                                Running step @session.Steps
+                            </div>     
+                        }
+                        else
+                        {
+                            <div>
+                                @session.Status.ToString().ToLowerInvariant() after @session.Steps step@(session.Steps == 1 ? "" : "s")
+                            </div>   
+                        }
                     }
                 </div>
 
@@ -78,10 +88,31 @@
                         <div class="mono output-box">@session.Output</div>
                     }
                 </div>
+
+                <div class="output-row">
+                    <label>
+                        Trace <button @onclick="() => traceVisible = !traceVisible">
+                            @(traceVisible ? "Hide" : "Show")
+                        </button>
+                    </label>
+                    @if (traceVisible)
+                    {
+                        <div class="@(session.Trace.Count > 0 ? "mono" : "") output-box  traces">
+                            @foreach (var trace in session.Trace)
+                            {
+                                @trace<br/>
+                            }
+                            @if (session.Trace.Count == 0)
+                            {
+                                <i>Empty</i>
+                            }
+                        </div>
+                    }
+                </div>
             </div>
         </div>
 
-        <div class="panel">
+        <div class="wide-panel">
             <h4 class="panel-header">Definition</h4>
             <div class="panel-content">
                 @if (!isDraft && descriptor is not null)
@@ -108,11 +139,6 @@
                 }
             </div>
         </div>
-
-        <div class="panel">
-            <h4 class="panel-header">Trace</h4>
-            <AlgorithmTraces Traces="@session.Trace" />
-        </div>
     }
 </div>
 
@@ -125,6 +151,7 @@
     private bool isDraft;
     private bool editable;
     private bool notFound;
+    private bool traceVisible;
     private string? structureError;
     private string input = "";
     private int maxStepsInput = 1000;
@@ -135,6 +162,7 @@
     [Parameter] public string? AlgorithmId { get; set; }
 
     [Parameter] public string? DraftId { get; set; }
+
 
 
     private string DisplayName => draft?.Name ?? algorithm?.Name ?? descriptor?.Name ?? "Algorithm";
