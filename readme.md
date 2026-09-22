@@ -125,8 +125,7 @@ foreach (var snapshot in machine.Run("101", new AlgorithmCancellation(10_000)))
 
 ## Quick start: Turing machine
 
-A Turing machine is defined by an alphabet (optionally strict), a blank symbol, a set of states with one
-initial state, and a transition table.
+A [Turing machine](https://en.wikipedia.org/wiki/Turing_machine) is a mathematical model of computation describing an abstract machine that manipulates symbols on a strip of tape according to a table of rules.[ Despite the model's simplicity, it is capable of implementing any computer algorithm. Machine is defined by an alphabet (optionally strict), a blank symbol, a set of states with one initial state, and a transition table.
 
 ```csharp
 using PrettyMachines.Algorithms.Abstract;
@@ -167,8 +166,7 @@ AlgorithmResult<IReadOnlyTape> tapeResult = machine.Execute(tape, new AlgorithmC
 
 ## Quick start: Markov algorithm
 
-A normal Markov algorithm applies the first matching substitution rule, replacing the leftmost occurrence
-of its pattern. A rule marked terminal stops the algorithm after it is applied.
+A [Markov algorithm](https://en.wikipedia.org/wiki/Markov_algorithm) is a string rewriting system that uses grammar-like rules to operate on strings of symbols. Markov algorithms have been shown to be Turing-complete, which means that they are suitable as a general model of computation and can represent any mathematical expression from its simple notation. Markov algorithms are named after the Soviet mathematician Andrey Markov, Jr. Algorithm applies the first matching substitution rule, replacing the leftmost occurrence of its pattern. A rule marked terminal stops the algorithm after it is applied.
 
 ```csharp
 using PrettyMachines.Algorithms.Abstract;
@@ -234,30 +232,6 @@ using PrettyMachines.Implementations;
 var adder = TuringMachines.Create_BinaryAdditionMachine();
 var sum = adder.Execute("101+11", new AlgorithmCancellation(100_000)).Output;   // "1000"
 ```
-
-### Catalog
-
-`PrettyMachines.Implementations.Catalog.AlgorithmCatalog` discovers every built-in factory by reflection and
-groups them by their declaring static class (family):
-
-```csharp
-using PrettyMachines.Implementations.Catalog;
-
-foreach (var family in AlgorithmCatalog.Discover())
-{
-    Console.WriteLine(family.Name);                       // "Turing machines", "Markov algorithms", ...
-    foreach (var descriptor in family.Algorithms)
-        Console.WriteLine($"  {descriptor.Name} ({descriptor.Id})");
-}
-
-var descriptor = AlgorithmCatalog.Find("TuringMachines", "Create_BinaryIncrementMachine");
-var algorithm = descriptor!.Create();                     // factory invoked with default optional parameters
-```
-
-The catalog has no Blazor dependency, so it is unit-testable from `PrettyMachines.Tests`. Discovered
-algorithms feed the `PrettyMachines.BlazorUI` WebAssembly app, which lists every family, runs and steps any
-built-in algorithm, and can fork a built-in into an editable draft or author a new Turing machine /
-Markov algorithm from scratch.
 
 ## Printing and parsing
 
