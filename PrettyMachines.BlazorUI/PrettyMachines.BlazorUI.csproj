@@ -1,30 +1,59 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
+    <RootNamespace>PrettyMachines.BlazorUI</RootNamespace>
+    <RunHotReload>true</RunHotReload>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0"/>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.0" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PrettyMachines.Algorithms\PrettyMachines.Algorithms.csproj" />
+    <ProjectReference Include="..\PrettyMachines.Implementations\PrettyMachines.Implementations.csproj" />
+  </ItemGroup>
+
+  <!-- CHANGING BASE PATH -->
+  <PropertyGroup>
+    <BlazorBaseHref Condition="'$(BlazorBaseHref)' == '' and '$(Configuration)' == 'Release'">/PrettyMachines/</BlazorBaseHref>
+    <BlazorBaseHref Condition="'$(BlazorBaseHref)' == ''">/</BlazorBaseHref>
+  </PropertyGroup>
+
+  <UsingTask TaskName="ReplaceFileText" TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <File ParameterType="System.String" Required="true"/>
+      <OldText ParameterType="System.String" Required="true"/>
+      <NewText ParameterType="System.String" Required="true"/>
+    </ParameterGroup>
+    <Task>
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        var path = System.IO.Path.GetFullPath(File);
+        var text = System.IO.File.ReadAllText(path);
+        System.IO.File.WriteAllText(path, text.Replace(OldText, NewText));
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="SetPublishBaseHref"
+          AfterTargets="Publish"
+          Condition="'$(BlazorBaseHref)' != '/'">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
-        <RootNamespace>PrettyMachines.BlazorUI</RootNamespace>
-        <RunHotReload>true</RunHotReload>
+      <_PublishedIndexHtml>$(PublishDir)wwwroot/index.html</_PublishedIndexHtml>
     </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.0" PrivateAssets="all"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.8" />
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.8" />
-    </ItemGroup>
+    <ReplaceFileText File="$(_PublishedIndexHtml)"
+                     OldText="&lt;base href=&quot;/&quot; /&gt;"
+                     NewText="&lt;base href=&quot;$(BlazorBaseHref)&quot; /&gt;"/>
 
-    <ItemGroup>
-      <ProjectReference Include="..\PrettyMachines.Algorithms\PrettyMachines.Algorithms.csproj" />
-      <ProjectReference Include="..\PrettyMachines.Implementations\PrettyMachines.Implementations.csproj" />
-    </ItemGroup>
-
-
-    <PropertyGroup>
-      <BaseHref Condition="'$(BaseHref)' == ''">/</BaseHref>
-      <BaseHref Condition="'$(BaseHref)' == 'Debug'">/</BaseHref>
-      <BaseHref Condition="'$(Configuration)' == 'Release'">/PrettyMachines/</BaseHref>
-  </PropertyGroup>
+    <Message Importance="high" Text="Base href set to $(BlazorBaseHref) in $(_PublishedIndexHtml)"/>
+  </Target>
 </Project>
