@@ -1,6 +1,31 @@
+.nav-root {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    min-height: 0;
+}
+
+.nav-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    font-size: 20px;
+    line-height: 1;
+    background-color: #f5f5f5;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
 .navigation {
     width: 12vw;
+    min-width: 200px;
     padding: 16px 8px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .navigation h1 {
@@ -75,4 +100,27 @@
 
 .nav-subitem li:hover {
     background-color: #e8e8e8;
+}
+
+@media (max-width: 850px) {
+    .nav-root {
+        width: 100%;
+    }
+
+    .nav-toggle {
+        display: flex;
+    }
+
+    .navigation {
+        display: none;
+        width: 100%;
+        min-width: 0;
+        flex: none;
+        max-height: 60vh;
+        padding: 8px;
+    }
+
+    .navigation.open {
+        display: block;
+    }
 }

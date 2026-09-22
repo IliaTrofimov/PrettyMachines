@@ -38,32 +38,37 @@
                        @bind="input" />
 
                 <div class="input-group">
-                    <button class="btn-run" disabled="@(!CanExecute)" @onclick="RunAlgorithm">▶ Run</button>
-                    <button class="btn-step" disabled="@(!CanExecute)" @onclick="StepAlgorithm">⏯ Step</button>
-                    <button class="link-button" disabled="@(!session.IsStarted)" @onclick="ResetAlgorithm">Reset</button>
-                    <!--
-                    <button class="link-button" disabled="@(!session.IsActive)" @onclick="StopAlgorithm">Stop</button>
-                    -->
-                    <label class="inline">
-                        max steps
-                        <input type="number" min="1" class="mono narrow" @bind="maxStepsInput" />
-                    </label>
+                    <div class="button-row">
+                        <button class="btn-run" disabled="@(!CanExecute)" @onclick="RunAlgorithm">▶ Run</button>
+                        <button class="btn-step" disabled="@(!CanExecute)" @onclick="StepAlgorithm">⏯ Step</button>
+                        <button class="link-button" disabled="@(!session.IsStarted)" @onclick="ResetAlgorithm">Reset</button>
+                        <!--
+                        <button class="link-button" disabled="@(!session.IsActive)" @onclick="StopAlgorithm">Stop</button>
+                        -->
+                    </div>
 
-                    @if (session.IsStarted)
-                    {
-                        @if (session.Status == TerminationStatus.Unknown)
+                    <div class="meta-row">
+                        <label class="inline">
+                            max steps
+                            <input type="number" min="1" class="mono narrow" @bind="maxStepsInput" />
+                        </label>
+
+                        @if (session.IsStarted)
                         {
-                            <div>
-                                Running step @session.Steps
-                            </div>     
+                            @if (session.Status == TerminationStatus.Unknown)
+                            {
+                                <div>
+                                    Running step @session.Steps
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    @session.Status.ToString().ToLowerInvariant() after @session.Steps step@(session.Steps == 1 ? "" : "s")
+                                </div>
+                            }
                         }
-                        else
-                        {
-                            <div>
-                                @session.Status.ToString().ToLowerInvariant() after @session.Steps step@(session.Steps == 1 ? "" : "s")
-                            </div>   
-                        }
-                    }
+                    </div>
                 </div>
 
                 @if (algorithm is not null && !algorithm.ValidateInput(input))

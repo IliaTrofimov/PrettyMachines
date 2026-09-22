@@ -17,6 +17,9 @@ html, body {
     flex-direction: row;
     align-items: stretch;
     gap: 24px;
+    height: 100dvh;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 /* App Container */
@@ -27,7 +30,8 @@ html, body {
     gap: 16px;
     padding: 16px;
     box-sizing: border-box;
-    height: 100vh;
+    height: 100%;
+    min-height: 0;
     width: 80vw;
     margin: 0 auto ;
 }
@@ -35,6 +39,9 @@ html, body {
 .wide-panel, .panel {
     background-color: #fafafa;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .wide-panel {
@@ -59,19 +66,32 @@ html, body {
     padding: 6px 8px;
     user-select: none;
     margin: 0;
+    flex-shrink: 0;
 }
 
 .panel-content{
     padding: 5px 10px;
     overflow-y: auto;
+    flex: 1;
+    min-height: 0;
 }
 
 .input-group {
     margin-top: 5px;
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     gap: 5px;
+}
+
+.button-row,
+.meta-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
 }
 
 .mono{
@@ -227,6 +247,11 @@ html, body {
     word-break: break-all;
 }
 
+.traces {
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
 .tape-view {
     white-space: pre;
 }
@@ -296,13 +321,31 @@ h5 {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 850px) {
+    .app-container {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .page-container {
+        width: 100%;
+        height: auto;
+        flex: 1;
+        min-height: 0;
+        padding: 8px;
+        gap: 8px;
+    }
+
+    .traces {
+        max-height: 30vh;
+    }
+
     .bottom-panels {
         flex-direction: column;
     }
 
     .input-group {
-        flex-direction: column;
+        align-items: center;
     }
 
     .btn {
