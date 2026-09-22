@@ -12,7 +12,7 @@
             <h4 class="panel-header">Not found</h4>
             <div class="panel-content">
                 <p>The requested algorithm or draft does not exist.</p>
-                <a href="/">Back to catalog</a>
+                <a href=".">Back to catalog</a>
             </div>
         </div>
     }
@@ -260,7 +260,7 @@
         {
             var created = DraftAlgorithmFactory.CreateBlank(familyId);
             DraftStore.Add(created);
-            Navigation.NavigateTo($"/{UrlPrefix.PREFIX}draft/{created.Id}");
+            Navigation.NavigateTo($"draft/{created.Id}");
         }
         catch (Exception exception)
         {
@@ -331,7 +331,7 @@
         {
             var forked = DraftAlgorithmFactory.Fork(descriptor);
             DraftStore.Add(forked);
-            Navigation.NavigateTo($"/{UrlPrefix.PREFIX}draft/{forked.Id}");
+            Navigation.NavigateTo($"draft/{forked.Id}");
         }
         catch (Exception exception)
         {

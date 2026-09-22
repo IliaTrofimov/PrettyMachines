@@ -75,14 +75,14 @@
             expanded.Add(id);
     }
 
-    private void OpenHome() => Navigate($"/{UrlPrefix.PREFIX}");
+    private void OpenHome() => Navigate("");
 
-    private void OpenEditor(string familyId) => Navigate($"/{UrlPrefix.PREFIX}editor/{familyId}");
+    private void OpenEditor(string familyId) => Navigate($"editor/{familyId}");
 
     private void OpenAlgorithm(string familyId, string algorithmId) =>
-        Navigate($"/{UrlPrefix.PREFIX}algorithm/{familyId}/{algorithmId}");
+        Navigate($"algorithm/{familyId}/{algorithmId}");
 
-    private void OpenDraft(string draftId) => Navigate($"/{UrlPrefix.PREFIX}draft/{draftId}");
+    private void OpenDraft(string draftId) => Navigate($"draft/{draftId}");
 
     private void Navigate(string url)
     {

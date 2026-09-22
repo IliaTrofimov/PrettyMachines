@@ -42,7 +42,7 @@
     protected override void OnInitialized() => families = AlgorithmCatalog.Discover();
 
     private void OpenAlgorithm(string familyId, string algorithmId) =>
-        Navigation.NavigateTo($"/{UrlPrefix.PREFIX}algorithm/{familyId}/{algorithmId}");
+        Navigation.NavigateTo($"algorithm/{familyId}/{algorithmId}");
 
-    private void CreateNew(string familyId) => Navigation.NavigateTo($"/{UrlPrefix.PREFIX}editor/{familyId}");
+    private void CreateNew(string familyId) => Navigation.NavigateTo($"editor/{familyId}");
 }
