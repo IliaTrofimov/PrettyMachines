@@ -6,7 +6,7 @@ public static class UrlPrefix
 	#if DEBUG
 		= ""
 	#else
-		= "PrettyMachines/"
+		= ""
 	#endif
 	;
 }
