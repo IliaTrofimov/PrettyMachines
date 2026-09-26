@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "kill-blazor-port",
+      "type": "shell",
+      "command": "lsof -ti tcp:8100 | xargs -I{} kill {} || true",
+      "presentation": { "reveal": "silent", "close": true }
+    }
+  ]
+}

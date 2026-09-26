@@ -1,0 +1,6 @@
+{
+  "csharp.debug.terminateChildProcesses": true,
+  "csharp.experimental.debug.hotReload": true,
+  "csharp.debug.hotReloadOnSave": true,
+  "csharp.debug.hotReloadVerbosity": "detailed"
+}

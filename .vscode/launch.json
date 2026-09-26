@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Blazor WASM: launch",
+      "type": "blazorwasm",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/PrettyMachines.BlazorUI",
+      "url": "http://localhost:8100",
+      "browser": "chrome"
+    }
+  ]
+}
