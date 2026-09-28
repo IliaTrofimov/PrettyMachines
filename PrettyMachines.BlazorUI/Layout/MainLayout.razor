@@ -1,8 +1,38 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@inject IStringLocalizer<Locale.Controls> LocControls
+@implements IDisposable
 
 <div class="layout-root d-flex flex-nowrap">
-    <NavMenu/>
+    @if (!IsCatalog)
+    {
+        <NavMenu/>
+    }
     <main class="app-content flex-grow-1 min-h-0 overflow-auto">
+        @if (IsCatalog)
+        {
+            <header class="catalog-header d-flex flex-wrap align-items-center justify-content-between gap-2 px-3 py-2 border-bottom bg-body-tertiary sticky-top">
+                <h1 class="fs-4 mb-0">Pretty Machines</h1>
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <a href="https://github.com/IliaTrofimov/PrettyMachines" target="_blank" rel="noopener">GitHub</a>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="small text-body-secondary">@LocControls["Language"]</span>
+                        <LanguageSelector/>
+                    </div>
+                </div>
+            </header>
+        }
         @Body
     </main>
 </div>
+
+@code {
+    private bool IsCatalog =>
+        string.IsNullOrEmpty(Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', 2)[0]);
+
+    protected override void OnInitialized() => Navigation.LocationChanged += OnLocationChanged;
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Navigation.LocationChanged -= OnLocationChanged;
+}

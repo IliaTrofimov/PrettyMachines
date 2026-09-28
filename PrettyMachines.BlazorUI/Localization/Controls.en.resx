@@ -214,7 +214,10 @@
     <value>Pretty Machines by Ilia Trofimov</value>
   </data>
   <data name="GitHub" xml:space="preserve">
-    <value>GitHub</value>
+    <value>GitHub repository</value>
+  </data>
+  <data name="GitHubLink" xml:space="preserve">
+    <value>See GitHub repository</value>
   </data>
   <data name="Halt" xml:space="preserve">
     <value>Halt</value>
@@ -230,6 +233,9 @@
   </data>
   <data name="InvalidInput" xml:space="preserve">
     <value>Invalid input</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
   </data>
   <data name="Left" xml:space="preserve">
     <value>Left</value>
