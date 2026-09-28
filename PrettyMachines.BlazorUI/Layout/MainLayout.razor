@@ -1,8 +1,8 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="layout-root">
-    <div class="app-container">
-        <NavMenu/>
+<div class="layout-root d-flex flex-nowrap">
+    <NavMenu/>
+    <main class="app-content flex-grow-1 min-h-0 overflow-auto">
         @Body
-    </div>
+    </main>
 </div>

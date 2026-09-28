@@ -13,22 +13,24 @@
 
     @foreach (var family in families)
     {
-        <div class="panel">
-            <h4 class="panel-header">@LocNames.GetAlgorithmFamilyName(family.Id)</h4>
-            <div class="panel-content">
-                <ul class="catalog-list">
+        <div class="card catalog-card shadow-sm">
+            <h4 class="card-header bg-warning-subtle border-bottom border-2 border-dark fw-semibold">
+                @LocNames.GetAlgorithmFamilyName(family.Id)
+            </h4>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
                     @foreach (var algorithm in family.Algorithms)
                     {
-                        <li>
-                            <button class="link-button" @onclick="() => OpenAlgorithm(family.Id, algorithm.Id)">
-                                @LocNames.GetAlgorithmName(algorithm.Name)
-                            </button>
-                        </li>
+                        <button type="button" class="list-group-item list-group-item-action"
+                                @onclick="() => OpenAlgorithm(family.Id, algorithm.Id)">
+                            @LocNames.GetAlgorithmName(algorithm.Name)
+                        </button>
                     }
-                </ul>
-                <button class="link-button" @onclick="() => CreateNew(family.Id)">
-                    + @LocControls["CreateNew"]
-                </button>
+                    <button type="button" class="list-group-item list-group-item-action fw-semibold text-success"
+                            @onclick="() => CreateNew(family.Id)">
+                        + @LocControls["CreateNew"]
+                    </button>
+                </div>
             </div>
         </div>
     }

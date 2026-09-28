@@ -1,0 +1,10 @@
+.catalog-page {
+    grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: auto;
+    align-content: start;
+}
+
+.catalog-card {
+    min-width: 0;
+}

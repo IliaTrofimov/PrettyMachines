@@ -19,20 +19,6 @@
         </Router>
     </ChildContent>
     <ErrorContent Context="caughtException">
-        <ErrorDisplay Error="caughtException" IsProduction="false"/>
+        <ErrorDisplay Error="caughtException"/>
     </ErrorContent>
 </ErrorBoundary>
-
-@code{
-    protected override void OnInitialized()
-    {
-        var queryString = new Uri(Navigation.Uri).Query;
-        var query = System.Web.HttpUtility.ParseQueryString(queryString);            
-        if (query.Get("lang") is not {} language)
-        {
-            
-        }
-
-        base.OnInitialized();
-    }
-}

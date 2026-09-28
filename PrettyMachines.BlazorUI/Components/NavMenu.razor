@@ -5,68 +5,99 @@
 @implements IDisposable
 
 <div class="nav-root">
-    <button class="nav-toggle" @onclick="ToggleMenu" aria-label="Toggle navigation">
+    <button type="button" class="btn btn-primary nav-toggle w-100 d-lg-none"
+            aria-controls="nav-sidebar" aria-expanded="@(menuOpen ? "true" : "false")"
+            aria-label="Toggle navigation" @onclick="ToggleMenu">
         ☰
     </button>
-    <div class="navigation @(menuOpen ? "open" : "")">
-        <h1 class="nav-title" @onclick="OpenHome">
-            Pretty Machines
-        </h1>
-        <div>
-            @if (families.Count == 0)
-            {
-                <i>@LocControls["NoContent"]</i>
-            }
 
-            @foreach (var family in families)
-            {
-                <div class="nav-item">
-                    <h4 @onclick="() => Toggle(family.Id)"
-                        class="@(expanded.Contains(family.Id) ? "expanded" : "collapsed")">
-                        @LocNames.GetAlgorithmFamilyName(family.Id)
-                    </h4>
-                    <ol class="nav-subitem @(expanded.Contains(family.Id) ? "show" : "hide")">
-                        <li @onclick="() => OpenEditor(family.Id)">
-                            <i>+ @LocControls["CreateNew"]</i>
-                        </li>
-                        @foreach (var algorithm in family.Algorithms)
-                        {
-                            <li @onclick="() => OpenAlgorithm(family.Id, algorithm.Id)">
-                                @LocNames.GetAlgorithmName(algorithm.Name)
-                            </li>
-                        }
-                    </ol>
+    <nav id="nav-sidebar"
+         class="navigation offcanvas-lg offcanvas-start @(menuOpen ? "show" : "")"
+         tabindex="-1" aria-label="Main navigation">
+        <div class="nav-body d-flex flex-column flex-grow-1 p-3">
+            <h1 class="nav-title fs-4 mb-0">
+                <a href="" class="link-body-emphasis text-decoration-none">Pretty Machines</a>
+            </h1>
+            <hr/>
+
+            <ul class="list-unstyled ps-0 mb-0">
+                @if (families.Count == 0)
+                {
+                    <li><i>@LocControls["NoContent"]</i></li>
+                }
+
+                @foreach (var family in families)
+                {
+                    <li class="mb-1">
+                        <button type="button"
+                                class="btn btn-toggle d-inline-flex align-items-center rounded border-0 @(expanded.Contains(family.Id) ? "" : "collapsed")"
+                                aria-expanded="@(expanded.Contains(family.Id).ToString().ToLowerInvariant())"
+                                @onclick="() => Toggle(family.Id)">
+                            @LocNames.GetAlgorithmFamilyName(family.Id)
+                        </button>
+                        <div class="@(expanded.Contains(family.Id) ? "collapse show" : "collapse")">
+                            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                                <li>
+                                    <a href="editor/@family.Id" class="link-body-emphasis d-inline-flex text-decoration-none rounded">
+                                        <i>+ @LocControls["CreateNew"]</i>
+                                    </a>
+                                </li>
+                                @foreach (var algorithm in family.Algorithms)
+                                {
+                                    <li>
+                                        <a href="algorithm/@family.Id/@algorithm.Id"
+                                           class="link-body-emphasis d-inline-flex text-decoration-none rounded">
+                                            @LocNames.GetAlgorithmName(algorithm.Name)
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </li>
+                }
+
+                @if (DraftStore.Drafts.Count > 0)
+                {
+                    <li class="mb-1">
+                        <button type="button"
+                                class="btn btn-toggle d-inline-flex align-items-center rounded border-0 @(expanded.Contains(CustomSectionId) ? "" : "collapsed")"
+                                aria-expanded="@(expanded.Contains(CustomSectionId).ToString().ToLowerInvariant())"
+                                @onclick="() => Toggle(CustomSectionId)">
+                            @LocControls["Custom"]
+                        </button>
+                        <div class="@(expanded.Contains(CustomSectionId) ? "collapse show" : "collapse")">
+                            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                                @foreach (var draft in DraftStore.Drafts)
+                                {
+                                    <li>
+                                        <a href="draft/@draft.Id"
+                                           class="link-body-emphasis d-inline-flex text-decoration-none rounded">
+                                            @draft.Name
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </li>
+                }
+            </ul>
+
+            <hr class="mt-auto"/>
+            <div class="nav-footer small text-body-secondary">
+                <div>
+                    See <a href="https://github.com/IliaTrofimov/PrettyMachines" target="_blank" rel="noopener">GitHub</a> repository
                 </div>
-            }
-
-            @if (DraftStore.Drafts.Count > 0)
-            {
-                <div class="nav-item">
-                    <h4 @onclick="() => Toggle(CustomSectionId)"
-                        class="@(expanded.Contains(CustomSectionId) ? "expanded" : "collapsed")">
-                        @LocControls["Custom"]
-                    </h4>
-                    <ol class="nav-subitem @(expanded.Contains(CustomSectionId) ? "show" : "hide")">
-                        @foreach (var draft in DraftStore.Drafts)
-                        {
-                            <li @onclick="() => OpenDraft(draft.Id)">
-                                @draft.Name
-                            </li>
-                        }
-                    </ol>
+                <div class="d-flex align-items-center gap-2">
+                    Language <LanguageSelector/>
                 </div>
-            }
+            </div>
         </div>
-    </div>
+    </nav>
 
-    <div class="fixed-bottom">
-        <div>
-            See <a href="https://github.com/IliaTrofimov/PrettyMachines" target="_blank" rel="noopener">GitHub</a> repository
-        </div>
-        <div>
-            Language <LanguageSelector/>
-        </div>
-    </div>
+    @if (menuOpen)
+    {
+        <div class="offcanvas-backdrop fade show d-lg-none" @onclick="CloseMenu"></div>
+    }
 </div>
 
 @code {
@@ -83,11 +114,23 @@
             expanded.Add(families[0].Id);
 
         DraftStore.Changed += OnDraftsChanged;
+        Navigation.LocationChanged += OnLocationChanged;
     }
 
     private void OnDraftsChanged() => InvokeAsync(StateHasChanged);
 
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        if (!menuOpen)
+            return;
+
+        menuOpen = false;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
     private void ToggleMenu() => menuOpen = !menuOpen;
+
+    private void CloseMenu() => menuOpen = false;
 
     private void Toggle(string id)
     {
@@ -95,20 +138,9 @@
             expanded.Add(id);
     }
 
-    private void OpenHome() => Navigate("");
-
-    private void OpenEditor(string familyId) => Navigate($"editor/{familyId}");
-
-    private void OpenAlgorithm(string familyId, string algorithmId) =>
-        Navigate($"algorithm/{familyId}/{algorithmId}");
-
-    private void OpenDraft(string draftId) => Navigate($"draft/{draftId}");
-
-    private void Navigate(string url)
+    public void Dispose()
     {
-        menuOpen = false;
-        Navigation.NavigateTo(url);
+        DraftStore.Changed -= OnDraftsChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
     }
-
-    public void Dispose() => DraftStore.Changed -= OnDraftsChanged;
 }
