@@ -26,9 +26,9 @@
                             @LocNames.GetAlgorithmName(algorithm.Name)
                         </button>
                     }
-                    <button type="button" class="list-group-item list-group-item-action fw-semibold text-success"
+                    <button type="button" class="list-group-item list-group-item-action fw-semibold text-success d-flex align-items-center"
                             @onclick="() => CreateNew(family.Id)">
-                        + @LocControls["CreateNew"]
+                        <Icon Name="plus" Class="me-1" />@LocControls["CreateNew"]
                     </button>
                 </div>
             </div>

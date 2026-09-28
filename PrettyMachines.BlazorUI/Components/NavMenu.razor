@@ -8,7 +8,7 @@
     <button type="button" class="btn btn-primary nav-toggle w-100 d-lg-none"
             aria-controls="nav-sidebar" aria-expanded="@(menuOpen ? "true" : "false")"
             aria-label="Toggle navigation" @onclick="ToggleMenu">
-        ☰
+        <Icon Name="menu" />
     </button>
 
     <nav id="nav-sidebar"
@@ -33,13 +33,14 @@
                                 class="btn btn-toggle d-inline-flex align-items-center rounded border-0 @(expanded.Contains(family.Id) ? "" : "collapsed")"
                                 aria-expanded="@(expanded.Contains(family.Id).ToString().ToLowerInvariant())"
                                 @onclick="() => Toggle(family.Id)">
+                            <Icon Name="chevron-right" Class="btn-toggle-icon me-1" />
                             @LocNames.GetAlgorithmFamilyName(family.Id)
                         </button>
                         <div class="@(expanded.Contains(family.Id) ? "collapse show" : "collapse")">
                             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
                                 <li>
-                                    <a href="editor/@family.Id" class="link-body-emphasis d-inline-flex text-decoration-none rounded">
-                                        <i>+ @LocControls["CreateNew"]</i>
+                                    <a href="editor/@family.Id" class="link-body-emphasis d-inline-flex align-items-center text-decoration-none rounded">
+                                        <Icon Name="plus" Class="me-1" />@LocControls["CreateNew"]
                                     </a>
                                 </li>
                                 @foreach (var algorithm in family.Algorithms)
@@ -63,6 +64,7 @@
                                 class="btn btn-toggle d-inline-flex align-items-center rounded border-0 @(expanded.Contains(CustomSectionId) ? "" : "collapsed")"
                                 aria-expanded="@(expanded.Contains(CustomSectionId).ToString().ToLowerInvariant())"
                                 @onclick="() => Toggle(CustomSectionId)">
+                            <Icon Name="chevron-right" Class="btn-toggle-icon me-1" />
                             @LocControls["Custom"]
                         </button>
                         <div class="@(expanded.Contains(CustomSectionId) ? "collapse show" : "collapse")">
@@ -85,12 +87,12 @@
             <hr class="mt-auto"/>
             <div class="nav-footer small text-body-secondary">
                 <div>
-                    <a href="https://github.com/IliaTrofimov/PrettyMachines" target="_blank" rel="noopener">
-                        @LocControls["GitHub"]
+                    <a href="https://github.com/IliaTrofimov/PrettyMachines" target="_blank" rel="noopener" class="d-inline-flex align-items-center">
+                        <Icon Name="github" Class="me-1" />@LocControls["GitHub"]
                     </a>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    @LocControls["Language"] <LanguageSelector/>
+                    <Icon Name="globe" />@LocControls["Language"] <LanguageSelector/>
                 </div>
             </div>
         </div>

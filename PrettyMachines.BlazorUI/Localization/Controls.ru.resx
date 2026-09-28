@@ -229,7 +229,7 @@
     <value>Начальное</value>
   </data>
   <data name="InputPlaceholder" xml:space="preserve">
-    <value>Введите входные данные...</value>
+    <value>Входные данные</value>
   </data>
   <data name="InvalidInput" xml:space="preserve">
     <value>Недопустимый ввод</value>

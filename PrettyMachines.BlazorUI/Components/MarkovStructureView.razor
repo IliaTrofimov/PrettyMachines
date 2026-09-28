@@ -33,7 +33,7 @@
 
 @if (DuplicatePatterns.Count > 0)
 {
-    <div class="validation-error">
+    <div class="invalid-feedback d-block">
         @LocControls["DuplicatePatterns"]:
         @string.Join(", ", DuplicatePatterns.Select(p => $"'{p}'"))
     </div>
@@ -80,7 +80,7 @@
             @if (Editable)
             {
                 <td>
-                    <button class="btn-delete" @onclick="() => Update(() => Draft.Rules.Remove(captured))">-</button>
+                    <button class="btn-delete" @onclick="() => Update(() => Draft.Rules.Remove(captured))"><Icon Name="minus" /></button>
                 </td>
             }
         </tr>
@@ -89,7 +89,7 @@
 </table>
 @if (Editable)
 {
-    <button class="link-button" @onclick="AddRule">+ @LocControls["AddRule"]</button>
+    <button class="link-button" @onclick="AddRule"><Icon Name="plus" Class="me-1" />@LocControls["AddRule"]</button>
 }
 
 @code {

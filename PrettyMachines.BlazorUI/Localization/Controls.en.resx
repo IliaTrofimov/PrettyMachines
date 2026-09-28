@@ -229,7 +229,7 @@
     <value>Initial</value>
   </data>
   <data name="InputPlaceholder" xml:space="preserve">
-    <value>Enter algorithm input...</value>
+    <value>Algorithm input...</value>
   </data>
   <data name="InvalidInput" xml:space="preserve">
     <value>Invalid input</value>

@@ -1,15 +1,24 @@
-<div class="mono output-box tape-view">
-    @foreach (var (cell, index) in Cells)
+<div class="tape-field">
+    @if (!string.IsNullOrEmpty(Label))
     {
-        <span class="tape-cell @(index == Tape.HeadIndex ? "tape-head" : "")">
-            @Symbol(cell)
-        </span>
+        <span class="tape-label">@Label</span>
     }
+    <div class="font-monospace d-flex overflow-auto tape-line">
+        @foreach (var (cell, index) in Cells)
+        {
+            <span class="tape-cell @(index == Tape.HeadIndex ? "bg-warning rounded" : "")">
+                @Symbol(cell)
+            </span>
+        }
+    </div>
 </div>
 
 @code {
     [Parameter, EditorRequired]
     public IReadOnlyTape Tape { get; set; } = null!;
+
+    [Parameter]
+    public string? Label { get; set; }
 
     private IEnumerable<(string?, int)> Cells => Tape.EnumerateCells(trimEmptyCells: false)
                                                      .Select((value, index) => (value, index));

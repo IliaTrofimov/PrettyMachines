@@ -43,7 +43,7 @@
                     @if (Editable)
                     {
                         <button class="btn-delete" @onclick="() => Update(() => Draft.Alphabet.Remove(captured))">
-                            -
+                            <Icon Name="minus" />
                         </button>
                     }
                 </span>
@@ -53,7 +53,7 @@
                 <span class="chip">
                     <input type="text" class="mono chip-input" placeholder="new" value="@newSymbol"
                            @onchange="e => newSymbol = e.Value?.ToString() ?? string.Empty" />
-                    <button class="btn-add" @onclick="AddSymbol" title="Add symbol">+</button>
+                    <button class="btn-add" @onclick="AddSymbol" title="Add symbol"><Icon Name="plus" /></button>
                 </span>
             }
         </div>
@@ -95,7 +95,7 @@
             @if (Editable)
             {
                 <td>
-                    <button class="btn-delete" @onclick="() => Update(() => RemoveState(captured))">-</button>
+                    <button class="btn-delete" @onclick="() => Update(() => RemoveState(captured))"><Icon Name="minus" /></button>
                 </td>
             }
         </tr>
@@ -104,7 +104,7 @@
 </table>
 @if (Editable)
 {
-    <button class="link-button" @onclick="AddState">+ @LocControls["AddState"]</button>
+    <button class="link-button" @onclick="AddState"><Icon Name="plus" Class="me-1" />@LocControls["AddState"]</button>
 }
 
 <h5>@LocControls["Transitions"]</h5>
@@ -191,7 +191,7 @@
             @if (Editable)
             {
                 <td>
-                    <button class="btn-delete" @onclick="() => Update(() => Draft.Transitions.Remove(captured))">-</button>
+                    <button class="btn-delete" @onclick="() => Update(() => Draft.Transitions.Remove(captured))"><Icon Name="minus" /></button>
                 </td>
             }
         </tr>
@@ -200,7 +200,7 @@
 </table>
 @if (Editable)
 {
-    <button class="link-button" @onclick="AddTransition">+ Add transition</button>
+    <button class="link-button" @onclick="AddTransition"><Icon Name="plus" Class="me-1" />Add transition</button>
 }
 
 @code {
