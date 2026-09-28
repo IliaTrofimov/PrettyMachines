@@ -2,17 +2,21 @@
 @page "/draft/{DraftId}"
 @page "/editor/{FamilyId}"
 
+
 @inject AlgorithmDraftStore DraftStore
 @inject NavigationManager Navigation
+@inject AlgorithmLocalizer LocNames
+@inject IStringLocalizer<Locale.Controls> LocControls
+
 
 <div class="page-container">
     @if (notFound)
     {
         <div class="wide-panel">
-            <h4 class="panel-header">Not found</h4>
+            <h4 class="panel-header">@LocControls["NotFound"]</h4>
             <div class="panel-content">
-                <p>The requested algorithm or draft does not exist.</p>
-                <a href=".">Back to catalog</a>
+                <p>@LocControls["AlgorithmNotFound"]</p>
+                <a href=".">@LocControls["BackToCatalog"]</a>
             </div>
         </div>
     }
@@ -23,7 +27,7 @@
                 @DisplayName
                 @if (isDraft)
                 {
-                    <span class="badge">draft</span>
+                    <span class="badge">@LocControls["Draft"]</span>
                 }
                 else if (descriptor is not null)
                 {
@@ -39,9 +43,15 @@
 
                 <div class="input-group">
                     <div class="button-row">
-                        <button class="btn-run" disabled="@(!CanExecute)" @onclick="RunAlgorithm">▶ Run</button>
-                        <button class="btn-step" disabled="@(!CanExecute)" @onclick="StepAlgorithm">⏯ Step</button>
-                        <button class="link-button" disabled="@(!session.IsStarted)" @onclick="ResetAlgorithm">Reset</button>
+                        <button class="btn-run" disabled="@(!CanExecute)" @onclick="RunAlgorithm">
+                            ▶ @LocControls["Run"]
+                        </button>
+                        <button class="btn-step" disabled="@(!CanExecute)" @onclick="StepAlgorithm">
+                            ⏯ @LocControls["Step"]
+                        </button>
+                        <button class="link-button" disabled="@(!session.IsStarted)" @onclick="ResetAlgorithm">
+                            @LocControls["Reset"]
+                        </button>
                         <!--
                         <button class="link-button" disabled="@(!session.IsActive)" @onclick="StopAlgorithm">Stop</button>
                         -->
@@ -49,32 +59,29 @@
 
                     <div class="meta-row">
                         <label class="inline">
-                            max steps
+                            @LocControls["MaxSteps"]
                             <input type="number" min="1" class="mono narrow" @bind="maxStepsInput" />
                         </label>
 
                         @if (session.IsStarted)
                         {
-                            @if (session.Status == TerminationStatus.Unknown)
-                            {
-                                <div>
-                                    Running step @session.Steps
-                                </div>
-                            }
-                            else
-                            {
-                                <div>
-                                    @session.Status.ToString().ToLowerInvariant() after @session.Steps step@(session.Steps == 1 ? "" : "s")
-                                </div>
-                            }
+                            <div>
+                                @if (session.Status == TerminationStatus.Unknown)
+                                {
+                                    @LocControls.GetString("RunningStep", @session.Steps)
+                                }
+                                else
+                                {
+                                    @LocControls.GetString(
+                                        session.Steps == 1 ? "FinishedAfterStepSingular" : "FinishedAfterStepPlural",
+                                        @LocControls[session.Status.ToString()],
+                                        session.Steps
+                                    ) 
+                                }
+                            </div>
                         }
                     </div>
                 </div>
-
-                @if (algorithm is not null && !algorithm.ValidateInput(input))
-                {
-                    <div class="validation-error">Input is not valid for this algorithm.</div>
-                }
 
                 @if (session.Error is not null)
                 {
@@ -82,7 +89,7 @@
                 }
 
                 <div class="output-row">
-                    <label>Output</label>
+                    <label>@LocControls["Output"]</label>
                     @if (session.Tape is { } tape)
                     {
                         <TapeView Tape="tape" />
@@ -96,8 +103,8 @@
 
                 <div class="output-row">
                     <label>
-                        Trace <button @onclick="() => traceVisible = !traceVisible">
-                            @(traceVisible ? "Hide" : "Show")
+                        @LocControls["Trace"] <button @onclick="() => traceVisible = !traceVisible">
+                            @(traceVisible ? @LocControls["Hide"] : @LocControls["Show"])
                         </button>
                     </label>
                     @if (traceVisible)
@@ -109,7 +116,7 @@
                             }
                             @if (session.Trace.Count == 0)
                             {
-                                <i>Empty</i>
+                                <i>@LocControls["NoContent"]</i>
                             }
                         </div>
                     }
@@ -118,11 +125,11 @@
         </div>
 
         <div class="wide-panel">
-            <h4 class="panel-header">Definition</h4>
+            <h4 class="panel-header">@LocControls["Definition"]</h4>
             <div class="panel-content">
                 @if (!isDraft && descriptor is not null)
                 {
-                    <button class="link-button" @onclick="EditAsDraft">Edit as draft</button>
+                    <button class="link-button" @onclick="EditAsDraft">@LocControls["EditAsDraft"]</button>
                 }
 
                 @if (structureError is not null)
@@ -140,7 +147,7 @@
                 }
                 else if (structureError is null)
                 {
-                    <i>No structured definition is available.</i>
+                    <i>@LocControls["NoStructuredDefinition"]</i>
                 }
             </div>
         </div>
@@ -170,14 +177,14 @@
 
 
 
-    private string DisplayName => draft?.Name ?? algorithm?.Name ?? descriptor?.Name ?? "Algorithm";
+    private string DisplayName => draft?.Name ?? LocNames.GetAlgorithmName(descriptor?.Name ?? algorithm?.Name);
 
     private bool CanExecute => algorithm is not null;
 
 
     protected override void OnParametersSet()
     {
-        var path = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?')[0];
+        var path = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', 2)[0];
         if (string.Equals(path, loadedKey, StringComparison.Ordinal))
             return;
 

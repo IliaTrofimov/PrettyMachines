@@ -13,7 +13,6 @@ public sealed class AlgorithmDescriptor
 {
     /// <summary>Initializes a new descriptor over a public static factory method.</summary>
     /// <param name="id">Stable identifier equal to the factory method name.</param>
-    /// <param name="name">Human-readable display name.</param>
     /// <param name="familyId">Identifier of the declaring family (the static class name).</param>
     /// <param name="returnType">Declared return type of the factory method.</param>
     /// <param name="factory">Factory method used to create the algorithm.</param>
@@ -33,7 +32,7 @@ public sealed class AlgorithmDescriptor
     /// <summary>Gets the stable identifier equal to the factory method name (for example <c>Create_BinaryIncrementMachine</c>).</summary>
     public string Id { get; }
 
-    /// <summary>Gets the human-readable display name (for example <c>Binary increment</c>).</summary>
+    /// <summary>Gets the display name.</summary>
     public string Name { get; }
 
     /// <summary>Gets the identifier of the declaring family (for example <c>TuringMachines</c>).</summary>

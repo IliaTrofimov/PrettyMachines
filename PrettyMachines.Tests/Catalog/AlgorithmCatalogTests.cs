@@ -29,27 +29,6 @@ public class AlgorithmCatalogTests
         markov.Algorithms.Should().HaveCount(14);
     }
 
-    [Theory]
-    [InlineData("Create_BinaryIncrementMachine", "Binary increment")]
-    [InlineData("Create_BracketsGrammar", "Brackets grammar")]
-    [InlineData("Create_StringReversalMachine", "String reversal")]
-    [InlineData("Create_UnaryToBinaryConverterMachine", "Unary to binary converter")]
-    [InlineData("Create_BinaryToDecimalConverterMachine", "Binary to decimal converter")]
-    [InlineData("Create_LeadingZerosTrim", "Leading zeros trim")]
-    [InlineData("Create_BusyBeaver", "Busy beaver")]
-    public void CleanAlgorithmName_strips_prefix_and_suffix_and_splits_pascal_case(string methodName, string expected)
-    {
-        AlgorithmCatalog.CleanAlgorithmName(methodName).Should().Be(expected);
-    }
-
-    [Theory]
-    [InlineData("TuringMachines", "Turing machines")]
-    [InlineData("MarkovAlgorithms", "Markov algorithms")]
-    public void CleanFamilyName_produces_readable_name(string typeName, string expected)
-    {
-        AlgorithmCatalog.CleanFamilyName(typeName).Should().Be(expected);
-    }
-
     public static IEnumerable<object[]> AllAlgorithms() =>
         AlgorithmCatalog.Discover()
             .SelectMany(family => family.Algorithms)

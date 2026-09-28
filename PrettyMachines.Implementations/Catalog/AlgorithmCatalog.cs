@@ -1,5 +1,7 @@
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using PrettyMachines.Abstract;
 
 
@@ -8,11 +10,9 @@ namespace PrettyMachines.Implementations.Catalog;
 /// <summary>
 /// Discovers the built-in algorithms declared by the static factory classes of this assembly.
 /// </summary>
-public static class AlgorithmCatalog
+public static partial class AlgorithmCatalog
 {
-    private const string FactoryPrefix = "Create_";
-    private const string MachineSuffix = "Machine";
-
+    private static List<AlgorithmFamily>? Cached = null;
 
     /// <summary>
     /// Reflects the <see cref="PrettyMachines.Implementations"/> assembly and returns all built-in algorithms
@@ -21,42 +21,47 @@ public static class AlgorithmCatalog
     /// <returns>Families ordered by display name; algorithms ordered by display name.</returns>
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, typeof(TuringMachines))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, typeof(MarkovAlgorithms))]
-    public static IReadOnlyList<AlgorithmFamily> Discover()
+    public static IReadOnlyList<AlgorithmFamily> Discover(bool forceReload = false)
     {
+        if (!forceReload && Cached != null)
+            return Cached;
+
         var assembly = typeof(TuringMachines).Assembly;
 
         var descriptors = assembly
             .GetTypes()
-            .Where(IsPublicStaticClass)
+            .Where(type => type.IsClass && type.IsAbstract && type.IsSealed && type.IsPublic && !type.IsGenericTypeDefinition)
             .Where(type => !string.Equals(type.Namespace, typeof(AlgorithmCatalog).Namespace, StringComparison.Ordinal))
             .SelectMany(DiscoverFamily)
             .OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(d => d.Id, StringComparer.Ordinal)
-            .ToList();
+            .ThenBy(d => d.Id, StringComparer.Ordinal);
 
-        return descriptors
+        Cached = descriptors
             .GroupBy(d => d.FamilyId)
             .Select(group => new AlgorithmFamily(
                 group.Key,
-                CleanFamilyName(group.Key),
                 group.OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase)
                      .ThenBy(d => d.Id, StringComparer.Ordinal)
-                     .ToList()))
-            .OrderBy(f => f.Name, StringComparer.OrdinalIgnoreCase)
+                     .ToList()
+                )
+            )
+            .OrderBy(f => f.Id, StringComparer.OrdinalIgnoreCase)
             .ThenBy(f => f.Id, StringComparer.Ordinal)
             .ToList();
+
+        return Cached;
     }
 
     /// <summary>Finds a descriptor by family and algorithm identifiers.</summary>
     /// <param name="familyId">Family identifier (declaring type name).</param>
     /// <param name="algorithmId">Algorithm identifier (factory method name).</param>
     /// <returns>The matching descriptor, or <c>null</c> when it does not exist.</returns>
-    public static AlgorithmDescriptor? Find(string? familyId, string? algorithmId)
+    public static AlgorithmDescriptor? Find(string? familyId, string? algorithmId, bool forceReload = false)
     {
         if (string.IsNullOrEmpty(familyId) || string.IsNullOrEmpty(algorithmId))
             return null;
 
-        return Discover()
+        return Discover(forceReload)
             .FirstOrDefault(f => string.Equals(f.Id, familyId, StringComparison.Ordinal))
             ?.Algorithms.FirstOrDefault(a => string.Equals(a.Id, algorithmId, StringComparison.Ordinal));
     }
@@ -76,8 +81,11 @@ public static class AlgorithmCatalog
         {
             var parameter = parameters[i];
             if (!parameter.IsOptional)
+            { 
                 throw new InvalidOperationException(
-                    $"Factory '{descriptor.Id}' has a required parameter '{parameter.Name}' and cannot be invoked from the catalog.");
+                    $"Factory '{descriptor.Id}' has a required parameter '{parameter.Name}' and cannot be invoked from the catalog."    
+                );
+            }
 
             arguments[i] = GetDefaultArgument(parameter);
         }
@@ -85,54 +93,8 @@ public static class AlgorithmCatalog
         var created = descriptor.Factory.Invoke(null, arguments);
         return created as IAlgorithm
             ?? throw new InvalidOperationException(
-                $"Factory '{descriptor.Id}' returned '{created?.GetType().Name ?? "null"}' which is not an {nameof(IAlgorithm)}.");
-    }
-
-    /// <summary>Converts a factory method name into a human-readable display name.</summary>
-    /// <param name="methodName">Factory method name (for example <c>Create_BinaryIncrementMachine</c>).</param>
-    /// <returns>Display name (for example <c>Binary increment</c>).</returns>
-    public static string CleanAlgorithmName(string methodName)
-    {
-        ArgumentNullException.ThrowIfNull(methodName);
-
-        var name = methodName;
-        if (name.StartsWith(FactoryPrefix, StringComparison.Ordinal))
-            name = name[FactoryPrefix.Length..];
-        if (name.EndsWith(MachineSuffix, StringComparison.Ordinal) && name.Length > MachineSuffix.Length)
-            name = name[..^MachineSuffix.Length];
-
-        var words = SplitPascalCase(name);
-        if (words.Count == 0)
-            return methodName;
-
-        words[0] = NormalizeWord(words[0], upperFirst: true);
-        for (var i = 1; i < words.Count; i++)
-            words[i] = NormalizeWord(words[i], upperFirst: false);
-
-        return string.Join(' ', words);
-    }
-
-    /// <summary>Converts a declaring type name into a human-readable family name.</summary>
-    /// <param name="typeName">Declaring type name (for example <c>TuringMachines</c>).</param>
-    /// <returns>Family name (for example <c>Turing machines</c>).</returns>
-    public static string CleanFamilyName(string typeName)
-    {
-        ArgumentNullException.ThrowIfNull(typeName);
-
-        var words = SplitPascalCase(typeName);
-        if (words.Count == 0)
-            return typeName;
-
-        for (var i = 1; i < words.Count; i++)
-            words[i] = NormalizeWord(words[i], upperFirst: false);
-
-        return string.Join(' ', words);
-    }
-
-
-    private static bool IsPublicStaticClass(Type type)
-    {
-        return type is { IsClass: true, IsAbstract: true, IsSealed: true, IsPublic: true, IsGenericTypeDefinition: false };
+                $"Factory '{descriptor.Id}' returned '{created?.GetType().Name ?? "null"}' which is not an {nameof(IAlgorithm)}."
+            );
     }
 
     private static IEnumerable<AlgorithmDescriptor> DiscoverFamily(Type type)
@@ -145,14 +107,24 @@ public static class AlgorithmCatalog
                 continue;
             if (!typeof(IAlgorithm).IsAssignableFrom(method.ReturnType))
                 continue;
-
+        
+            var customName = method.GetCustomAttributes<AlgorithmBuilderAttribute>().FirstOrDefault()?.Name;
+            
             yield return new AlgorithmDescriptor(
                 method.Name,
-                CleanAlgorithmName(method.Name),
+                customName ?? FixMethodName(method.Name),
                 type.Name,
                 method.ReturnType,
-                method);
+                method
+            );
         }
+    }
+
+    private static string FixMethodName(string methodName)
+    {
+        methodName = CreatePrefixRegex().Replace(methodName, "");
+        methodName = MachineSuffixRegex().Replace(methodName, "");
+        return methodName;
     }
 
     private static object? GetDefaultArgument(ParameterInfo parameter)
@@ -161,37 +133,10 @@ public static class AlgorithmCatalog
         return value is DBNull or Missing ? Type.Missing : value;
     }
 
-    private static string NormalizeWord(string word, bool upperFirst)
-    {
-        if (word.Length == 0)
-            return word;
+	[GeneratedRegex(@"^Create_")]
+	private static partial Regex CreatePrefixRegex();
 
-        var first = upperFirst ? char.ToUpperInvariant(word[0]) : char.ToLowerInvariant(word[0]);
-        return first + word[1..].ToLowerInvariant();
-    }
-
-    private static List<string> SplitPascalCase(string value)
-    {
-        var words = new List<string>();
-        if (string.IsNullOrEmpty(value))
-            return words;
-
-        var start = 0;
-        for (var i = 1; i < value.Length; i++)
-        {
-            var current = value[i];
-            var previous = value[i - 1];
-            var isBoundary = char.IsUpper(current) &&
-                             (!char.IsUpper(previous) || (i + 1 < value.Length && char.IsLower(value[i + 1])));
-
-            if (!isBoundary)
-                continue;
-
-            words.Add(value[start..i]);
-            start = i;
-        }
-
-        words.Add(value[start..]);
-        return words.Where(w => w.Length > 0).ToList();
-    }
+    [GeneratedRegex(@"Machine$")]
+	private static partial Regex MachineSuffixRegex();
+    
 }

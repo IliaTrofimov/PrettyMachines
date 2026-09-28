@@ -1,35 +1,33 @@
 @page "/"
 
 @inject NavigationManager Navigation
+@inject IStringLocalizer<Locale.Controls> LocControls
+@inject AlgorithmLocalizer LocNames
+
 
 <div class="page-container catalog-page">
-    <div class="wide-panel">
-        <h4 class="panel-header">Algorithm catalog</h4>
-        <div class="panel-content">
-            <p>
-                Every built-in algorithm from <code>PrettyMachines.Implementations</code> is discovered automatically.
-                Pick one to run and inspect it step by step, or create a new algorithm from scratch.
-            </p>
-        </div>
-    </div>
+    @if (families.Count == 0)
+    {
+        <i>@LocControls["NoContent"]</i>
+    }
 
     @foreach (var family in families)
     {
         <div class="panel">
-            <h4 class="panel-header">@family.Name</h4>
+            <h4 class="panel-header">@LocNames.GetAlgorithmFamilyName(family.Id)</h4>
             <div class="panel-content">
                 <ul class="catalog-list">
                     @foreach (var algorithm in family.Algorithms)
                     {
                         <li>
                             <button class="link-button" @onclick="() => OpenAlgorithm(family.Id, algorithm.Id)">
-                                @algorithm.Name
+                                @LocNames.GetAlgorithmName(algorithm.Name)
                             </button>
                         </li>
                     }
                 </ul>
                 <button class="link-button" @onclick="() => CreateNew(family.Id)">
-                    + Create new...
+                    + @LocControls["CreateNew"]
                 </button>
             </div>
         </div>
@@ -41,8 +39,7 @@
 
     protected override void OnInitialized() => families = AlgorithmCatalog.Discover();
 
-    private void OpenAlgorithm(string familyId, string algorithmId) =>
-        Navigation.NavigateTo($"algorithm/{familyId}/{algorithmId}");
+    private void OpenAlgorithm(string familyId, string algorithmId) => Navigation.NavigateTo($"algorithm/{familyId}/{algorithmId}");
 
     private void CreateNew(string familyId) => Navigation.NavigateTo($"editor/{familyId}");
 }

@@ -1,7 +1,9 @@
 <div class="mono output-box tape-view">
     @foreach (var (cell, index) in Cells)
     {
-        <span class="tape-cell @(index == Tape.HeadIndex ? "tape-head" : "")">@Symbol(cell)</span>
+        <span class="tape-cell @(index == Tape.HeadIndex ? "tape-head" : "")">
+            @Symbol(cell)
+        </span>
     }
 </div>
 

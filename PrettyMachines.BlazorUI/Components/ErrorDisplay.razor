@@ -1,7 +1,9 @@
+@inject IStringLocalizer<Locale.Controls> LocControls;
+
 <div class="container">
-    @if (IsProduction)
+    @if (isProduction)
     {
-        <h3>Error happened</h3>
+        <h3>@LocControls["ErrorOccurred"]</h3>
         <hr/>
         <div>
             @Error.Message
@@ -29,28 +31,32 @@
         <pre class="mono stack-trace">
             @stackTrace
         </pre>
-        <hr/>
-        <div>
-            <a href=".">Reload page</a>
-        </div>
     }
+    <hr/>
+    <div>
+        <a href=".">@LocControls["TryReload"]</a>
+    </div>
 </div>
 
 
 @code {
+    private const bool isProduction 
+    #if RELEASE
+        = true;
+    #else
+        = false;
+    #endif
+
 
     private string stackTrace = "";
     
     [Parameter]
     public required Exception Error { get; set; }
-   
-    [Parameter]
-    public bool IsProduction { get; set; }
 
 
     protected override void OnParametersSet()
     {
-        if (!string.IsNullOrEmpty(Error.StackTrace) && !IsProduction)
+        if (!string.IsNullOrEmpty(Error.StackTrace) && !isProduction)
         {
             stackTrace = Error.StackTrace.Replace(" in ", "\n\tin");      
         }

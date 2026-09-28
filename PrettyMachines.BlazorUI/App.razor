@@ -2,6 +2,8 @@
 @using PrettyMachines.BlazorUI.Layout
 @using PrettyMachines.BlazorUI.Pages
 
+@inject NavigationManager Navigation
+
 <ErrorBoundary>
     <ChildContent>
         <Router AppAssembly="@typeof(App).Assembly">
@@ -20,3 +22,17 @@
         <ErrorDisplay Error="caughtException" IsProduction="false"/>
     </ErrorContent>
 </ErrorBoundary>
+
+@code{
+    protected override void OnInitialized()
+    {
+        var queryString = new Uri(Navigation.Uri).Query;
+        var query = System.Web.HttpUtility.ParseQueryString(queryString);            
+        if (query.Get("lang") is not {} language)
+        {
+            
+        }
+
+        base.OnInitialized();
+    }
+}

@@ -17,4 +17,47 @@
 <body id="app">
 </body>
 
+<script>
+    window.getUrlQueryParam = (key) => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(key);
+    };
+
+    window.saveDraftToLocalStoage = (algFamilyId, draftId, draftObj) => {
+        window.localStorage.setItem(`draft-${algFamilyId}-${draftId}`, JSON.stringify(draftObj, null, 0));
+    };
+
+    window.loadDraftsFromLocalStoage = () => {
+        const results = [];
+        let index = 0;
+        let key = null;
+
+        do {
+            key = window.localStorage.key(index++);
+            if (key?.startsWith("draft-")){
+                const parts = key.split('-', 3);
+                if (parts.length == 3){
+                    const draftObj = JSON.parse(window.localStorage.getItem(key))["draftObj"];
+                    results.push({
+                        "algFamilyId": parts[1],
+                        "draftId": parts[2],
+                        "draftObj": JSON.parse(window.localStorage.getItem(key))
+                    });
+                }
+            }
+        } 
+        while (key != null);
+
+        return results;
+    };
+
+    window.saveCultureToLocalStorage = (cultureName) => {
+        return window.localStorage.setItem("culture", cultureName ?? "en-US");
+    };
+
+    window.loadCultureFromLocalStorage = () => {
+        return window.localStorage.getItem("culture") ?? "en-US";
+    };
+</script>
+
 </html>

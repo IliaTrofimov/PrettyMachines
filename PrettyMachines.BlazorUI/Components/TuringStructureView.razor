@@ -1,18 +1,22 @@
+@inject IStringLocalizer<Locale.Controls> LocControls;
+
 @if (!Editable)
 {
-    <div class="help-box">Read-only view. Press "Edit as draft" to change this algorithm.</div>
+    <div class="help-box">
+        @LocControls["ReadOnlyView"]
+    </div>
 }
 
 <div class="structure-form">
     <div class="field-row">
-        <label>Name</label>
+        <label>@LocControls["Name"]</label>
         <input type="text" class="mono" disabled="@(!Editable)"
                value="@Draft.Name"
                @onchange="e => Update(() => Draft.Name = e.Value?.ToString() ?? string.Empty)" />
     </div>
 
     <div class="field-row">
-        <label>Blank symbol</label>
+        <label>@LocControls["BlankSymbol"]</label>
         <span class="inline">
             <input type="checkbox" disabled="@(!Editable)" checked="@Draft.HasBlankSymbol"
                    @onchange="e => Update(() => Draft.HasBlankSymbol = e.Value is true)" />
@@ -23,14 +27,14 @@
         <label class="inline">
             <input type="checkbox" disabled="@(!Editable)" checked="@Draft.StrictAlphabet"
                    @onchange="e => Update(() => Draft.StrictAlphabet = e.Value is true)" />
-            Strict alphabet
+            @LocControls["StrictAlphabet"]
         </label>
     </div>
 
     <div class="field-row">
-        <label>Alphabet</label>
+        <label>@LocControls["Alphabet"]</label>
         <div class="chip-list">
-            @foreach (var symbol in Draft.Alphabet.ToList())
+            @foreach (var symbol in Draft.Alphabet)
             {
                 var captured = symbol;
                 <span class="chip">
@@ -38,7 +42,9 @@
                            @onchange="e => Update(() => ReplaceSymbol(captured, e.Value?.ToString() ?? string.Empty))" />
                     @if (Editable)
                     {
-                        <button class="btn-delete" @onclick="() => Update(() => Draft.Alphabet.Remove(captured))">-</button>
+                        <button class="btn-delete" @onclick="() => Update(() => Draft.Alphabet.Remove(captured))">
+                            -
+                        </button>
                     }
                 </span>
             }
@@ -54,14 +60,14 @@
     </div>
 </div>
 
-<h5>States</h5>
+<h5>@LocControls["States"]</h5>
 <table class="structure-table mono">
     <thead>
     <tr>
         <th>#</th>
-        <th>Name</th>
-        <th>Initial</th>
-        <th>Terminal</th>
+        <th>@LocControls["Name"]</th>
+        <th>@LocControls["StartState"]</th>
+        <th>@LocControls["TerminalState"]</th>
         @if (Editable)
         {
             <th></th>
@@ -69,7 +75,7 @@
     </tr>
     </thead>
     <tbody>
-    @foreach (var state in Draft.States.ToList())
+    @foreach (var state in Draft.States)
     {
         var captured = state;
         <tr>
@@ -98,19 +104,19 @@
 </table>
 @if (Editable)
 {
-    <button class="link-button" @onclick="AddState">+ Add state</button>
+    <button class="link-button" @onclick="AddState">+ @LocControls["AddState"]</button>
 }
 
-<h5>Transitions</h5>
+<h5>@LocControls["Transitions"]</h5>
 <table class="structure-table mono">
     <thead>
     <tr>
-        <th>State</th>
-        <th>Scan</th>
-        <th>Value</th>
-        <th>Next</th>
-        <th>Print</th>
-        <th>Move</th>
+        <th>@LocControls["State"]</th>
+        <th>@LocControls["Scan"]</th>
+        <th>@LocControls["Value"]</th>
+        <th>@LocControls["Next"]</th>
+        <th>@LocControls["Print"]</th>
+        <th>@LocControls["Move"]</th>
         @if (Editable)
         {
             <th></th>
@@ -134,10 +140,18 @@
             <td>
                 <select disabled="@(!Editable)" value="@captured.SymbolMatch"
                         @onchange="e => Update(() => captured.SymbolMatch = ToEnum(e.Value, SymbolMatch.Exact))">
-                    <option value="@SymbolMatch.Exact">Exact</option>
-                    <option value="@SymbolMatch.NotEmpty">Not empty</option>
-                    <option value="@SymbolMatch.Empty">Empty</option>
-                    <option value="@SymbolMatch.Any">Any</option>
+                    <option value="@SymbolMatch.Exact">
+                        @LocControls["Exact"]
+                    </option>
+                    <option value="@SymbolMatch.NotEmpty">
+                        @LocControls["NotEmpty"]
+                    </option>
+                    <option value="@SymbolMatch.Empty">
+                        @LocControls["Empty"]
+                    </option>
+                    <option value="@SymbolMatch.Any">
+                        @LocControls["Any"]
+                    </option>
                 </select>
             </td>
             <td>
@@ -148,7 +162,9 @@
             <td>
                 <select disabled="@(!Editable)" value="@captured.NextStateIndex"
                         @onchange="e => Update(() => captured.NextStateIndex = ToInt(e.Value))">
-                    <option value="-1">Halt</option>
+                    <option value="-1">
+                        @LocControls["Halt"]
+                    </option>
                     @for (var i = 0; i < Draft.States.Count; i++)
                     {
                         <option value="@i">@Draft.GetStateName(i)</option>
@@ -167,9 +183,9 @@
             <td>
                 <select disabled="@(!Editable)" value="@captured.Movement"
                         @onchange="e => Update(() => captured.Movement = ToEnum(e.Value, TapeMovement.None))">
-                    <option value="@TapeMovement.None">None</option>
-                    <option value="@TapeMovement.Left">Left</option>
-                    <option value="@TapeMovement.Right">Right</option>
+                    <option value="@TapeMovement.None">@LocControls["None"]</option>
+                    <option value="@TapeMovement.Left">@LocControls["Left"]</option>
+                    <option value="@TapeMovement.Right">@LocControls["Right"]</option>
                 </select>
             </td>
             @if (Editable)

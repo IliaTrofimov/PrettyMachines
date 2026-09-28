@@ -1,0 +1,50 @@
+@using System.Globalization
+@using System.Web
+
+@inject NavigationManager Navigation
+
+
+<select @bind:get="selectedIndex" @bind:set="ApplyCultureAsync">
+	@for (var index = 0; index < CultureHelper.SupportedCultures.Length; index++)
+	{
+		var lang = @CultureHelper.SupportedCultures[index].ThreeLetterISOLanguageName;
+		<option value="@index">
+			@lang.ToUpperInvariant() @LanguageFlag(lang)
+		</option>
+	}
+</select>
+
+@code {
+    private int selectedIndex;
+
+    protected override void OnInitialized()
+    {
+        selectedIndex = CultureHelper.SupportedCultures.IndexOf(CultureInfo.DefaultThreadCurrentCulture);
+		if (selectedIndex == -1)
+			selectedIndex = CultureHelper.SupportedCultures.IndexOf(CultureHelper.DefaultCulture);
+		if (selectedIndex == -1)
+			selectedIndex = 0;
+    }
+
+	private async Task ApplyCultureAsync(int index)
+	{
+		if (selectedIndex == index)
+			return;
+
+		selectedIndex = index;
+		var selectedCulture = CultureHelper.SupportedCultures[index];
+		var language = selectedCulture.ThreeLetterISOLanguageName;
+		var newUrl = Navigation.GetUriWithQueryParameter("lang", language);
+		Navigation.NavigateTo(newUrl, forceLoad: true);
+	}
+
+	private static string LanguageFlag(string languageISO)
+	{
+		return languageISO switch
+		{
+			"rus" => "🇷🇺",
+			"eng" => "🇬🇧",
+			_ => ""
+		};
+	}
+}

@@ -12,8 +12,8 @@ public static class MarkovAlgorithms
     /// <b>- alphabet:</b> opening and closing brackets of one type from <paramref name="symbols"/>.<br/>
     /// <b>- outputs:</b> <see cref="BracketsGrammarSymbols.Accepted"/> or <see cref="BracketsGrammarSymbols.Rejected"/> from <paramref name="symbols"/>.
     /// </summary>
-    [AlgorithmBuilder(Name = "Brackets grammar")]
-    public static MarkovAlgorithm Create_BracketsGrammar(BracketsGrammarSymbols? symbols = null)
+    [AlgorithmBuilder("BracketsGrammar")]
+	public static MarkovAlgorithm Create_BracketsGrammar(BracketsGrammarSymbols? symbols = null)
     {
         symbols ??= new BracketsGrammarSymbols();
         symbols.Validate();
@@ -43,7 +43,8 @@ public static class MarkovAlgorithms
     /// <b>- alphabet:</b> 0 and 1.<br/>
     /// <b>- outputs:</b> calculated binary number.
     /// </summary>
-    public static MarkovAlgorithm Create_BinaryIncrement()
+    [AlgorithmBuilder("BinaryIncrement")]
+	public static MarkovAlgorithm Create_BinaryIncrement()
     {
         return MarkovAlgorithm.Create("Binary increment")
             .WithAlphabet('0', '1')
@@ -63,7 +64,8 @@ public static class MarkovAlgorithms
     /// <b>- alphabet:</b> 0 and 1.<br/>
     /// <b>- outputs:</b> calculated binary number without leading zeros; zero stays zero (saturating).
     /// </summary>
-    public static MarkovAlgorithm Create_BinaryDecrement()
+    [AlgorithmBuilder("BinaryDecrement")]
+	public static MarkovAlgorithm Create_BinaryDecrement()
     {
         return MarkovAlgorithm.Create("Binary decrement")
             .WithAlphabet('0', '1')
@@ -97,8 +99,8 @@ public static class MarkovAlgorithms
     /// <b>- outputs:</b> calculated binary sum without leading zeros.
     /// </summary>
     /// <remarks>Uses repeated decrement of the second operand and increment of the first.</remarks>
-    [AlgorithmBuilder(Name = "Binary addition")]
-    public static MarkovAlgorithm Create_BinaryAddition()
+    [AlgorithmBuilder("BinaryAddition")]
+	public static MarkovAlgorithm Create_BinaryAddition()
     {
         return MarkovAlgorithm.Create("Binary addition")
             .WithAlphabet('0', '1', '+')
@@ -143,8 +145,8 @@ public static class MarkovAlgorithms
     /// <b>- outputs:</b> calculated binary difference without leading zeros; zero for underflow (saturating).
     /// </summary>
     /// <remarks>Uses repeated decrement of both operands; saturates when the first operand reaches zero.</remarks>
-    [AlgorithmBuilder(Name = "Binary subtraction")]
-    public static MarkovAlgorithm Create_BinarySubtraction()
+    [AlgorithmBuilder("BinarySubtraction")]
+	public static MarkovAlgorithm Create_BinarySubtraction()
     {
         return MarkovAlgorithm.Create("Binary subtraction")
             .WithAlphabet('0', '1', '-')
@@ -192,8 +194,8 @@ public static class MarkovAlgorithms
     /// <b>- outputs:</b> concatenated string "AB".<br/>
     /// <b>- example:</b> "ab+cd" -> "abcd".
     /// </summary>
-    [AlgorithmBuilder(Name = "String concatenation")]
-    public static MarkovAlgorithm Create_StringConcatenation()
+    [AlgorithmBuilder("StringConcatenation")]
+	public static MarkovAlgorithm Create_StringConcatenation()
     {
         return MarkovAlgorithm.Create("String concatenation")
             .WithMarkers('+')
@@ -208,8 +210,8 @@ public static class MarkovAlgorithms
     /// <b>- outputs:</b> an empty string for empty input, the input unchanged when it starts with 1,
     /// and a same-length string of ones when it starts with 0.
     /// </summary>
-    [AlgorithmBuilder(Name = "Busy beaver")]
-    public static MarkovAlgorithm Create_BusyBeaver()
+    [AlgorithmBuilder("BusyBeaver")]
+	public static MarkovAlgorithm Create_BusyBeaver()
     {
         return MarkovAlgorithm.Create("Busy beaver")
             .WithAlphabet('0', '1')
@@ -231,8 +233,8 @@ public static class MarkovAlgorithms
     /// <b>- example:</b> "101" -> "|||||".
     /// </summary>
     /// <remarks>Uses repeated decrement of the binary number, appending one unary digit per step.</remarks>
-    [AlgorithmBuilder(Name = "Binary to unary number converter")]
-    public static MarkovAlgorithm Create_BinaryToUnaryConverter()
+    [AlgorithmBuilder("BinaryToUnaryConverter")]
+	public static MarkovAlgorithm Create_BinaryToUnaryConverter()
     {
         return MarkovAlgorithm.Create("Binary to unary number converter")
             .WithAlphabet('0', '1')
@@ -269,8 +271,8 @@ public static class MarkovAlgorithms
     /// <b>- example:</b> "5" -> "101" or "1000" -> "1111101000".
     /// </summary>
     /// <remarks>Converts the decimal number into unary by repeated decrement, then unary into binary.</remarks>
-    [AlgorithmBuilder(Name = "Decimal to binary number converter")]
-    public static MarkovAlgorithm Create_DecimalToBinaryConverter()
+    [AlgorithmBuilder("DecimalToBinaryConverter")]
+	public static MarkovAlgorithm Create_DecimalToBinaryConverter()
     {
         var builder = MarkovAlgorithm.Create("Decimal to binary number converter")
             .WithAlphabet("0123456789")
@@ -323,8 +325,8 @@ public static class MarkovAlgorithms
     /// <b>- example:</b> "101" -> "5" or "1111101000" -> "1000".
     /// </summary>
     /// <remarks>Repeatedly decrements the binary number and increments a decimal accumulator.</remarks>
-    [AlgorithmBuilder(Name = "Binary to decimal number converter")]
-    public static MarkovAlgorithm Create_BinaryToDecimalConverter()
+    [AlgorithmBuilder("BinaryToDecimalConverter")]
+	public static MarkovAlgorithm Create_BinaryToDecimalConverter()
     {
         var builder = MarkovAlgorithm.Create("Binary to decimal number converter")
             .WithAlphabet("0123456789")
@@ -372,8 +374,8 @@ public static class MarkovAlgorithms
     /// <b>- example:</b> "abc" -> "cba".
     /// </summary>
     /// <remarks>Moves the first character of the remaining input to the left of the accumulated result.</remarks>
-    [AlgorithmBuilder(Name = "String reversal")]
-    public static MarkovAlgorithm Create_StringReversal(IEnumerable<char>? alphabet = null)
+    [AlgorithmBuilder("StringReversal")]
+	public static MarkovAlgorithm Create_StringReversal(IEnumerable<char>? alphabet = null)
     {
         var symbols = (alphabet ?? "abcdefghijklmnopqrstuvwxyz").Distinct().ToArray();
         if (symbols.Length == 0)
@@ -417,8 +419,8 @@ public static class MarkovAlgorithms
     /// <b>- alphabet:</b> any symbol.<br/>
     /// <b>- example:</b> "000123" -> "1234" or "000" -> "0".
     /// </summary>
-    [AlgorithmBuilder(Name = "Leading zeros trimmer")]
-    public static MarkovAlgorithm Create_LeadingZerosTrim()
+    [AlgorithmBuilder("LeadingZerosTrim")]
+	public static MarkovAlgorithm Create_LeadingZerosTrim()
     {
         var builder = MarkovAlgorithm.Create("Leading zeros trim")
             .WithAlphabet("0123456789")
@@ -439,8 +441,8 @@ public static class MarkovAlgorithms
     /// <b>- alphabet:</b> "|" for unary numbers, 0 and 1 for binary.<br/>
     /// <b>- example:</b> "|||||" (5 items) -> "101".
     /// </summary>
-    [AlgorithmBuilder(Name = "Unary to binary number converter")]
-    public static MarkovAlgorithm Create_UnaryToBinaryConverter()
+    [AlgorithmBuilder("UnaryToBinaryConverter")]
+	public static MarkovAlgorithm Create_UnaryToBinaryConverter()
     {
         return MarkovAlgorithm.Create("Unary to binary number converter")
             .WithAlphabet('|')
@@ -460,8 +462,8 @@ public static class MarkovAlgorithms
     /// <b>- alphabet:</b> "|" for unary numbers, 0, 1 and 2 for ternary.<br/>
     /// <b>- example:</b> "|||||" (5 items) -> "12".
     /// </summary>
-    [AlgorithmBuilder(Name = "Unary to ternary number converter")]
-    public static MarkovAlgorithm Create_UnaryToTernaryConverter()
+    [AlgorithmBuilder("UnaryToTernaryConverter")]
+	public static MarkovAlgorithm Create_UnaryToTernaryConverter()
     {
         return MarkovAlgorithm.Create("Unary to ternary number converter")
             .WithAlphabet('|')

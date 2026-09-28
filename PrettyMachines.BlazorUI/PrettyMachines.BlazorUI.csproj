@@ -7,6 +7,8 @@
     <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
     <RootNamespace>PrettyMachines.BlazorUI</RootNamespace>
     <RunHotReload>true</RunHotReload>
+    <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+    <SatelliteResourceLanguages>en;ru</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,11 +16,36 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.0" PrivateAssets="all"/>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="10.0.12" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PrettyMachines.Algorithms\PrettyMachines.Algorithms.csproj" />
     <ProjectReference Include="..\PrettyMachines.Implementations\PrettyMachines.Implementations.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Localization\Names.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LocalizationEN.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Localization\Controls.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Controls.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Localization\Names.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Names.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Localization\Controls.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Controls.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <!-- CHANGING BASE PATH -->

@@ -1,5 +1,7 @@
 ﻿@inject NavigationManager Navigation
 @inject AlgorithmDraftStore DraftStore
+@inject IStringLocalizer<Locale.Controls> LocControls
+@inject AlgorithmLocalizer LocNames    
 @implements IDisposable
 
 <div class="nav-root">
@@ -7,23 +9,30 @@
         ☰
     </button>
     <div class="navigation @(menuOpen ? "open" : "")">
-        <h1 class="nav-title" @onclick="OpenHome">Pretty Machines</h1>
+        <h1 class="nav-title" @onclick="OpenHome">
+            Pretty Machines
+        </h1>
         <div>
+            @if (families.Count == 0)
+            {
+                <i>@LocControls["NoContent"]</i>
+            }
+
             @foreach (var family in families)
             {
                 <div class="nav-item">
                     <h4 @onclick="() => Toggle(family.Id)"
                         class="@(expanded.Contains(family.Id) ? "expanded" : "collapsed")">
-                        @family.Name
+                        @LocNames.GetAlgorithmFamilyName(family.Id)
                     </h4>
                     <ol class="nav-subitem @(expanded.Contains(family.Id) ? "show" : "hide")">
                         <li @onclick="() => OpenEditor(family.Id)">
-                            <i>Create new...</i>
+                            <i>+ @LocControls["CreateNew"]</i>
                         </li>
                         @foreach (var algorithm in family.Algorithms)
                         {
                             <li @onclick="() => OpenAlgorithm(family.Id, algorithm.Id)">
-                                @algorithm.Name
+                                @LocNames.GetAlgorithmName(algorithm.Name)
                             </li>
                         }
                     </ol>
@@ -35,7 +44,7 @@
                 <div class="nav-item">
                     <h4 @onclick="() => Toggle(CustomSectionId)"
                         class="@(expanded.Contains(CustomSectionId) ? "expanded" : "collapsed")">
-                        Custom
+                        @LocControls["Custom"]
                     </h4>
                     <ol class="nav-subitem @(expanded.Contains(CustomSectionId) ? "show" : "hide")">
                         @foreach (var draft in DraftStore.Drafts)
@@ -47,6 +56,15 @@
                     </ol>
                 </div>
             }
+        </div>
+    </div>
+
+    <div class="fixed-bottom">
+        <div>
+            See <a href="https://github.com/IliaTrofimov/PrettyMachines" target="_blank" rel="noopener">GitHub</a> repository
+        </div>
+        <div>
+            Language <LanguageSelector/>
         </div>
     </div>
 </div>

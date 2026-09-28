@@ -1,8 +1,9 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.JSInterop;
 using PrettyMachines.BlazorUI;
 using PrettyMachines.BlazorUI.Services;
-
 
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -10,5 +11,12 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddSingleton<AlgorithmDraftStore>();
+builder.Services.AddSingleton<AlgorithmLocalizer>();
+builder.Services.AddLocalization();
 
-await builder.Build().RunAsync();
+var host = builder.Build();
+
+var js = host.Services.GetRequiredService<IJSRuntime>();
+await CultureHelper.UpdateCultureWithJS(js);
+
+await host.RunAsync();
