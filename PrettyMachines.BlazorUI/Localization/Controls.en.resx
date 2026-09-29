@@ -153,6 +153,12 @@
   <data name="AppTitle" xml:space="preserve">
     <value>Pretty Machines</value>
   </data>
+  <data name="AutoStep" xml:space="preserve">
+    <value>Auto step</value>
+  </data>
+  <data name="AutoStepTooltip" xml:space="preserve">
+    <value>Execute whole algorithm with animated steps</value>
+  </data>
   <data name="BackToCatalog" xml:space="preserve">
     <value>Back to catalog</value>
   </data>
@@ -309,6 +315,12 @@
   <data name="Reset" xml:space="preserve">
     <value>Reset</value>
   </data>
+  <data name="ResetAlgorithmTooltip" xml:space="preserve">
+    <value>Stop algorithm, clear input and output </value>
+  </data>
+  <data name="ResetOutputTooltip" xml:space="preserve">
+    <value>Stop algorithm and clear output </value>
+  </data>
   <data name="Right" xml:space="preserve">
     <value>Right</value>
   </data>
@@ -317,6 +329,9 @@
   </data>
   <data name="Run" xml:space="preserve">
     <value>Run</value>
+  </data>
+  <data name="RunTooltip" xml:space="preserve">
+    <value>Execute whole algorithm immediately</value>
   </data>
   <data name="RunningStep" xml:space="preserve">
     <value>Running step {0}</value>
@@ -344,6 +359,12 @@
   </data>
   <data name="Step" xml:space="preserve">
     <value>Step</value>
+  </data>
+  <data name="StepTooltip" xml:space="preserve">
+    <value>Execute 1 step of the algorithm</value>
+  </data>
+  <data name="Stop" xml:space="preserve">
+    <value>Stop</value>
   </data>
   <data name="StrictAlphabet" xml:space="preserve">
     <value>Strict alphabet</value>

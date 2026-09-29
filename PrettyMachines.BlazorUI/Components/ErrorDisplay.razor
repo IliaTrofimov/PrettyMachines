@@ -50,7 +50,7 @@
 
     private string stackTrace = "";
     
-    [Parameter]
+    [Parameter, EditorRequired]
     public required Exception Error { get; set; }
 
 
@@ -58,7 +58,7 @@
     {
         if (!string.IsNullOrEmpty(Error.StackTrace) && !isProduction)
         {
-            stackTrace = Error.StackTrace.Replace(" in ", "\n\tin");      
+            stackTrace = Error.StackTrace.Replace(" in ", "\n\tin ").Replace(":line", "\n\t:line");
         }
     }
 }

@@ -116,7 +116,7 @@ public sealed class AlgorithmRunSession : IDisposable
     }
 
     /// <summary>Stops the session and clears all state.</summary>
-    public void Reset()
+    public void Reset(bool keepInput = false)
     {
         cancellation?.Cancel();
         cancellation?.Dispose();
@@ -126,13 +126,17 @@ public sealed class AlgorithmRunSession : IDisposable
         algorithm = null;
         trace.Clear();
         Output = "";
-        Input = "";
         Steps = 0;
         Status = TerminationStatus.Unknown;
         IsFinished = true;
         Error = null;
-        IsValidInput = true;
-        Tape = null;
+
+        if (!keepInput)
+        {
+            Tape = null;
+            Input = "";
+            IsValidInput = true;
+        }
     }
 
     /// <inheritdoc/>

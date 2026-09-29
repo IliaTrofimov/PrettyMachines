@@ -16,4 +16,9 @@ internal sealed class AlgorithmBuilderAttribute(string? name = null) : Attribute
 	/// or factory method's name.
 	/// </summary>
 	public string? Name => name;
+
+	/// <summary>
+	/// Optional example input text for this algorithm.
+	/// </summary>
+	public string? ExampleInput { get; init; }
 }

@@ -7,6 +7,7 @@
 @inject NavigationManager Navigation
 @inject AlgorithmLocalizer LocNames
 @inject IStringLocalizer<Locale.Controls> LocControls
+@implements IDisposable
 
 
 <div class="page-container algorithm-page">
@@ -39,24 +40,32 @@
                 <div class="input-group">
                     <input type="text" id="algorithm-input" class="font-monospace form-control"
                             placeholder="@LocControls["InputPlaceholder"]" @bind="input" />
-                    <button type="button" class='btn btn-outline-secondary'
-                            @onclick="ResetAlgorithm">
+                    <button type="button" class='btn btn-outline-secondary' title="@LocControls["ResetAlgorithmTooltip"]"
+                            @onclick="ClearInput">
                         <Icon Name="reset" Class="me-1" />@LocControls["Reset"]
                     </button>
                 </div>
                
                 <div class="d-flex flex-wrap align-items-center gap-5 mb-3 mt-3">
                     <div class="input-group input-group-sm w-auto">
-                        <button type="button" class="btn btn-outline-success" disabled="@(!CanExecute)" 
+                        <button type="button" class="btn btn-outline-success" disabled="@(!CanExecute)" title="@LocControls["RunTooltip"]" 
                                 @onclick="RunAlgorithm">
                             <Icon Name="fast-forward" Class="me-1" />@LocControls["Run"]
                         </button>
-                        <button type="button" class="btn btn-outline-success" disabled="@(!CanExecute)" 
+                         <button type="button" class="btn btn-outline-success" disabled="@(!CanExecute)" title="@LocControls["AutoStepTooltip"]"
+                                @onclick="AutoStepAlgorithm">
+                            <Icon Name="run" Class="me-1" />@LocControls["AutoStep"]
+                        </button>
+                        <button type="button" class="btn btn-outline-success" disabled="@(!CanExecute)" title="@LocControls["StepTooltip"]"
                                 @onclick="StepAlgorithm">
                             <Icon Name="step-forward" Class="me-1" />@LocControls["Step"]
                         </button>
-                        <button type="button" class='btn @(!session.IsStarted ? "btn-outline-secondary" : "btn-outline-danger")' disabled="@(!session.IsStarted)" 
-                                @onclick="ResetAlgorithm">
+                        @{
+                            var stopEnabled = session.IsStarted;
+                        }
+                        <button type="button" class='btn @(!stopEnabled ? "btn-outline-secondary" : "btn-outline-danger")' title="@LocControls["ResetOutputTooltip"]"
+                                disabled="@(!stopEnabled)" 
+                                @onclick="ClearOutput">
                             <Icon Name="stop" Class="me-1" />@LocControls["Reset"]
                         </button>
                     </div>
@@ -115,6 +124,9 @@
 </div>
 
 @code {
+    private const int AutoStepDelayMs = 800;
+    private const int RunYieldIntervalMs = 50;
+
     private readonly AlgorithmRunSession session = new();
 
     private AlgorithmDescriptor? descriptor;
@@ -127,13 +139,15 @@
     private string input = "";
     private int? maxStepsInput = null;
     private string? loadedKey;
+    private CancellationTokenSource? executionCts;
+    private bool autoStepping;
+    private bool disposed;
 
     [Parameter] public string? FamilyId { get; set; }
 
     [Parameter] public string? AlgorithmId { get; set; }
 
     [Parameter] public string? DraftId { get; set; }
-
 
 
     private string DisplayName => draft?.Name ?? LocNames.GetAlgorithmName(descriptor?.Name ?? algorithm?.Name);
@@ -153,6 +167,7 @@
 
     private void Load(string path)
     {
+        StopExecution();
         session.Reset();
         descriptor = null;
         draft = null;
@@ -213,6 +228,8 @@
         {
             algorithm = descriptor.Create();
             draft = CreateDisplayDraft(descriptor, algorithm);
+            if (!string.IsNullOrEmpty(descriptor.ExampleInput))
+                input = descriptor.ExampleInput;
         }
         catch (Exception exception)
         {
@@ -305,16 +322,100 @@
         }
     }
 
-    private void RunAlgorithm()
+    private async Task RunAlgorithm()
     {
+        StopExecution();
+        autoStepping = false;
         EnsureSession(restartIfFinished: true);
-        session.Run();
+        if (!session.IsActive)
+            return;
+
+        var cts = new CancellationTokenSource();
+        executionCts = cts;
+        var token = cts.Token;
+
+        try
+        {
+            var lastYield = Environment.TickCount64;
+            while (!token.IsCancellationRequested && session.Status == TerminationStatus.Unknown)
+            {
+                session.Step();
+
+                if (Environment.TickCount64 - lastYield < RunYieldIntervalMs)
+                    continue;
+
+                lastYield = Environment.TickCount64;
+                RenderIfAlive();
+                await Task.Yield();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            cts.Dispose();
+            if (ReferenceEquals(executionCts, cts))
+                executionCts = null;
+            RenderIfAlive();
+        }
     }
 
     private void StepAlgorithm()
     {
+        StopExecution();
         EnsureSession(restartIfFinished: false);
         session.Step();
+    }
+
+    private async Task AutoStepAlgorithm()
+    {
+        if (autoStepping)
+        {
+            StopExecution();
+            return;
+        }
+
+        StopExecution();
+        EnsureSession(restartIfFinished: true);
+        if (!session.IsActive)
+            return;
+
+        autoStepping = true;
+        var cts = new CancellationTokenSource();
+        executionCts = cts;
+        var token = cts.Token;
+
+        try
+        {
+            while (!token.IsCancellationRequested && session.Status == TerminationStatus.Unknown)
+            {
+                await Task.Delay(AutoStepDelayMs, token);
+                session.Step();
+                RenderIfAlive();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            cts.Dispose();
+            if (ReferenceEquals(executionCts, cts))
+            {
+                executionCts = null;
+                autoStepping = false;
+            }
+            RenderIfAlive();
+        }
+    }
+
+    private void StopExecution() => executionCts?.Cancel();
+
+    private void RenderIfAlive()
+    {
+        if (!disposed)
+            StateHasChanged();
     }
 
     private void EnsureSession(bool restartIfFinished)
@@ -327,7 +428,28 @@
             session.Start(algorithm, input, steps);
     }
 
-    private void ResetAlgorithm() => session.Reset();
+    private void ClearOutput()
+    {
+        StopExecution();
+        autoStepping = false;
+        session.Reset(keepInput: true);
+    }
+
+    private void ClearInput()
+    {
+        StopExecution();
+        autoStepping = false;
+        session.Reset(keepInput: false);
+    }
 
     private void StopAlgorithm() => session.Stop();
+
+    public void Dispose()
+    {
+        disposed = true;
+        executionCts?.Cancel();
+        executionCts?.Dispose();
+        executionCts = null;
+        session.Dispose();
+    }
 }

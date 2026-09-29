@@ -16,7 +16,8 @@ public sealed class AlgorithmDescriptor
     /// <param name="familyId">Identifier of the declaring family (the static class name).</param>
     /// <param name="returnType">Declared return type of the factory method.</param>
     /// <param name="factory">Factory method used to create the algorithm.</param>
-    public AlgorithmDescriptor(string id, string name, string familyId, Type returnType, MethodInfo factory)
+    /// <param name="example">Example input string.</param>
+    public AlgorithmDescriptor(string id, string name, string familyId, Type returnType, MethodInfo factory, string? example = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         ArgumentNullException.ThrowIfNull(returnType);
@@ -27,6 +28,7 @@ public sealed class AlgorithmDescriptor
         FamilyId = familyId;
         ReturnType = returnType;
         Factory = factory;
+        ExampleInput = example;
     }
 
     /// <summary>Gets the stable identifier equal to the factory method name (for example <c>Create_BinaryIncrementMachine</c>).</summary>
@@ -34,6 +36,9 @@ public sealed class AlgorithmDescriptor
 
     /// <summary>Gets the display name.</summary>
     public string Name { get; }
+
+    /// <summary>Gets optional example input string.</summary>
+    public string? ExampleInput { get; } 
 
     /// <summary>Gets the identifier of the declaring family (for example <c>TuringMachines</c>).</summary>
     public string FamilyId { get; }

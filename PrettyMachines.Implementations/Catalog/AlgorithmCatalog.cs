@@ -108,14 +108,15 @@ public static partial class AlgorithmCatalog
             if (!typeof(IAlgorithm).IsAssignableFrom(method.ReturnType))
                 continue;
         
-            var customName = method.GetCustomAttributes<AlgorithmBuilderAttribute>().FirstOrDefault()?.Name;
+            var attribute = method.GetCustomAttributes<AlgorithmBuilderAttribute>().FirstOrDefault();
             
             yield return new AlgorithmDescriptor(
                 method.Name,
-                customName ?? FixMethodName(method.Name),
+                attribute?.Name ?? FixMethodName(method.Name),
                 type.Name,
                 method.ReturnType,
-                method
+                method,
+                attribute?.ExampleInput
             );
         }
     }
