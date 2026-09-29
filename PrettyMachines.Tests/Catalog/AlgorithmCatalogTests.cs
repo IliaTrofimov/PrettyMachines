@@ -51,7 +51,7 @@ public class AlgorithmCatalogTests
     {
         AlgorithmCatalog.Find(nameof(TuringMachines), "Create_BracketsGrammar")!
             .Create().Should().BeOfType<TuringMachine>();
-        AlgorithmCatalog.Find(nameof(TuringMachines), "Create_StringReversalMachine")!
+        AlgorithmCatalog.Find(nameof(TuringMachines), "Create_StringReversal")!
             .Create().Should().BeOfType<TuringMachine>();
         AlgorithmCatalog.Find(nameof(MarkovAlgorithms), "Create_BracketsGrammar")!
             .Create().Should().BeOfType<MarkovAlgorithm>();
@@ -62,8 +62,8 @@ public class AlgorithmCatalogTests
     [Fact]
     public void Find_is_case_sensitive_and_returns_null_for_unknown_ids()
     {
-        AlgorithmCatalog.Find(nameof(TuringMachines), "Create_BinaryIncrementMachine").Should().NotBeNull();
-        AlgorithmCatalog.Find(nameof(TuringMachines), "create_binaryincrementmachine").Should().BeNull();
+        AlgorithmCatalog.Find(nameof(TuringMachines), "Create_BinaryIncrement").Should().NotBeNull();
+        AlgorithmCatalog.Find(nameof(TuringMachines), "create_binaryincrement").Should().BeNull();
         AlgorithmCatalog.Find("Missing", "Create_BusyBeaver").Should().BeNull();
         AlgorithmCatalog.Find(null, null).Should().BeNull();
     }

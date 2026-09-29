@@ -66,10 +66,10 @@ public class DraftAdapterTests
     }
 
     [Theory]
-    [InlineData("Create_BinaryIncrementMachine", "101", "110")]
-    [InlineData("Create_BinaryDecrementMachine", "100", "11")]
-    [InlineData("Create_StringConcatenationMachine", "ab+cd", "abcd")]
-    [InlineData("Create_StringReversalMachine", "abc", "cba")]
+    [InlineData("Create_BinaryIncrement", "101", "110")]
+    [InlineData("Create_BinaryDecrement", "100", "11")]
+    [InlineData("Create_StringConcatenation", "ab+cd", "abcd")]
+    [InlineData("Create_StringReversal", "abc", "cba")]
     public void Turing_draft_round_trip_preserves_execution(string algorithmId, string input, string expected)
     {
         var descriptor = AlgorithmCatalog.Find(nameof(TuringMachines), algorithmId)!;
@@ -118,7 +118,7 @@ public class DraftAdapterTests
     [Fact]
     public void Fork_creates_a_runnable_copy_of_a_built_in()
     {
-        var descriptor = AlgorithmCatalog.Find(nameof(TuringMachines), "Create_BinaryIncrementMachine")!;
+        var descriptor = AlgorithmCatalog.Find(nameof(TuringMachines), "Create_BinaryIncrement")!;
 
         var draft = DraftAlgorithmFactory.Fork(descriptor);
         draft.SourceDescriptorId.Should().Be(descriptor.Id);
