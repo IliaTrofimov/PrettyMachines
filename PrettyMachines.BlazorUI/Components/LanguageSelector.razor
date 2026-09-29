@@ -4,7 +4,7 @@
 @inject NavigationManager Navigation
 
 
-<select @bind:get="selectedIndex" @bind:set="ApplyCultureAsync">
+<select @bind:get="selectedIndex" @bind:set="ApplyCultureAsync" class="form-select form-select-sm">
 	@for (var index = 0; index < CultureHelper.SupportedCultures.Length; index++)
 	{
 		var lang = @CultureHelper.SupportedCultures[index].ThreeLetterISOLanguageName;

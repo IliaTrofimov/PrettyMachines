@@ -3,29 +3,29 @@
 
 @if (!Editable)
 {
-    <div class="help-box">
+    <div class="text-body-secondary fst-italic small mb-2">
         @LocControls["ReadOnlyView"]
     </div>
 }
 
 <div class="structure-form">
-    <div class="field-row">
-        <label>@LocControls["Name"]</label>
-        <input type="text" class="mono" disabled="@(!Editable)"
+    <div class="input-group input-group-sm">
+        <span class="input-group-text structure-label">@LocControls["Name"]</span>
+        <input type="text" class="form-control font-monospace" disabled="@(!Editable)"
                value="@Draft.Name"
                @onchange="e => Update(() => Draft.Name = e.Value?.ToString() ?? string.Empty)" />
     </div>
 
-    <div class="field-row">
-        <label>@LocControls["Alphabet"]</label>
-        <input type="text" class="mono" placeholder="(any)" disabled="@(!Editable)"
+    <div class="input-group input-group-sm">
+        <span class="input-group-text structure-label">@LocControls["Alphabet"]</span>
+        <input type="text" class="form-control font-monospace" placeholder="@(LocControls["AnyPlaceholder"])" disabled="@(!Editable)"
                value="@AlphabetText"
                @onchange="e => Update(() => SetChars(Draft.Alphabet, e.Value?.ToString()))" />
     </div>
 
-    <div class="field-row">
-        <label>@LocControls["Markers"]</label>
-        <input type="text" class="mono" placeholder="(none)" disabled="@(!Editable)"
+    <div class="input-group input-group-sm">
+        <span class="input-group-text structure-label">@LocControls["Markers"]</span>
+        <input type="text" class="form-control font-monospace" placeholder="@(LocControls["NonePlaceholder"])" disabled="@(!Editable)"
                value="@MarkersText"
                @onchange="e => Update(() => SetChars(Draft.Markers, e.Value?.ToString()))" />
     </div>
@@ -33,63 +33,62 @@
 
 @if (DuplicatePatterns.Count > 0)
 {
-    <div class="invalid-feedback d-block">
+    <div class="invalid-feedback d-block mb-2">
         @LocControls["DuplicatePatterns"]:
         @string.Join(", ", DuplicatePatterns.Select(p => $"'{p}'"))
     </div>
 }
 
 <h5>@LocControls["Rules"]</h5>
-<table class="structure-table mono">
-    <thead>
-    <tr>
-        <th>#</th>
-        <th>@LocControls["Pattern"]</th>
-        <th>@LocControls["Replacement"]</th>
-        <th>@LocControls["TerminalState"]</th>
-        <th>@LocControls["Comment"]</th>
+<div class="input-group input-group-sm mb-1 fw-semibold">
+    <span class="input-group-text rule-index">#</span>
+    <span class="input-group-text rule-col">@LocControls["Pattern"]</span>
+    <span class="input-group-text rule-terminal">@LocControls["TerminalState"]</span>
+    <span class="input-group-text rule-col">@LocControls["Replacement"]</span>
+    <span class="input-group-text separator"></span>
+    <span class="input-group-text rule-col">@LocControls["Comment"]</span>
+    @if (Editable)
+    {
+        <span class="input-group-text rule-actions"></span>        
+    }
+</div>
+
+@foreach (var rule in Draft.Rules.ToList())
+{
+    var captured = rule;
+    var index = Draft.Rules.IndexOf(captured);
+    <div class="input-group input-group-sm mb-1 @(DuplicatePatterns.Contains(captured.Pattern) ? "invalid-instruction" : "")">
+        <span class="input-group-text rule-index">@index</span>
+        <input type="text" class="form-control font-monospace rule-col" value="@captured.Pattern" disabled="@(!Editable)"
+               @onchange="e => Update(() => captured.Pattern = e.Value?.ToString() ?? string.Empty)" />
+        
+        <span class="input-group-text rule-terminal">
+            <input type="checkbox" class="form-check-input mt-0" disabled="@(!Editable)" checked="@captured.IsTerminal"
+                   @onchange="e => Update(() => captured.IsTerminal = e.Value is true)" />
+            <span class="ms-2 font-monospace">@(captured.IsTerminal ? "=>" : "->")</span>
+        </span>
+
+        <input type="text" class="form-control font-monospace rule-col" value="@captured.Replacement" disabled="@(!Editable)"
+               @onchange="e => Update(() => captured.Replacement = e.Value?.ToString() ?? string.Empty)" />
+        
+        <span class="input-group-text separator"></span>
+        
+        <input type="text" class="form-control font-monospace rule-col" placeholder="@(LocControls["NonePlaceholder"])" value="@captured.Comment" disabled="@(!Editable)"
+               @onchange="e => Update(() => captured.Comment = string.IsNullOrWhiteSpace(e.Value?.ToString()) ? null : e.Value!.ToString())" />
+                
         @if (Editable)
         {
-            <th></th>
+            <button type="button" class="btn btn-outline-danger rule-actions" @onclick="() => Update(() => Draft.Rules.Remove(captured))">
+                <Icon Name="minus" />
+            </button>
         }
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var rule in Draft.Rules.ToList())
-    {
-        var captured = rule;
-        var index = Draft.Rules.IndexOf(captured);
-        <tr class="@(DuplicatePatterns.Contains(captured.Pattern) ? "invalid-instruction" : "")">
-            <td>@index</td>
-            <td>
-                <input type="text" class="mono" value="@captured.Pattern" disabled="@(!Editable)"
-                       @onchange="e => Update(() => captured.Pattern = e.Value?.ToString() ?? string.Empty)" />
-            </td>
-            <td>
-                <input type="text" class="mono" value="@captured.Replacement" disabled="@(!Editable)"
-                       @onchange="e => Update(() => captured.Replacement = e.Value?.ToString() ?? string.Empty)" />
-            </td>
-            <td>
-                <input type="checkbox" disabled="@(!Editable)" checked="@captured.IsTerminal"
-                       @onchange="e => Update(() => captured.IsTerminal = e.Value is true)" />
-            </td>
-            <td>
-                <input type="text" class="mono" placeholder="(none)" value="@captured.Comment" disabled="@(!Editable)"
-                       @onchange="e => Update(() => captured.Comment = string.IsNullOrWhiteSpace(e.Value?.ToString()) ? null : e.Value!.ToString())" />
-            </td>
-            @if (Editable)
-            {
-                <td>
-                    <button class="btn-delete" @onclick="() => Update(() => Draft.Rules.Remove(captured))"><Icon Name="minus" /></button>
-                </td>
-            }
-        </tr>
-    }
-    </tbody>
-</table>
+    </div>
+}
 @if (Editable)
 {
-    <button class="link-button" @onclick="AddRule"><Icon Name="plus" Class="me-1" />@LocControls["AddRule"]</button>
+    <button type="button" class="btn btn-link p-0 align-baseline" @onclick="AddRule">
+        <Icon Name="plus" Class="me-1" />@LocControls["AddRule"]
+    </button>
 }
 
 @code {

@@ -28,11 +28,11 @@
                 @DisplayName
                 @if (isDraft)
                 {
-                    <span class="badge text-bg-secondary ms-2">@LocControls["Draft"]</span>
+                    <h6>@LocControls["Draft"]</h6>
                 }
                 else if (descriptor is not null)
                 {
-                    <span class="badge text-bg-secondary ms-2">@LocNames.GetAlgorithmFamilyName(descriptor.FamilyId)</span>
+                    <h6>@LocNames.GetAlgorithmFamilyName(descriptor.FamilyId)</h6>
                 }
             </h4>
 

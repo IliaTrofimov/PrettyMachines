@@ -1,0 +1,35 @@
+.structure-form {
+    max-width: 22rem;
+}
+
+.structure-label {
+    width: 8rem;
+}
+
+.input-group .rule-index {
+    flex: 0 0 auto;
+    width: 2.5rem;
+    justify-content: flex-end;
+}
+
+.input-group .rule-col {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.input-group .rule-terminal {
+    flex: 0 0 auto;
+    width: 6rem;
+    justify-content: center;
+}
+
+.input-group .rule-actions {
+    flex: 0 0 auto;
+    width: 3rem;
+    justify-content: center;
+}
+
+.input-group .separator {
+    flex: 0 0 auto;
+    width: 1.5rem;
+}
