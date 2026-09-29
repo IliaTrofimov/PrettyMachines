@@ -1,3 +1,19 @@
+.algorithm-page {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    height: auto;
+}
+
+.panel-card {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.panel-body {
+    min-height: 0;
+    overflow-y: auto;
+}
+
 .max-steps-input {
     width: 6rem;
 }

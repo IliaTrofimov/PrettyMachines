@@ -25,37 +25,6 @@ html, body {
     width: 100%;
 }
 
-.wide-panel {
-    background-color: #fafafa;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    grid-column: 1 / -1;
-}
-
-.wide-panel input {
-    overflow-x: visible;
-    white-space: nowrap;
-}
-
-.panel-header {
-    background-color: wheat;
-    border-bottom: black 2px solid;
-    padding: 6px 8px;
-    user-select: none;
-    margin: 0;
-    flex-shrink: 0;
-}
-
-.panel-content{
-    padding: 5px 10px;
-    overflow-y: auto;
-    flex: 1;
-    min-height: 0;
-}
-
-
 .mono{
     font-family: Monaco, 'Cascadia Code', 'Roboto Mono', monospace;;
 }
@@ -66,17 +35,6 @@ html, body {
 
 .btn-delete {
     background-color: indianred;
-}
-
-.badge {
-    margin-left: 8px;
-    padding: 1px 6px;
-    border-radius: 8px;
-    background-color: #e0e0e0;
-    font-size: 11px;
-    font-weight: normal;
-    text-transform: none;
-    vertical-align: middle;
 }
 
 .help-box {
@@ -162,45 +120,8 @@ html, body {
     box-sizing: border-box;
 }
 
-.output-row {
-    margin-top: 8px;
-}
-
-.output-box {
-    min-height: 1.4em;
-    padding: 6px 8px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    white-space: pre-wrap;
-    word-break: break-all;
-}
-
-.traces {
-    max-height: 40vh;
-    overflow-y: auto;
-}
-
 h5 {
     margin: 12px 0 4px 0;
-}
-
-/* Scrollbar Styling */
-.panel-content::-webkit-scrollbar {
-    width: 8px;
-}
-
-.panel-content::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.panel-content::-webkit-scrollbar-thumb {
-    background: #cbd5e0;
-    border-radius: 10px;
-}
-
-.panel-content::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0;
 }
 
 .link-button {
@@ -237,9 +158,5 @@ h5 {
         min-height: 0;
         padding: 8px;
         gap: 8px;
-    }
-
-    .traces {
-        max-height: 30vh;
     }
 }

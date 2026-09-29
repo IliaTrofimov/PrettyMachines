@@ -63,8 +63,8 @@ public static class TuringMachines
     /// <b>- alphabet:</b> 0 and 1.<br/>
     /// <b>- outputs:</b> calculated binary number without leading zeros.
     /// </summary>
-    [AlgorithmBuilder("BinaryIncrementMachine")]
-	public static TuringMachine Create_BinaryIncrementMachine()
+    [AlgorithmBuilder("BinaryIncrement")]
+	public static TuringMachine Create_BinaryIncrement()
     {
         return TuringMachine.Create("Binary increment")
             .WithAlphabet("0", "1")
@@ -85,8 +85,8 @@ public static class TuringMachines
     /// <b>- alphabet:</b> 0 and 1.<br/>
     /// <b>- outputs:</b> calculated binary number without leading zeros; zero stays zero (saturating).
     /// </summary>
-    [AlgorithmBuilder("BinaryDecrementMachine")]
-	public static TuringMachine Create_BinaryDecrementMachine()
+    [AlgorithmBuilder("BinaryDecrement")]
+	public static TuringMachine Create_BinaryDecrement()
     {
         const string empty = "_";
 
@@ -124,8 +124,8 @@ public static class TuringMachines
     /// <b>- outputs:</b> calculated binary sum without leading zeros.
     /// </summary>
     /// <remarks>Uses repeated decrement of the second operand and increment of the first.</remarks>
-    [AlgorithmBuilder("BinaryAdditionMachine")]
-	public static TuringMachine Create_BinaryAdditionMachine()
+    [AlgorithmBuilder("BinaryAddition")]
+	public static TuringMachine Create_BinaryAddition()
     {
         const string empty = "_";
 
@@ -175,8 +175,8 @@ public static class TuringMachines
     /// <b>- outputs:</b> calculated binary difference without leading zeros; zero for underflow (saturating).
     /// </summary>
     /// <remarks>Uses repeated decrement of both operands; saturates when the first operand reaches zero.</remarks>
-    [AlgorithmBuilder("BinarySubtractionMachine")]
-	public static TuringMachine Create_BinarySubtractionMachine()
+    [AlgorithmBuilder("BinarySubtraction")]
+	public static TuringMachine Create_BinarySubtraction()
     {
         const string empty = "_";
 
@@ -252,8 +252,8 @@ public static class TuringMachines
     /// <b>- outputs:</b> concatenated string "AB".<br/>
     /// <b>- example:</b> "ab+cd" -> "abcd".
     /// </summary>
-    [AlgorithmBuilder("StringConcatenationMachine")]
-	public static TuringMachine Create_StringConcatenationMachine()
+    [AlgorithmBuilder("StringConcatenation")]
+	public static TuringMachine Create_StringConcatenation()
     {
         return TuringMachine.Create("String concatenation")
             .WithBlankSymbol("")
@@ -271,8 +271,8 @@ public static class TuringMachines
     /// <b>- outputs:</b> binary representation of the unary input.<br/>
     /// <b>- example:</b> "|||||" (5 items) -> "101".
     /// </summary>
-    [AlgorithmBuilder("UnaryToBinaryConverterMachine")]
-	public static TuringMachine Create_UnaryToBinaryConverterMachine()
+    [AlgorithmBuilder("UnaryToBinaryConverter")]
+	public static TuringMachine Create_UnaryToBinaryConverter()
     {
         const string empty = "_";
         const string separator = "#";
@@ -324,8 +324,8 @@ public static class TuringMachines
     /// <b>- outputs:</b> ternary representation of the unary input.<br/>
     /// <b>- example:</b> "|||||" (5 items) -> "12".
     /// </summary>
-    [AlgorithmBuilder("UnaryToTernaryConverterMachine")]
-	public static TuringMachine Create_UnaryToTernaryConverterMachine()
+    [AlgorithmBuilder("UnaryToTernaryConverter")]
+	public static TuringMachine Create_UnaryToTernaryConverter()
     {
         const string empty = "_";
         const string separator = "#";
@@ -381,8 +381,8 @@ public static class TuringMachines
     /// <b>- example:</b> "101" -> "|||||".
     /// </summary>
     /// <remarks>Uses repeated decrement of the binary number, appending one unary digit per step.</remarks>
-    [AlgorithmBuilder("BinaryToUnaryConverterMachine")]
-	public static TuringMachine Create_BinaryToUnaryConverterMachine()
+    [AlgorithmBuilder("BinaryToUnaryConverter")]
+	public static TuringMachine Create_BinaryToUnaryConverter()
     {
         const string empty = "_";
 
@@ -434,8 +434,8 @@ public static class TuringMachines
     /// <b>- example:</b> "5" -> "101" or "1000" -> "1111101000".
     /// </summary>
     /// <remarks>Repeatedly decrements the decimal number and increments a binary accumulator.</remarks>
-    [AlgorithmBuilder("DecimalToBinaryConverterMachine")]
-	public static TuringMachine Create_DecimalToBinaryConverterMachine()
+    [AlgorithmBuilder("DecimalToBinaryConverter")]
+	public static TuringMachine Create_DecimalToBinaryConverter()
     {
         const string empty = "_";
         const string separator = "&";
@@ -501,8 +501,8 @@ public static class TuringMachines
     /// <b>- example:</b> "101" -> "5" or "1111101000" -> "1000".
     /// </summary>
     /// <remarks>Repeatedly decrements the binary number and increments a decimal accumulator.</remarks>
-    [AlgorithmBuilder("BinaryToDecimalConverterMachine")]
-	public static TuringMachine Create_BinaryToDecimalConverterMachine()
+    [AlgorithmBuilder("BinaryToDecimalConverter")]
+	public static TuringMachine Create_BinaryToDecimalConverter()
     {
         const string empty = "_";
         const string separator = "&";
@@ -568,8 +568,8 @@ public static class TuringMachines
     /// <b>- example:</b> "abc" -> "cba".
     /// </summary>
     /// <remarks>Moves the first character of the remaining input to the left of the accumulated result.</remarks>
-    [AlgorithmBuilder("StringReversalMachine")]
-	public static TuringMachine Create_StringReversalMachine(IEnumerable<char>? alphabet = null)
+    [AlgorithmBuilder("StringReversal")]
+	public static TuringMachine Create_StringReversal(IEnumerable<char>? alphabet = null)
     {
         const string empty = "_";
 

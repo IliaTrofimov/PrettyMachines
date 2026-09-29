@@ -22,7 +22,7 @@ public class TuringMachinesTests(ITestOutputHelper output) : BaseAlgorithmTest(o
     [InlineData("1001", "1010")]
     public void BinaryIncrement_ProducesExpectedResult(string input, string expected)
     {
-        var algorithm = TuringMachines.Create_BinaryIncrementMachine();
+        var algorithm = TuringMachines.Create_BinaryIncrement();
 
         CheckAlgorithm(expected, TerminationStatus.Success, algorithm, input, Cancellation);
     }
@@ -41,7 +41,7 @@ public class TuringMachinesTests(ITestOutputHelper output) : BaseAlgorithmTest(o
     [InlineData("1000", "111")]
     public void BinaryDecrement_ProducesExpectedResult(string input, string expected)
     {
-        var algorithm = TuringMachines.Create_BinaryDecrementMachine();
+        var algorithm = TuringMachines.Create_BinaryDecrement();
 
         CheckAlgorithm(expected, TerminationStatus.Success, algorithm, input, Cancellation);
     }
@@ -60,7 +60,7 @@ public class TuringMachinesTests(ITestOutputHelper output) : BaseAlgorithmTest(o
     [InlineData("0+101",   "101")]
     public void BinaryAddition_ProducesExpectedResult(string input, string expected)
     {
-        var algorithm = TuringMachines.Create_BinaryAdditionMachine();
+        var algorithm = TuringMachines.Create_BinaryAddition();
 
         CheckAlgorithm(expected, TerminationStatus.Success, algorithm, input, Cancellation);
     }
@@ -81,7 +81,7 @@ public class TuringMachinesTests(ITestOutputHelper output) : BaseAlgorithmTest(o
     [InlineData("10-11",   "0")]
     public void BinarySubtraction_ProducesExpectedResult(string input, string expected)
     {
-        var algorithm = TuringMachines.Create_BinarySubtractionMachine();
+        var algorithm = TuringMachines.Create_BinarySubtraction();
 
         CheckAlgorithm(expected, TerminationStatus.Success, algorithm, input, Cancellation);
     }
@@ -98,7 +98,7 @@ public class TuringMachinesTests(ITestOutputHelper output) : BaseAlgorithmTest(o
     [InlineData("x+",          "x")]
     public void StringConcatenation_ProducesExpectedResult(string input, string expected)
     {
-        var algorithm = TuringMachines.Create_StringConcatenationMachine();
+        var algorithm = TuringMachines.Create_StringConcatenation();
 
         CheckAlgorithm(expected, TerminationStatus.Success, algorithm, input, Cancellation);
     }
@@ -139,7 +139,7 @@ public class TuringMachinesTests(ITestOutputHelper output) : BaseAlgorithmTest(o
     [InlineData("|||||||||","1001")]
     public void UnaryToBinary_ProducesExpectedResult(string input, string expected)
     {
-        var algorithm = TuringMachines.Create_UnaryToBinaryConverterMachine();
+        var algorithm = TuringMachines.Create_UnaryToBinaryConverter();
 
         CheckAlgorithm(expected, TerminationStatus.Success, algorithm, input, Cancellation);
     }
@@ -160,7 +160,7 @@ public class TuringMachinesTests(ITestOutputHelper output) : BaseAlgorithmTest(o
     [InlineData("|||||||||","100")]
     public void UnaryToTernary_ProducesExpectedResult(string input, string expected)
     {
-        var algorithm = TuringMachines.Create_UnaryToTernaryConverterMachine();
+        var algorithm = TuringMachines.Create_UnaryToTernaryConverter();
 
         CheckAlgorithm(expected, TerminationStatus.Success, algorithm, input, Cancellation);
     }
@@ -181,7 +181,7 @@ public class TuringMachinesTests(ITestOutputHelper output) : BaseAlgorithmTest(o
     [InlineData("1000", "||||||||")]
     public void BinaryToUnary_ProducesExpectedResult(string input, string expected)
     {
-        var algorithm = TuringMachines.Create_BinaryToUnaryConverterMachine();
+        var algorithm = TuringMachines.Create_BinaryToUnaryConverter();
 
         CheckAlgorithm(expected, TerminationStatus.Success, algorithm, input, Cancellation);
     }
@@ -202,7 +202,7 @@ public class TuringMachinesTests(ITestOutputHelper output) : BaseAlgorithmTest(o
     [InlineData("1000", "1111101000")]
     public void DecimalToBinary_ProducesExpectedResult(string input, string expected)
     {
-        var algorithm = TuringMachines.Create_DecimalToBinaryConverterMachine();
+        var algorithm = TuringMachines.Create_DecimalToBinaryConverter();
 
         CheckAlgorithm(expected, TerminationStatus.Success, algorithm, input, LongCancellation);
     }
@@ -223,7 +223,7 @@ public class TuringMachinesTests(ITestOutputHelper output) : BaseAlgorithmTest(o
     [InlineData("1111101000", "1000")]
     public void BinaryToDecimal_ProducesExpectedResult(string input, string expected)
     {
-        var algorithm = TuringMachines.Create_BinaryToDecimalConverterMachine();
+        var algorithm = TuringMachines.Create_BinaryToDecimalConverter();
 
         CheckAlgorithm(expected, TerminationStatus.Success, algorithm, input, LongCancellation);
     }
@@ -241,7 +241,7 @@ public class TuringMachinesTests(ITestOutputHelper output) : BaseAlgorithmTest(o
     [InlineData("kayak", "kayak")]
     public void StringReversal_ProducesExpectedResult(string input, string expected)
     {
-        var algorithm = TuringMachines.Create_StringReversalMachine();
+        var algorithm = TuringMachines.Create_StringReversal();
 
         CheckAlgorithm(expected, TerminationStatus.Success, algorithm, input, Cancellation);
     }
@@ -254,7 +254,7 @@ public class TuringMachinesTests(ITestOutputHelper output) : BaseAlgorithmTest(o
     [InlineData("1011", "1101")]
     public void StringReversal_WithCustomAlphabet_ProducesExpectedResult(string input, string expected)
     {
-        var algorithm = TuringMachines.Create_StringReversalMachine("01");
+        var algorithm = TuringMachines.Create_StringReversal("01");
 
         CheckAlgorithm(expected, TerminationStatus.Success, algorithm, input, Cancellation);
     }

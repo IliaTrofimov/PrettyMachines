@@ -1,0 +1,82 @@
+@inject IStringLocalizer<Locale.Controls> LocControls
+
+<div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+    <span class="fw-semibold">@LocControls["Output"]</span>
+
+    @if (Session.IsStarted)
+    {
+        <button type="button" class="btn btn-sm badge btn-secondary"
+                @onclick="() => traceVisible = !traceVisible">
+            <Icon Name="@(traceVisible ? "chevron-up" : "chevron-down")" Class="me-1" />
+            @(traceVisible ? LocControls["HideTrace"] : LocControls["ShowTrace"])
+        </button>
+        
+        <span class="@StatusFeedbackClass">
+            @if (Session.Status == TerminationStatus.Unknown)
+            {
+                @LocControls.GetString("RunningStep", @Session.Steps)
+            }
+            else
+            {
+                @LocControls.GetString(
+                    Session.Steps == 1 ? "FinishedAfterStepSingular" : "FinishedAfterStepPlural",
+                    @LocControls[Session.Status.ToString()],
+                    Session.Steps
+                )
+            }
+        </span>
+    }
+</div>
+
+@if (Session.Tape is { } tape)
+{
+    <div class="font-monospace d-flex overflow-auto tape-line border rounded bg-body p-2">
+        @foreach (var (cell, index) in Cells)
+        {
+            <span class="tape-cell @(index == tape.HeadIndex ? "bg-warning rounded" : "")">
+                @Symbol(cell)
+            </span>
+        }
+    </div>
+    <div class="text-body-secondary fst-italic small mt-1">@LocControls["TapeHeadHint"]</div>
+}
+else
+{
+    <div class="font-monospace output-box border rounded bg-body p-2 text-break">@Session.Output</div>
+}
+
+@if (traceVisible)
+{
+    <div class="output-box traces overflow-auto border rounded p-2 bg-body text-break mt-2 @(Session.Trace.Count > 0 ? "font-monospace" : "")">
+        @foreach (var trace in Session.Trace)
+        {
+            @trace<br/>
+        }
+        @if (Session.Trace.Count == 0)
+        {
+            <i>@LocControls["NoContent"]</i>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public AlgorithmRunSession Session { get; set; } = null!;
+
+    private bool traceVisible;
+
+    private string StatusFeedbackClass => Session.Status switch
+    {
+        TerminationStatus.Success => "valid-feedback d-block w-auto mt-0",
+        TerminationStatus.Unknown => "form-text mt-0",
+        _ => "invalid-feedback d-block w-auto mt-0",
+    };
+
+    private IEnumerable<(string?, int)> Cells =>
+        Session.Tape is null
+            ? []
+            : Session.Tape.EnumerateCells(trimEmptyCells: false)
+                            .Select((value, index) => (value, index));
+
+    private static string Symbol(string? cell) => string.IsNullOrEmpty(cell) ? "\u00A0" : cell;
+}

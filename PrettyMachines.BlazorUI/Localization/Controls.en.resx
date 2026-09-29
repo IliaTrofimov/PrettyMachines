@@ -225,6 +225,9 @@
   <data name="Hide" xml:space="preserve">
     <value>Hide</value>
   </data>
+  <data name="HideTrace" xml:space="preserve">
+    <value>Hide trace</value>
+  </data>
   <data name="Initial" xml:space="preserve">
     <value>Initial</value>
   </data>
@@ -324,6 +327,9 @@
   <data name="Show" xml:space="preserve">
     <value>Show</value>
   </data>
+  <data name="ShowTrace" xml:space="preserve">
+    <value>Show trace</value>
+  </data>
   <data name="StartHereComment" xml:space="preserve">
     <value>Start here</value>
   </data>
@@ -371,6 +377,9 @@
   </data>
   <data name="UnhandledException" xml:space="preserve">
     <value>unhandled exception</value>
+  </data>
+  <data name="Unlimited" xml:space="preserve">
+    <value>unlimited</value>
   </data>
   <data name="Value" xml:space="preserve">
     <value>Value</value>

@@ -9,12 +9,12 @@
 @inject IStringLocalizer<Locale.Controls> LocControls
 
 
-<div class="page-container">
+<div class="page-container algorithm-page">
     @if (notFound)
     {
-        <div class="wide-panel">
-            <h4 class="panel-header">@LocControls["NotFound"]</h4>
-            <div class="panel-content">
+        <div class="card panel-card">
+            <h4 class="card-header bg-warning-subtle border-bottom border-2 border-dark fw-semibold">@LocControls["NotFound"]</h4>
+            <div class="card-body panel-body">
                 <p>@LocControls["AlgorithmNotFound"]</p>
                 <a href=".">@LocControls["BackToCatalog"]</a>
             </div>
@@ -22,30 +22,34 @@
     }
     else
     {
-        <div class="wide-panel">
-            <h4 class="panel-header">
+        <div class="card panel-card">
+            <h4 class="card-header bg-warning-subtle border-bottom border-2 border-dark fw-semibold">
                 @DisplayName
                 @if (isDraft)
                 {
-                    <span class="badge">@LocControls["Draft"]</span>
+                    <span class="badge text-bg-secondary ms-2">@LocControls["Draft"]</span>
                 }
                 else if (descriptor is not null)
                 {
-                    <span class="badge">@descriptor.FamilyId</span>
+                    <span class="badge text-bg-secondary ms-2">@LocNames.GetAlgorithmFamilyName(descriptor.FamilyId)</span>
                 }
             </h4>
 
-            <div class="panel-content">
-                <div class="form-floating mb-2">
-                    <input type="text" id="algorithm-input" class="mono form-control"
-                           placeholder=" " @bind="input" />
-                    <label for="algorithm-input">@LocControls["InputPlaceholder"]</label>
+            <div class="card-body panel-body">
+                <div class="input-group">
+                    <input type="text" id="algorithm-input" class="font-monospace form-control"
+                            placeholder="@LocControls["InputPlaceholder"]" @bind="input" />
+                    <button type="button" class='btn btn-outline-secondary'
+                            @onclick="ResetAlgorithm">
+                        <Icon Name="reset" Class="me-1" />@LocControls["Reset"]
+                    </button>
                 </div>
-                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+               
+                <div class="d-flex flex-wrap align-items-center gap-5 mb-3 mt-3">
                     <div class="input-group input-group-sm w-auto">
                         <button type="button" class="btn btn-outline-success" disabled="@(!CanExecute)" 
                                 @onclick="RunAlgorithm">
-                            <Icon Name="play" Class="me-1" />@LocControls["Run"]
+                            <Icon Name="fast-forward" Class="me-1" />@LocControls["Run"]
                         </button>
                         <button type="button" class="btn btn-outline-success" disabled="@(!CanExecute)" 
                                 @onclick="StepAlgorithm">
@@ -53,83 +57,44 @@
                         </button>
                         <button type="button" class='btn @(!session.IsStarted ? "btn-outline-secondary" : "btn-outline-danger")' disabled="@(!session.IsStarted)" 
                                 @onclick="ResetAlgorithm">
-                            <Icon Name="reset" Class="me-1" />@LocControls["Reset"]
+                            <Icon Name="stop" Class="me-1" />@LocControls["Reset"]
                         </button>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <label class="text-nowrap" for="max-steps">@LocControls["MaxSteps"]</label>
-                        <input id="max-steps" type="number" min="1" class="form-control max-steps-input" @bind="maxStepsInput" />
+                        <label for="max-steps">@LocControls["MaxSteps"]</label>
+                        <input id="max-steps" type="number" min="1" max="99999" class="form-control form-control-sm max-steps-input" 
+                                @bind="maxStepsInput" />
+                        @if (!maxStepsInput.HasValue)
+                        {
+                            <label>@LocControls["Unlimited"]</label>
+                        }
                     </div>
                 </div>
 
-                @if (session.Error is not null)
-                {
-                    <div class="invalid-feedback d-block">@session.Error</div>
-                }
-
-                <div class="output-row">
-                    @if (session.Tape is { } tape)
-                    {
-                        <TapeView Tape="tape" Label="@(LocControls["Output"])" />
-                        <div class="help-box">@LocControls["TapeHeadHint"]</div>
-                    }
-                    else
-                    {
-                        <label>@LocControls["Output"]</label>
-                        <div class="mono output-box">@session.Output</div>
-                    }
+                <div class="mt-2">
+                    <OutputView Session="@session"/>
                 </div>
-
-                @if (session.IsStarted)
-                {
-                    <div class="@StatusFeedbackClass">
-                        @if (session.Status == TerminationStatus.Unknown)
-                        {
-                            @LocControls.GetString("RunningStep", @session.Steps)
-                        }
-                        else
-                        {
-                            @LocControls.GetString(
-                                session.Steps == 1 ? "FinishedAfterStepSingular" : "FinishedAfterStepPlural",
-                                @LocControls[session.Status.ToString()],
-                                session.Steps
-                            ) 
-                        }
-                        <button type="button" class="btn btn-sm btn-outline-secondary"
-                                @onclick="() => traceVisible = !traceVisible">
-                            <Icon Name="@(traceVisible ? "chevron-up" : "chevron-down")" Class="me-1" />
-                            @(traceVisible ? LocControls["Hide"] : LocControls["Show"]) @LocControls["Trace"] 
-                        </button>
-                    </div>
-                }
-
-                @if (traceVisible)
-                {
-                    <div class="@(session.Trace.Count > 0 ? "mono" : "") output-box  traces">
-                        @foreach (var trace in session.Trace)
-                        {
-                            @trace<br/>
-                        }
-                        @if (session.Trace.Count == 0)
-                        {
-                            <i>@LocControls["NoContent"]</i>
-                        }
-                    </div>
-                }
             </div>
         </div>
 
-        <div class="wide-panel">
-            <h4 class="panel-header">@LocControls["Definition"]</h4>
-            <div class="panel-content">
+        <div class="card panel-card">
+            <h4 class="card-header bg-warning-subtle border-bottom border-2 border-dark fw-semibold">
+                @LocControls["Definition"]
                 @if (!isDraft && descriptor is not null)
                 {
-                    <button type="button" class="btn btn-link p-0 align-baseline" @onclick="EditAsDraft">@LocControls["EditAsDraft"]</button>
+                    <button type="button" class="btn btn-link p-0 align-baseline" @onclick="EditAsDraft">
+                        @LocControls["EditAsDraft"]
+                    </button>
                 }
-
+            </h4>
+            <div class="card-body panel-body">
                 @if (structureError is not null)
                 {
                     <div class="invalid-feedback d-block">@structureError</div>
+                }
+                else if (session.Error is not null)
+                {
+                    <div class="invalid-feedback d-block">@session.Error</div>
                 }
 
                 @if (draft?.Turing is { } turingDraft)
@@ -158,10 +123,9 @@
     private bool isDraft;
     private bool editable;
     private bool notFound;
-    private bool traceVisible;
     private string? structureError;
     private string input = "";
-    private int maxStepsInput = 1000;
+    private int? maxStepsInput = null;
     private string? loadedKey;
 
     [Parameter] public string? FamilyId { get; set; }
@@ -175,13 +139,6 @@
     private string DisplayName => draft?.Name ?? LocNames.GetAlgorithmName(descriptor?.Name ?? algorithm?.Name);
 
     private bool CanExecute => algorithm is not null;
-
-    private string StatusFeedbackClass => session.Status switch
-    {
-        TerminationStatus.Success => "valid-feedback d-block",
-        TerminationStatus.Unknown => "form-text",
-        _ => "invalid-feedback d-block",
-    };
 
 
     protected override void OnParametersSet()
@@ -365,7 +322,7 @@
         if (algorithm is null)
             return;
 
-        var steps = (uint)Math.Max(1, maxStepsInput);
+        var steps = (uint)Math.Max(1, maxStepsInput ?? int.MaxValue);
         if (!session.IsStarted || session.Input != input || session.MaxSteps != steps || (restartIfFinished && session.IsFinished))
             session.Start(algorithm, input, steps);
     }

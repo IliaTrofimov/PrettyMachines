@@ -10,7 +10,7 @@ public class AlgorithmRunSessionTests
     [Fact]
     public void Session_exposes_a_tape_whose_head_moves_on_each_step()
     {
-        var machine = TuringMachines.Create_BinaryIncrementMachine();
+        var machine = TuringMachines.Create_BinaryIncrement();
 
         using var session = new AlgorithmRunSession();
         session.Start(machine, "101", 1000);
@@ -37,7 +37,7 @@ public class AlgorithmRunSessionTests
     [Fact]
     public void Session_steps_through_a_turing_machine_one_snapshot_at_a_time()
     {
-        var machine = TuringMachines.Create_BinaryIncrementMachine();
+        var machine = TuringMachines.Create_BinaryIncrement();
 
         using var session = new AlgorithmRunSession();
         session.Start(machine, "101", 1000);
@@ -85,7 +85,7 @@ public class AlgorithmRunSessionTests
     [Fact]
     public void Reset_clears_the_session()
     {
-        var machine = TuringMachines.Create_BinaryIncrementMachine();
+        var machine = TuringMachines.Create_BinaryIncrement();
 
         using var session = new AlgorithmRunSession();
         session.Start(machine, "101", 1000);
@@ -103,7 +103,7 @@ public class AlgorithmRunSessionTests
     [Fact]
     public void Stop_marks_the_session_as_aborted()
     {
-        var machine = TuringMachines.Create_UnaryToBinaryConverterMachine();
+        var machine = TuringMachines.Create_UnaryToBinaryConverter();
 
         using var session = new AlgorithmRunSession();
         session.Start(machine, "|||||", 1_000_000);

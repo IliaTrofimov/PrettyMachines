@@ -1,0 +1,25 @@
+.tape-line {
+    min-height: 1.5em;
+}
+
+.tape-cell {
+    flex: 0 0 auto;
+    min-width: 1ch;
+    text-align: center;
+}
+
+.output-box {
+    white-space: pre-wrap;
+    min-height: 2.5rem;
+}
+
+.traces {
+    max-height: 40vh;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 850px) {
+    .traces {
+        max-height: 30vh;
+    }
+}

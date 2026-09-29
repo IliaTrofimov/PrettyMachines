@@ -225,6 +225,9 @@
   <data name="Hide" xml:space="preserve">
     <value>Скрыть</value>
   </data>
+  <data name="HideTrace" xml:space="preserve">
+    <value>Скрыть трассировку</value>
+  </data>
   <data name="Initial" xml:space="preserve">
     <value>Начальное</value>
   </data>
@@ -324,6 +327,9 @@
   <data name="Show" xml:space="preserve">
     <value>Показать</value>
   </data>
+  <data name="ShowTrace" xml:space="preserve">
+    <value>Показать трассировку</value>
+  </data>
   <data name="StartHereComment" xml:space="preserve">
     <value>Начните здесь</value>
   </data>
@@ -371,6 +377,9 @@
   </data>
   <data name="UnhandledException" xml:space="preserve">
     <value>необработанное исключение</value>
+  </data>
+  <data name="Unlimited" xml:space="preserve">
+    <value>неограничено</value>
   </data>
   <data name="Value" xml:space="preserve">
     <value>Значение</value>
