@@ -168,6 +168,9 @@
   <data name="CatalogDescription" xml:space="preserve">
     <value>Все встроенные алгоритмы из PrettyMachines.Implementations находятся автоматически. Выберите алгоритм для пошагового разбора или создайте новый с нуля.</value>
   </data>
+  <data name="Clear" xml:space="preserve">
+    <value>Очистить</value>
+  </data>
   <data name="Comment" xml:space="preserve">
     <value>Комментарий</value>
   </data>
@@ -197,6 +200,9 @@
   </data>
   <data name="Empty" xml:space="preserve">
     <value>Пусто</value>
+  </data>
+  <data name="Erase" xml:space="preserve">
+    <value>Стереть</value>
   </data>
   <data name="ErrorHappened" xml:space="preserve">
     <value>Произошла ошибка</value>
@@ -279,6 +285,12 @@
   <data name="NoStructuredDefinition" xml:space="preserve">
     <value>Структура недоступна.</value>
   </data>
+  <data name="NonTerminalState" xml:space="preserve">
+    <value>Нетерминальное состояние/правило</value>
+  </data>
+  <data name="NonTerminalStateShort" xml:space="preserve">
+    <value>Нетерм.</value>
+  </data>
   <data name="None" xml:space="preserve">
     <value>Нет</value>
   </data>
@@ -349,6 +361,9 @@
     <value>Начните здесь</value>
   </data>
   <data name="StartState" xml:space="preserve">
+    <value>Начальное состояние</value>
+  </data>
+  <data name="StartStateShort" xml:space="preserve">
     <value>Старт</value>
   </data>
   <data name="State" xml:space="preserve">
@@ -379,7 +394,10 @@
     <value>Подсвеченная ячейка - головка ленты.</value>
   </data>
   <data name="TerminalState" xml:space="preserve">
-    <value>Терминальное</value>
+    <value>Терминальное состояние/инструкция</value>
+  </data>
+  <data name="TerminalStateShort" xml:space="preserve">
+    <value>Терм.</value>
   </data>
   <data name="ToggleNavigation" xml:space="preserve">
     <value>Открыть меню</value>
@@ -392,12 +410,6 @@
   </data>
   <data name="TryReload" xml:space="preserve">
     <value>Попробуйте обновить страницу</value>
-  </data>
-  <data name="Unhandled" xml:space="preserve">
-    <value>необработанное</value>
-  </data>
-  <data name="UnhandledException" xml:space="preserve">
-    <value>необработанное исключение</value>
   </data>
   <data name="Unlimited" xml:space="preserve">
     <value>неограничено</value>

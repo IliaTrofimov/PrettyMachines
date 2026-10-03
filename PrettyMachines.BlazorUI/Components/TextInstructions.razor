@@ -1,0 +1,50 @@
+@typeparam T
+
+<div>
+	@foreach (var (instr, i) in Instructions.Select((instr, i) => (instr, i)))
+	{
+		var capturedIndex = i;
+		var capturedInstr = instr;
+
+		@if (i == selectedIndex)
+		{
+			<input class="@InstructionClass?.Invoke(capturedInstr)"
+				@bind-value:get="@InstructionToString(instr)" 
+				@bind-value:set="(str) => ChangeInput(capturedIndex, str, capturedInstr)"/>
+		}
+		else
+		{
+			<div class="@InstructionClass?.Invoke(capturedInstr)" @onclick="() => SelectInput(capturedIndex)">
+				@InstructionToString(instr)
+			</div>
+		}
+	}
+</div>
+
+@code {
+	private int selectedIndex = -1;
+
+
+	[Parameter, EditorRequired]
+	public IList<T> Instructions { get; set; } 
+
+	[Parameter, EditorRequired]
+	public Func<T, string> InstructionToString { get; set; }
+
+	[Parameter, EditorRequired]
+	public EventCallback<(int index, string newValue, T instr)> InstructionChanged { get; set; }
+
+	[Parameter]
+	public Func<T, string?>? InstructionClass { get; set; }
+
+
+	private async Task ChangeInput(int index, string? value, T instr)
+	{
+		await InstructionChanged.InvokeAsync((index, value ?? "", instr));
+	}
+
+	private void SelectInput(int index)
+	{
+		selectedIndex = index;
+	}
+}

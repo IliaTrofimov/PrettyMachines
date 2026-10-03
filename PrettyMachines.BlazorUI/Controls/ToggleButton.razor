@@ -1,0 +1,70 @@
+
+@if (string.IsNullOrEmpty(RadioName))
+{
+	<input type="checkbox" class="btn-check @ClassInput" id="@Id" disabled="@Disabled" 
+		@bind:get="@Value" @bind:set="e => ValueChanged.InvokeAsync(e)"
+	/>	
+}
+else
+{
+	<input type="radio" class="btn-check @ClassInput" id="@Id" name="@RadioName" disabled="@Disabled" 
+		@bind:get="@Value" @bind:set="e => ValueChanged.InvokeAsync(e)"
+	/>
+}
+<label class="btn @ClassLabel" for="@Id" title="@((Value ? TitleChecked : TitleUnchecked) ?? Title)">
+    @((Value ? TextChecked : TextUnchecked) ?? Text)
+</label>
+
+@code {
+	/// <summary>Element Id for linking input and label.</summary>
+	[Parameter, EditorRequired]
+	public string Id { get; set; }
+
+	/// <summary>Checked or unchecked state.</summary>
+	[Parameter]
+	public bool Value {get; set;}
+
+	/// <summary>Checked or unchecked state callback function.</summary>
+	[Parameter]
+	public EventCallback<bool> ValueChanged { get; set; } 
+
+	/// <summary>Disable or enable this control.</summary>
+	[Parameter]
+	public bool Disabled { get; set; }
+
+	/// <summary>Text that appear inside this button</summary>
+	[Parameter]
+	public string? Text { get; set; }
+
+	/// <summary>Text that appear inside this button when value is checked</summary>
+	[Parameter]
+	public string? TextChecked { get; set; }
+
+	/// <summary>Text that appear inside this button when value is unchecked</summary>
+	[Parameter]
+	public string? TextUnchecked { get; set; }
+
+	/// <summary>Tooltip text</summary>
+	[Parameter]
+	public string? Title { get; set; }
+
+	/// <summary>Tooltip text when value is checked</summary>
+	[Parameter]
+	public string? TitleChecked { get; set; }
+
+	/// <summary>Tooltip text when value is unchecked</summary>
+	[Parameter]
+	public string? TitleUnchecked { get; set; }
+
+	/// <summary>Additional css classes for the input element. By default element has a 'btn-check' class.</summary>
+	[Parameter]
+	public string? ClassInput { get; set; }
+
+	/// <summary>Additional css classes for the label element. By default element has a 'btn' class.</summary>
+	[Parameter]
+	public string? ClassLabel { get; set; }
+
+	/// <summary>When not null, sets name of radio button group. Null value will create a checkbox.</summary>
+	[Parameter]
+	public string? RadioName { get; set; }
+}

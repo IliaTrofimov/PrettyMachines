@@ -1,0 +1,81 @@
+.turing-grid {
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+
+    --turing-index-w: 1.5rem;
+    --turing-actions-w: 2rem;
+    --turing-gap: 0.5rem;
+}
+
+.turing-row {
+    display: grid;
+    grid-template-columns: var(--turing-cols);
+    gap: var(--turing-gap);
+    align-items: center;
+    min-width: 0;
+}
+
+.states-grid .turing-row {
+    --turing-cols: var(--turing-index-w) minmax(0, 1fr) var(--turing-actions-w);
+}
+
+.transitions-grid .turing-row {
+    --turing-cols: minmax(3.75rem, 0.5fr) minmax(0, 1.7fr) minmax(3.5rem, 0.5fr)
+                 minmax(0, 1.7fr) minmax(3rem, 0.5fr) var(--turing-actions-w);
+}
+
+.turing-row > * { min-width: 0; }
+
+.turing-header { color: var(--bs-secondary-color); font-size: 0.8rem; }
+.turing-index { font-size: 0.75rem; text-align: right; }
+.turing-actions { display: flex; justify-content: flex-end; }
+.turing-remove {
+    --bs-btn-padding-y: 0.1rem;
+    --bs-btn-padding-x: 0.15rem;
+    --bs-btn-font-size: 0.75rem;
+    line-height: 1;
+    width: 2rem;
+}
+
+.turing-composite {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+    padding: 0 0.5rem;
+}
+.turing-composite > input[type="text"] { flex: 1 1 auto; min-width: 0; }
+
+/* Narrow: shrink controls, keep every column. */
+@container (max-width: 760px) {
+    .transitions-grid .turing-row {
+        --turing-cols: minmax(3.25rem, 0.5fr) minmax(0, 1.7fr) minmax(3rem, 0.5fr)
+                     minmax(0, 1.7fr) minmax(2.75rem, 0.5fr) var(--turing-actions-w);
+    }
+    .turing-composite,
+    .turing-grid ::deep .dropdown-toggle { font-size: 0.75rem; }
+}
+
+/* Very narrow (mobile): stack each row into one column with per-cell labels. */
+@container (max-width: 520px) {
+    .states-grid .turing-row,
+    .transitions-grid .turing-row {
+        --turing-cols: minmax(0, 1fr);
+        row-gap: 0.25rem;
+    }
+    .turing-header { display: none; }
+    .turing-cell::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--bs-secondary-color);
+    }
+    .turing-cell:not([data-label])::before { content: none; }
+    .turing-cell { padding-bottom: 0.25rem; }
+    .turing-index { text-align: left; }
+    .turing-actions { justify-content: flex-start; }
+}

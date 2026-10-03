@@ -1,207 +1,116 @@
 @inject IStringLocalizer<Locale.Controls> LocControls;
 
-@if (!Editable)
-{
-    <div class="help-box">
-        @LocControls["ReadOnlyView"]
-    </div>
-}
 
-<div class="structure-form">
-    <div class="field-row">
-        <label>@LocControls["Name"]</label>
-        <input type="text" class="mono" disabled="@(!Editable)"
-               value="@Draft.Name"
-               @onchange="e => Update(() => Draft.Name = e.Value?.ToString() ?? string.Empty)" />
-    </div>
+<h5 class="mt-1 mb-1">
+    @LocControls["States"]
+    <button type="button" class="btn btn-link btn-sm p-0 align-baseline" @onclick="AddState">
+        <Icon Name="plus" Class="me-1" />@LocControls["AddState"]
+    </button>
+</h5>
 
-    <div class="field-row">
-        <label>@LocControls["BlankSymbol"]</label>
-        <span class="inline">
-            <input type="checkbox" disabled="@(!Editable)" checked="@Draft.HasBlankSymbol"
-                   @onchange="e => Update(() => Draft.HasBlankSymbol = e.Value is true)" />
-            <input type="text" class="mono narrow" disabled="@(!Editable || !Draft.HasBlankSymbol)" placeholder="(none)"
-                   value="@Draft.BlankSymbol"
-                   @onchange="e => Update(() => Draft.BlankSymbol = e.Value?.ToString() ?? string.Empty)" />
-        </span>
-        <label class="inline">
-            <input type="checkbox" disabled="@(!Editable)" checked="@Draft.StrictAlphabet"
-                   @onchange="e => Update(() => Draft.StrictAlphabet = e.Value is true)" />
-            @LocControls["StrictAlphabet"]
-        </label>
+<div class="turing-grid states-grid" role="table">
+    <div class="turing-row turing-header" role="row">
+        <div class="turing-index" role="columnheader">#</div>
+        <div class="turing-cell" role="columnheader">@LocControls["Name"]</div>
+        <div class="turing-actions" role="columnheader"></div>
     </div>
 
-    <div class="field-row">
-        <label>@LocControls["Alphabet"]</label>
-        <div class="chip-list">
-            @foreach (var symbol in Draft.Alphabet)
-            {
-                var captured = symbol;
-                <span class="chip">
-                    <input type="text" class="mono chip-input" disabled="@(!Editable)" value="@captured"
-                           @onchange="e => Update(() => ReplaceSymbol(captured, e.Value?.ToString() ?? string.Empty))" />
-                    @if (Editable)
-                    {
-                        <button class="btn-delete" @onclick="() => Update(() => Draft.Alphabet.Remove(captured))">
-                            <Icon Name="minus" />
-                        </button>
-                    }
-                </span>
-            }
-            @if (Editable)
-            {
-                <span class="chip">
-                    <input type="text" class="mono chip-input" placeholder="new" value="@newSymbol"
-                           @onchange="e => newSymbol = e.Value?.ToString() ?? string.Empty" />
-                    <button class="btn-add" @onclick="AddSymbol" title="Add symbol"><Icon Name="plus" /></button>
-                </span>
-            }
+    @for (var i = 0; i < Draft.States.Count; i++)
+    {
+        var captured = Draft.States[i];
+        <div class="turing-row" role="row">
+            <div class="turing-index" role="cell">q@($"{i:d2}")</div>
+            <div class="turing-cell" role="cell" data-label="@LocControls["Name"]">
+                <div class="turing-composite form-control form-control-sm d-flex align-items-center gap-2">
+                    <input type="text" class="form-control form-control-sm font-monospace border-0 p-0 shadow-none bg-transparent flex-grow-1"
+                           @bind="captured.Name"
+                    />
+                         
+                    <ToggleButton Id=@($"state-initial-{i}") Value="@captured.IsInitial" ValueChanged="_ => SetInitial(captured)"
+                        Text="@LocControls["StartStateShort"]" Title="@LocControls["StartState"]"
+                        ClassLabel="btn-sm btn-outline-secondary"
+                    />
+
+                    <ToggleButton Id=@($"state-terminal-{i}") @bind-Value="captured.IsTerminal" Disabled="@captured.IsInitial" 
+                        TextChecked="@LocControls["TerminalStateShort"]" TextUnchecked="@LocControls["NonTerminalStateShort"]"
+                        TitleChecked="@LocControls["TerminalState"]" TitleUnchecked="@LocControls["NonTerminalState"]"
+                        ClassLabel="btn-sm btn-outline-secondary"
+                    />
+                </div>
+            </div>
+            <div class="turing-actions" role="cell">
+                <button type="button" class="btn btn-sm btn-outline-danger turing-remove"
+                        @onclick="() => Update(() => RemoveState(captured))">
+                    <Icon Name="minus" />
+                </button>
+            </div>
         </div>
-    </div>
+    }
 </div>
 
-<h5>@LocControls["States"]</h5>
-<table class="structure-table mono">
-    <thead>
-    <tr>
-        <th>#</th>
-        <th>@LocControls["Name"]</th>
-        <th>@LocControls["StartState"]</th>
-        <th>@LocControls["TerminalState"]</th>
-        @if (Editable)
-        {
-            <th></th>
-        }
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var state in Draft.States)
-    {
-        var captured = state;
-        <tr>
-            <td>@Draft.States.IndexOf(captured)</td>
-            <td>
-                <input type="text" class="mono" disabled="@(!Editable)" value="@captured.Name"
-                       @onchange="e => Update(() => captured.Name = e.Value?.ToString() ?? string.Empty)" />
-            </td>
-            <td>
-                <input type="radio" name="initial-state" disabled="@(!Editable)" checked="@captured.IsInitial"
-                       @onchange="() => Update(() => SetInitial(captured))" />
-            </td>
-            <td>
-                <input type="checkbox" disabled="@(!Editable)" checked="@captured.IsTerminal"
-                       @onchange="e => Update(() => captured.IsTerminal = e.Value is true)" />
-            </td>
-            @if (Editable)
-            {
-                <td>
-                    <button class="btn-delete" @onclick="() => Update(() => RemoveState(captured))"><Icon Name="minus" /></button>
-                </td>
-            }
-        </tr>
-    }
-    </tbody>
-</table>
-@if (Editable)
-{
-    <button class="link-button" @onclick="AddState"><Icon Name="plus" Class="me-1" />@LocControls["AddState"]</button>
-}
+<h5 class="mt-3 mb-1">
+    @LocControls["Transitions"]
+    <button type="button" class="btn btn-link btn-sm p-0 align-baseline" @onclick="AddTransition">
+        <Icon Name="plus" Class="me-1" />@LocControls["AddTransition"]
+    </button>
+</h5>
 
-<h5>@LocControls["Transitions"]</h5>
-<table class="structure-table mono">
-    <thead>
-    <tr>
-        <th>@LocControls["State"]</th>
-        <th>@LocControls["Scan"]</th>
-        <th>@LocControls["Value"]</th>
-        <th>@LocControls["Next"]</th>
-        <th>@LocControls["Print"]</th>
-        <th>@LocControls["Move"]</th>
-        @if (Editable)
-        {
-            <th></th>
-        }
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var transition in Draft.Transitions.ToList())
+<div class="turing-grid transitions-grid" role="table">
+    <div class="turing-row turing-header" role="row">
+        <div class="turing-cell" role="columnheader">@LocControls["State"]</div>
+        <div class="turing-cell" role="columnheader">@LocControls["Value"]</div>
+        <div class="turing-cell" role="columnheader">@LocControls["Next"]</div>
+        <div class="turing-cell" role="columnheader">@LocControls["Print"]</div>
+        <div class="turing-cell" role="columnheader">@LocControls["Move"]</div>
+        <div class="turing-actions" role="columnheader"></div>
+    </div>
+
+    @for (var i = 0; i < Draft.Transitions.Count; i++)
     {
-        var captured = transition;
-        <tr>
-            <td>
-                <select disabled="@(!Editable)" value="@captured.StateIndex"
-                        @onchange="e => Update(() => captured.StateIndex = ToInt(e.Value))">
-                    @for (var i = 0; i < Draft.States.Count; i++)
-                    {
-                        <option value="@i">@Draft.GetStateName(i)</option>
-                    }
-                </select>
-            </td>
-            <td>
-                <select disabled="@(!Editable)" value="@captured.SymbolMatch"
-                        @onchange="e => Update(() => captured.SymbolMatch = ToEnum(e.Value, SymbolMatch.Exact))">
-                    <option value="@SymbolMatch.Exact">
-                        @LocControls["Exact"]
-                    </option>
-                    <option value="@SymbolMatch.NotEmpty">
-                        @LocControls["NotEmpty"]
-                    </option>
-                    <option value="@SymbolMatch.Empty">
-                        @LocControls["Empty"]
-                    </option>
-                    <option value="@SymbolMatch.Any">
-                        @LocControls["Any"]
-                    </option>
-                </select>
-            </td>
-            <td>
-                <input type="text" class="mono narrow" value="@captured.SymbolValue"
-                       disabled="@(!Editable || captured.SymbolMatch != SymbolMatch.Exact)"
-                       @onchange="e => Update(() => captured.SymbolValue = e.Value?.ToString() ?? string.Empty)" />
-            </td>
-            <td>
-                <select disabled="@(!Editable)" value="@captured.NextStateIndex"
-                        @onchange="e => Update(() => captured.NextStateIndex = ToInt(e.Value))">
-                    <option value="-1">
-                        @LocControls["Halt"]
-                    </option>
-                    @for (var i = 0; i < Draft.States.Count; i++)
-                    {
-                        <option value="@i">@Draft.GetStateName(i)</option>
-                    }
-                </select>
-            </td>
-            <td>
-                <span class="inline">
-                    <input type="checkbox" disabled="@(!Editable)" checked="@captured.Prints"
-                           @onchange="e => Update(() => captured.Prints = e.Value is true)" />
-                    <input type="text" class="mono narrow" placeholder="(none)" value="@captured.Print"
-                           disabled="@(!Editable || !captured.Prints)"
-                           @onchange="e => Update(() => captured.Print = e.Value?.ToString() ?? string.Empty)" />
-                </span>
-            </td>
-            <td>
-                <select disabled="@(!Editable)" value="@captured.Movement"
-                        @onchange="e => Update(() => captured.Movement = ToEnum(e.Value, TapeMovement.None))">
-                    <option value="@TapeMovement.None">@LocControls["None"]</option>
-                    <option value="@TapeMovement.Left">@LocControls["Left"]</option>
-                    <option value="@TapeMovement.Right">@LocControls["Right"]</option>
-                </select>
-            </td>
-            @if (Editable)
-            {
-                <td>
-                    <button class="btn-delete" @onclick="() => Update(() => Draft.Transitions.Remove(captured))"><Icon Name="minus" /></button>
-                </td>
-            }
-        </tr>
+        var captured = Draft.Transitions[i];
+        <div class="turing-row" role="row">
+            <div class="turing-cell" role="cell" data-label="@LocControls["State"]">
+                <SelectDropdown TValue="int"
+                                Value="captured.StateIndex"
+                                ValueChanged="index => Update(() => captured.StateIndex = index)"
+                                Options="StateOptions" />
+            </div>
+            <div class="turing-cell" role="cell" data-label="@LocControls["Value"]">
+                <EditableComboBox Id="@($"transition-value-{i}")"
+                                  Value="SymbolToCombo(captured)"
+                                  Options="symbolOptions"
+                                  Placeholder="@LocControls["Exact"]"
+                                  ValueChanged="v => Update(() => ApplySymbol(captured, v))" />
+            </div>
+            <div class="turing-cell" role="cell" data-label="@LocControls["Next"]">
+                <SelectDropdown TValue="int"
+                                Value="captured.NextStateIndex"
+                                ValueChanged="index => Update(() => captured.NextStateIndex = index)"
+                                Options="NextStateOptions" />
+            </div>
+            <div class="turing-cell" role="cell" data-label="@LocControls["Print"]">
+                <EditableComboBox Id="@($"transition-print-{i}")"
+                                  Value="PrintToCombo(captured)"
+                                  Options="printOptions"
+                                  Placeholder="@LocControls["Print"]"
+                                  ValueChanged="v => Update(() => ApplyPrint(captured, v))" />
+            </div>
+            <div class="turing-cell" role="cell" data-label="@LocControls["Move"]">
+                <SelectDropdown TValue="TapeMovement"
+                                Value="captured.Movement"
+                                ValueChanged="movement => Update(() => captured.Movement = movement)"
+                                Options="MovementOptions" />
+            </div>
+            <div class="turing-actions" role="cell">
+                <button type="button" class="btn btn-sm btn-outline-danger turing-remove"
+                        @onclick="() => Update(() => Draft.Transitions.Remove(captured))">
+                    <Icon Name="minus" />
+                </button>
+            </div>
+        </div>
     }
-    </tbody>
-</table>
-@if (Editable)
-{
-    <button class="link-button" @onclick="AddTransition"><Icon Name="plus" Class="me-1" />Add transition</button>
-}
+</div>
+
 
 @code {
     private string newSymbol = string.Empty;
@@ -244,7 +153,10 @@
     private void SetInitial(DraftState state)
     {
         foreach (var other in Draft.States)
-            other.IsInitial = ReferenceEquals(other, state);
+            other.IsInitial = false;
+        state.IsTerminal = false;
+        state.IsInitial = true;
+        StateHasChanged();
     }
 
     private void RemoveState(DraftState state)
@@ -280,8 +192,111 @@
         Movement = TapeMovement.None,
     });
 
-    private static int ToInt(object? value) => int.TryParse(value?.ToString(), out var parsed) ? parsed : -1;
+    private const string PrintNoneKey = "none";
+    private const string PrintEraseKey = "erase";
 
-    private static T ToEnum<T>(object? value, T fallback) where T : struct, Enum =>
-        Enum.TryParse<T>(value?.ToString(), out var parsed) ? parsed : fallback;
+    private IReadOnlyList<ComboOption> symbolOptions =>
+    [
+        new() { Key = nameof(SymbolMatch.Any), Label = LocControls["Any"].Value },
+        new() { Key = nameof(SymbolMatch.Empty), Label = LocControls["Empty"].Value },
+        new() { Key = nameof(SymbolMatch.NotEmpty), Label = LocControls["NotEmpty"].Value },
+    ];
+
+    private IReadOnlyList<ComboOption> printOptions =>
+    [
+        new() { Key = PrintEraseKey, Label = LocControls["Erase"].Value },
+        new() { Key = PrintNoneKey, Label = LocControls["None"].Value },
+    ];
+
+
+    private static ComboValue SymbolToCombo(DraftTransition transition)
+    {
+        return transition.SymbolMatch == SymbolMatch.Exact
+            ? ComboValue.FromText(transition.SymbolValue)
+            : ComboValue.FromSpecial(transition.SymbolMatch.ToString());
+    }
+
+    private static void ApplySymbol(DraftTransition transition, ComboValue value)
+    {
+        if (value.IsSpecial && Enum.TryParse<SymbolMatch>(value.SpecialKey, out var match))
+        {
+            transition.SymbolMatch = match;
+            transition.SymbolValue = string.Empty;
+        }
+        else
+        {
+            transition.SymbolMatch = SymbolMatch.Exact;
+            transition.SymbolValue = value.Text ?? string.Empty;
+        }
+    }
+
+    private ComboValue PrintToCombo(DraftTransition transition)
+    {
+        if (!transition.Prints)
+            return ComboValue.FromSpecial(PrintNoneKey);
+
+        if (!string.IsNullOrEmpty(Draft.BlankSymbol) &&
+            string.Equals(transition.Print, Draft.BlankSymbol, StringComparison.Ordinal))
+            return ComboValue.FromSpecial(PrintEraseKey);
+
+        return ComboValue.FromText(transition.Print);
+    }
+
+    private void ApplyPrint(DraftTransition transition, ComboValue value)
+    {
+        if (value.IsSpecial && value.SpecialKey == PrintNoneKey)
+        {
+            transition.Prints = false;
+            transition.Print = string.Empty;
+        }
+        else if (value.IsSpecial && value.SpecialKey == PrintEraseKey)
+        {
+            transition.Prints = true;
+            transition.Print = Draft.BlankSymbol;
+        }
+        else
+        {
+            transition.Prints = true;
+            transition.Print = value.Text ?? string.Empty;
+        }
+    }
+
+    private IReadOnlyList<SelectOption<int>> StateOptions => Enumerable.Range(0, Draft.States.Count)
+        .Select(StateOption)
+        .ToArray();
+
+    private IReadOnlyList<SelectOption<int>> NextStateOptions => Enumerable.Range(-1, Draft.States.Count + 1)
+        .Select(StateOption)
+        .ToArray();
+
+    private IReadOnlyList<SelectOption<TapeMovement>> MovementOptions =>
+    [
+        MovementOption(TapeMovement.None, LocControls["None"].Value, ""),
+        MovementOption(TapeMovement.Left, "<<<", LocControls["Left"].Value),
+        MovementOption(TapeMovement.Right, ">>>", LocControls["Right"].Value),
+    ];
+
+    private SelectOption<int> StateOption(int index) => new()
+    {
+        Value = index,
+        ShortText = ShortStateName(index),
+        FullText = FullStateName(index),
+    };
+
+    private static SelectOption<TapeMovement> MovementOption(TapeMovement movement, string arrow, string name) => new()
+    {
+        Value = movement,
+        ShortText = arrow,
+        FullText = $"{arrow} {name}",
+    };
+
+    private string ShortStateName(int index)
+    {
+        if (index == -1)
+            return LocControls["Halt"].Value;
+        return index >= 0 && index < Draft.States.Count ? $"q{index:D2}" : "?";
+    }
+
+    private string FullStateName(int index) =>
+        index == -1 ? LocControls["Halt"].Value : Draft.GetStateName(index);
 }

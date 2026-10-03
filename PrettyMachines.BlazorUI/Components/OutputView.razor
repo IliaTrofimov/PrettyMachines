@@ -28,12 +28,12 @@
     }
 </div>
 
-@if (Session.Tape is { } tape)
+@if (Session.Tape != null)
 {
     <div class="font-monospace d-flex overflow-auto tape-line border rounded bg-body p-2">
         @foreach (var (cell, index) in Cells)
         {
-            <span class="tape-cell @(index == tape.HeadIndex ? "bg-warning rounded" : "")">
+            <span class="tape-cell @(index == Session.Tape.HeadIndex ? "bg-warning rounded" : "")">
                 @Symbol(cell)
             </span>
         }

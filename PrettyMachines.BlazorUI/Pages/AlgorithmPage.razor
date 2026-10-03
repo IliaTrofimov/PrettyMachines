@@ -42,7 +42,7 @@
                             placeholder="@LocControls["InputPlaceholder"]" @bind="input" />
                     <button type="button" class='btn btn-outline-secondary' title="@LocControls["ResetAlgorithmTooltip"]"
                             @onclick="ClearInput">
-                        <Icon Name="reset" Class="me-1" />@LocControls["Reset"]
+                        <Icon Name="clear" Class="me-1" />
                     </button>
                 </div>
                
@@ -75,7 +75,7 @@
                                 @bind="maxStepsInput" />
                         @if (!maxStepsInput.HasValue)
                         {
-                            <label>@LocControls["Unlimited"]</label>
+                            <label class="form-text">@LocControls["Unlimited"]</label>
                         }
                     </div>
                 </div>
@@ -89,10 +89,10 @@
         <div class="card panel-card">
             <h4 class="card-header bg-warning-subtle border-bottom border-2 border-dark fw-semibold">
                 @LocControls["Definition"]
-                @if (!isDraft && descriptor is not null)
+                @if (descriptor != null)
                 {
-                    <button type="button" class="btn btn-link p-0 align-baseline" @onclick="EditAsDraft">
-                        @LocControls["EditAsDraft"]
+                    <button type="button" class="btn btn-link btn-sm p-0 align-baseline" >
+                        <Icon Name="reset"/>@LocControls["ResetDefinition"]
                     </button>
                 }
             </h4>
@@ -108,11 +108,11 @@
 
                 @if (draft?.Turing is { } turingDraft)
                 {
-                    <TuringStructureView Draft="turingDraft" Editable="editable" OnChanged="OnStructureChanged" />
+                    <TuringStructureView Draft="turingDraft" OnChanged="OnStructureChanged" />
                 }
                 else if (draft?.Markov is { } markovDraft)
                 {
-                    <MarkovStructureView Draft="markovDraft" Editable="editable" OnChanged="OnStructureChanged" />
+                    <MarkovStructureView Draft="markovDraft" OnChanged="OnStructureChanged" />
                 }
                 else if (structureError is null)
                 {
@@ -133,7 +133,6 @@
     private AlgorithmDraft? draft;
     private IAlgorithm? algorithm;
     private bool isDraft;
-    private bool editable;
     private bool notFound;
     private string? structureError;
     private string input = "";
@@ -142,6 +141,7 @@
     private CancellationTokenSource? executionCts;
     private bool autoStepping;
     private bool disposed;
+
 
     [Parameter] public string? FamilyId { get; set; }
 
@@ -173,7 +173,6 @@
         draft = null;
         algorithm = null;
         isDraft = false;
-        editable = false;
         notFound = false;
         structureError = null;
         input = "";
@@ -211,7 +210,6 @@
 
         draft = loaded;
         isDraft = true;
-        editable = true;
         RebuildDraft();
     }
 

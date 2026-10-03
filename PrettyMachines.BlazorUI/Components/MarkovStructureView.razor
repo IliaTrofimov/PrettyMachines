@@ -1,95 +1,102 @@
+@using System.Data
 @inject IStringLocalizer<Locale.Controls> LocControls
 
 
-@if (!Editable)
-{
-    <div class="text-body-secondary fst-italic small mb-2">
-        @LocControls["ReadOnlyView"]
-    </div>
-}
+<h5 class="mt-1 mb-1">
+    @LocControls["Rules"]
+    <button type="button" class="btn btn-link btn-sm p-0 align-baseline" @onclick="AddRule">
+        <Icon Name="plus" Class="me-1" />@LocControls["AddRule"]
+    </button>
+</h5>
 
-<div class="structure-form">
-    <div class="input-group input-group-sm">
-        <span class="input-group-text structure-label">@LocControls["Name"]</span>
-        <input type="text" class="form-control font-monospace" disabled="@(!Editable)"
-               value="@Draft.Name"
-               @onchange="e => Update(() => Draft.Name = e.Value?.ToString() ?? string.Empty)" />
+
+<div class="rules-grid @(CommentsExpanded ? "is-comments-expanded" : string.Empty)" role="table">
+    <div class="rule-row rules-header" role="row">
+        <div class="rule-index" role="columnheader">
+            #
+        </div>
+        <div class="rule-input" role="columnheader">
+            @LocControls["Pattern"]
+        </div>
+        <div class="rule-arrow" role="columnheader"></div>
+        <div class="rule-input" role="columnheader">
+            @LocControls["Replacement"]
+        </div>
+        <div class="rule-comment" role="columnheader">
+            <button type="button" class="btn btn-sm btn-link p-0 rule-comment-toggle d-flex align-items-center gap-1"
+                title="@LocControls["Comment"]" aria-label="@LocControls["Comment"]" aria-expanded="@CommentsExpanded"
+                @onclick="ToggleComments">
+                <Icon Name="@(CommentsExpanded ? "chevron-down" : "chevron-right")" />
+                <span class="rule-comment-label">@LocControls["Comment"]</span>
+            </button>
+        </div>
+        <div class="rule-actions" role="columnheader"></div>
     </div>
 
-    <div class="input-group input-group-sm">
-        <span class="input-group-text structure-label">@LocControls["Alphabet"]</span>
-        <input type="text" class="form-control font-monospace" placeholder="@(LocControls["AnyPlaceholder"])" disabled="@(!Editable)"
-               value="@AlphabetText"
-               @onchange="e => Update(() => SetChars(Draft.Alphabet, e.Value?.ToString()))" />
-    </div>
-
-    <div class="input-group input-group-sm">
-        <span class="input-group-text structure-label">@LocControls["Markers"]</span>
-        <input type="text" class="form-control font-monospace" placeholder="@(LocControls["NonePlaceholder"])" disabled="@(!Editable)"
-               value="@MarkersText"
-               @onchange="e => Update(() => SetChars(Draft.Markers, e.Value?.ToString()))" />
-    </div>
-</div>
-
-@if (DuplicatePatterns.Count > 0)
-{
-    <div class="invalid-feedback d-block mb-2">
-        @LocControls["DuplicatePatterns"]:
-        @string.Join(", ", DuplicatePatterns.Select(p => $"'{p}'"))
-    </div>
-}
-
-<h5>@LocControls["Rules"]</h5>
-<div class="input-group input-group-sm mb-1 fw-semibold">
-    <span class="input-group-text rule-index">#</span>
-    <span class="input-group-text rule-col">@LocControls["Pattern"]</span>
-    <span class="input-group-text rule-terminal">@LocControls["TerminalState"]</span>
-    <span class="input-group-text rule-col">@LocControls["Replacement"]</span>
-    <span class="input-group-text separator"></span>
-    <span class="input-group-text rule-col">@LocControls["Comment"]</span>
-    @if (Editable)
+    @for (var i = 0; i < Draft.Rules.Count; i++)
     {
-        <span class="input-group-text rule-actions"></span>        
+        var rule = Draft.Rules[i];
+        var index = i;
+
+        <div class="rule-row" role="row">
+            <div class="rule-index" role="cell">
+                @index
+            </div>
+            <div class="rule-input" role="cell">
+                <input type="text" class="form-control form-control-sm font-monospace" 
+                    value="@rule.Pattern"
+                    @onchange="e => Update(() => rule.Pattern = e.Value?.ToString() ?? string.Empty)" 
+                />
+            </div>
+            <div class="rule-arrow" role="cell">
+                @if (rule.IsTerminal)
+                {
+                    <text>→⬝</text>
+                }
+                else
+                {
+                    <text>→</text>
+                }
+            </div>
+            <div class="rule-input" role="cell">
+                <div class="rule-replacement form-control form-control-sm d-flex align-items-center gap-2 ">
+                    <input type="text" class="form-control form-control-sm font-monospace border-0 p-0 shadow-none bg-transparent flex-grow-1"
+                        value="@rule.Replacement"
+                        @onchange="e => Update(() => rule.Replacement = e.Value?.ToString() ?? string.Empty)" />
+
+                    <input type="checkbox" class="btn-check" id="@($"rule-terminal-{index}")" checked="@rule.IsTerminal"
+                        @onchange="e => Update(() => rule.IsTerminal = e.Value is true)" />
+
+                    <label class="btn btn-sm btn-outline-secondary rule-terminal-toggle" for="@($"rule-terminal-{index}")"
+                        title="@(rule.IsTerminal ? LocControls["TerminalState"] : LocControls["NonTerminalState"])">
+                        @(rule.IsTerminal ? LocControls["TerminalStateShort"] : LocControls["NonTerminalStateShort"])
+                    </label>
+                </div>
+            </div>
+
+            <div class="rule-comment" role="cell">
+                @if (CommentsExpanded)
+                {
+                    <input type="text" class="form-control form-control-sm" @bind-value="rule.Comment"/>
+                }
+                else
+                {
+                    <span title="@rule.Comment" @onclick="() => CommentsExpanded = true">
+                        @rule.Comment
+                    </span>
+                }
+            </div>
+
+            <div class="rule-actions" role="cell">
+                <button type="button" class="btn btn-sm btn-outline-danger rule-remove"
+                    @onclick="() => Update(() => Draft.Rules.RemoveAt(index))">
+                    <Icon Name="minus" />
+                </button>
+            </div>
+        </div>
     }
 </div>
 
-@foreach (var rule in Draft.Rules.ToList())
-{
-    var captured = rule;
-    var index = Draft.Rules.IndexOf(captured);
-    <div class="input-group input-group-sm mb-1 @(DuplicatePatterns.Contains(captured.Pattern) ? "invalid-instruction" : "")">
-        <span class="input-group-text rule-index">@index</span>
-        <input type="text" class="form-control font-monospace rule-col" value="@captured.Pattern" disabled="@(!Editable)"
-               @onchange="e => Update(() => captured.Pattern = e.Value?.ToString() ?? string.Empty)" />
-        
-        <span class="input-group-text rule-terminal">
-            <input type="checkbox" class="form-check-input mt-0" disabled="@(!Editable)" checked="@captured.IsTerminal"
-                   @onchange="e => Update(() => captured.IsTerminal = e.Value is true)" />
-            <span class="ms-2 font-monospace">@(captured.IsTerminal ? "=>" : "->")</span>
-        </span>
-
-        <input type="text" class="form-control font-monospace rule-col" value="@captured.Replacement" disabled="@(!Editable)"
-               @onchange="e => Update(() => captured.Replacement = e.Value?.ToString() ?? string.Empty)" />
-        
-        <span class="input-group-text separator"></span>
-        
-        <input type="text" class="form-control font-monospace rule-col" placeholder="@(LocControls["NonePlaceholder"])" value="@captured.Comment" disabled="@(!Editable)"
-               @onchange="e => Update(() => captured.Comment = string.IsNullOrWhiteSpace(e.Value?.ToString()) ? null : e.Value!.ToString())" />
-                
-        @if (Editable)
-        {
-            <button type="button" class="btn btn-outline-danger rule-actions" @onclick="() => Update(() => Draft.Rules.Remove(captured))">
-                <Icon Name="minus" />
-            </button>
-        }
-    </div>
-}
-@if (Editable)
-{
-    <button type="button" class="btn btn-link p-0 align-baseline" @onclick="AddRule">
-        <Icon Name="plus" Class="me-1" />@LocControls["AddRule"]
-    </button>
-}
 
 @code {
     [Parameter, EditorRequired]
@@ -112,6 +119,8 @@
         .Select(group => group.Key)
         .ToList();
 
+    private bool CommentsExpanded { get; set; }
+
 
     private async Task Update(Action change)
     {
@@ -129,4 +138,6 @@
     }
 
     private void AddRule() => Draft.Rules.Add(new DraftRule());
+
+    private void ToggleComments() => CommentsExpanded = !CommentsExpanded;
 }

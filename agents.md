@@ -36,17 +36,19 @@ All algorithms must inherit base abstract algorithm class.
   - [x] Infinite machine tape simulation;
   - [x] Builder class;
   - [x] Unit tests;
-  - [ ] Example algorithms (need more);
+  - [x] Example algorithms (need more);
 - [x] Markov algorithm
   - [x] Builder class;
   - [x] Unit tests
-  - [ ] Example algorithms (need more)
+  - [x] Example algorithms (need more)
 - [ ] Finite state machines
   - [ ] Builder class;
   - [ ] Unit tests;
   - [ ] Examples;
-- [ ] Base algorithm class requires some refinements;
-- [ ] BlazorUI WebASM application for building and executing all algorithms from this projects;
+- [x] Base algorithm class requires some refinements;
+- [x] BlazorUI WebASM application for building and executing all algorithms from this projects;
+  - [ ] Local storage
+  - [ ] Raw text instructions input
 
 Do not invent new public API without aligning with `readme.md` architecture.
 Prefer extending existing interfaces over new parallel abstractions.
@@ -76,3 +78,4 @@ Prefer extending existing interfaces over new parallel abstractions.
 - Commit `bin/`, `obj/`, `.idea/` (see `.gitignore`).
 - Change public interface shapes without updating README and all implementations.
 - Add heavy dependencies inside `PrettyEngine.Core/` without discussion.
+- Build Blazor projects!

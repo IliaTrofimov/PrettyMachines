@@ -1,0 +1,5 @@
+.select-dropdown-menu {
+    min-width: 100%;
+    max-height: 16rem;
+    overflow-y: auto;
+}

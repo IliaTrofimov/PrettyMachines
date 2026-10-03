@@ -1,35 +1,131 @@
-.structure-form {
-    max-width: 22rem;
+.rules-grid {
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+
+    --rule-index-w: 1.5rem;
+    --rule-arrow-w: 1.2rem;
+    --rule-actions-w: 2rem;
+    --rule-gap: 0.5rem;
 }
 
-.structure-label {
-    width: 8rem;
-}
-
-.input-group .rule-index {
-    flex: 0 0 auto;
-    width: 2.5rem;
-    justify-content: flex-end;
-}
-
-.input-group .rule-col {
-    flex: 1 1 0;
+/* Collapsed (default) and expanded templates. Same template is used by header
+   and body rows, so Pattern/Replacement labels always align with their inputs. */
+.rule-row {
+    --rule-cols:
+            var(--rule-index-w) 
+            minmax(0, 1fr) 
+            var(--rule-arrow-w)
+            minmax(0, 1.2fr)
+            minmax(0, 0.7fr)
+            var(--rule-actions-w);
+    display: grid;
+    grid-template-columns: var(--rule-cols);
+    gap: var(--rule-gap);
+    align-items: center;
     min-width: 0;
 }
 
-.input-group .rule-terminal {
-    flex: 0 0 auto;
-    width: 6rem;
-    justify-content: center;
+.rules-grid.is-comments-expanded .rule-row {
+    --rule-cols: var(--rule-index-w) minmax(0, 1fr) var(--rule-arrow-w)
+                 minmax(0, 1.2fr) minmax(12rem, 1.4fr) var(--rule-actions-w);
 }
 
-.input-group .rule-actions {
-    flex: 0 0 auto;
-    width: 3rem;
+.rule-row > * { min-width: 0; }
+
+.rules-header { color: var(--bs-secondary-color); font-size: 0.8rem; }
+.rule-index { font-size: 0.75rem; text-align: right; }
+.rule-arrow { text-align: center; color: var(--bs-secondary-color); white-space: nowrap; }
+
+.rule-replacement {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+    padding: 0 0.5rem;
+}
+.rule-replacement > input[type="text"] { flex: 1 1 auto; min-width: 0; }
+
+.rule-terminal-toggle {
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
+    flex: 0 0 3.25rem;
+    height: 1.5rem;
+    padding: 0 0.15rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.input-group .separator {
-    flex: 0 0 auto;
-    width: 1.5rem;
+.rule-comment { min-width: 0; overflow: hidden; padding-left: 0.5rem; }
+.rule-comment > span {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color);
+}
+.rule-comment input { font-size: 0.75rem; min-width: 0; }
+
+.rule-comment-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--bs-secondary-color);
+    text-decoration: none;
+}
+.rule-comment-label {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.rule-actions { display: flex; justify-content: flex-end; }
+.rule-remove {
+    --bs-btn-padding-y: 0.1rem;
+    --bs-btn-padding-x: 0.15rem;
+    --bs-btn-font-size: 0.75rem;
+    line-height: 1;
+    width: 2rem;
+}
+
+/* Narrow: the query target must be a descendant of the container (.rule-row),
+   because .rules-grid cannot query itself. */
+@container (max-width: 600px) {
+    .rule-row {
+        --rule-arrow-w: 0.9rem;
+        --rule-cols: 
+            var(--rule-index-w)
+            minmax(0, 1fr)
+            var(--rule-arrow-w)
+            minmax(0, 1.2fr)
+            minmax(1.5rem, 0.4fr)
+            var(--rule-actions-w);
+    }
+    .rule-arrow { padding: 0; }
+    .rules-grid.is-comments-expanded .rule-row {
+        --rule-cols: 
+            var(--rule-index-w)
+            minmax(0, 1fr)
+            var(--rule-actions-w);
+    }
+    .rules-grid.is-comments-expanded .rule-input,
+    .rules-grid.is-comments-expanded .rule-arrow { display: none; }
+
+    .rule-terminal-toggle {
+        flex-basis: 2.5rem;
+        padding: 0 1px;
+        font-size: 0.7rem;
+    }
 }
