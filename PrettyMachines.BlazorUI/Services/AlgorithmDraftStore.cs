@@ -1,4 +1,5 @@
 using PrettyMachines.BlazorUI.Models;
+using PrettyMachines.BlazorUI.Services.DraftAdapters;
 
 
 namespace PrettyMachines.BlazorUI.Services;
@@ -28,6 +29,17 @@ public sealed class AlgorithmDraftStore
         if (string.IsNullOrEmpty(id))
             return null;
         return drafts.FirstOrDefault(d => string.Equals(d.Id, id, StringComparison.Ordinal));
+    }
+
+    /// <summary>Creates a blank draft for the given family and adds it to the store.</summary>
+    /// <param name="familyId">Family identifier (for example <c>TuringMachines</c>).</param>
+    /// <returns>The created draft.</returns>
+    /// <exception cref="InvalidOperationException">The family is not supported.</exception>
+    public AlgorithmDraft CreateBlank(string familyId)
+    {
+        var draft = DraftAlgorithmFactory.CreateBlank(familyId);
+        Add(draft);
+        return draft;
     }
 
     /// <summary>Adds a new draft to the store.</summary>

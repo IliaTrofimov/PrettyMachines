@@ -1,6 +1,5 @@
 @page "/algorithm/{FamilyId}/{AlgorithmId}"
 @page "/draft/{DraftId}"
-@page "/editor/{FamilyId}"
 
 
 @inject AlgorithmDraftStore DraftStore
@@ -55,7 +54,7 @@
                     </button>
                 </div>
                
-                <div class="d-flex flex-wrap align-items-center gap-5 mb-3 mt-3">
+                <div class="d-flex flex-wrap align-items-center gap-3 mb-3 mt-3">
                     <div class="input-group input-group-sm w-auto">
                         <button type="button" class="btn btn-outline-success" disabled="@(!CanExecute)" title="@LocControls["RunTooltip"]" 
                                 @onclick="RunAlgorithm">
@@ -98,12 +97,6 @@
         <div class="card panel-card">
             <h4 class="card-header bg-warning-subtle border-bottom border-2 border-dark fw-semibold">
                 @LocControls["Definition"]
-                @if (descriptor != null || draft?.SourceDescriptorId is not null)
-                {
-                    <button type="button" class="btn btn-link btn-sm p-0 align-baseline" @onclick="ResetDefinition">
-                        <Icon Name="reset"/>@LocControls["ResetDefinition"]
-                    </button>
-                }
             </h4>
             <div class="card-body panel-body">
                 @if (structureError is not null)
@@ -211,12 +204,6 @@
             return;
         }
 
-        if (segments.Length >= 2 && segments[0] == "editor")
-        {
-            CreateNewDraft(Uri.UnescapeDataString(segments[1]));
-            return;
-        }
-
         if (segments.Length >= 3 && segments[0] == "algorithm")
         {
             LoadBuiltIn(Uri.UnescapeDataString(segments[1]), Uri.UnescapeDataString(segments[2]));
@@ -257,21 +244,6 @@
         }
         catch (Exception exception)
         {
-            structureError = exception.Message;
-        }
-    }
-
-    private void CreateNewDraft(string familyId)
-    {
-        try
-        {
-            var created = DraftAlgorithmFactory.CreateBlank(familyId);
-            DraftStore.Add(created);
-            Navigation.NavigateTo($"draft/{created.Id}");
-        }
-        catch (Exception exception)
-        {
-            notFound = true;
             structureError = exception.Message;
         }
     }

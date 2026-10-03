@@ -81,7 +81,11 @@
 
     private void OpenAlgorithm(string familyId, string algorithmId) => Navigation.NavigateTo($"algorithm/{familyId}/{algorithmId}");
 
-    private void CreateNew(string familyId) => Navigation.NavigateTo($"editor/{familyId}");
+    private void CreateNew(string familyId)
+    {
+        var created = DraftStore.CreateBlank(familyId);
+        Navigation.NavigateTo($"draft/{created.Id}");
+    }
 
     private void OpenDraft(string id) => Navigation.NavigateTo($"draft/{id}");
 

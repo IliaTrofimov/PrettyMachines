@@ -40,9 +40,10 @@
                         <div class="@ExpandedClass(family.Id)">
                             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
                                 <li>
-                                    <a href="editor/@family.Id" class="link-body-emphasis d-inline-flex align-items-center text-decoration-none rounded">
+                                    <button type="button" class="btn btn-link link-body-emphasis d-inline-flex align-items-center text-decoration-none rounded p-0"
+                                            @onclick="() => CreateNew(family.Id)">
                                         <Icon Name="plus" Class="me-1" />@LocControls["CreateNew"]
-                                    </a>
+                                    </button>
                                 </li>
                                 @foreach (var algorithm in family.Algorithms)
                                 {
@@ -144,6 +145,12 @@
     private void ToggleMenu() => menuOpen = !menuOpen;
 
     private void CloseMenu() => menuOpen = false;
+
+    private void CreateNew(string familyId)
+    {
+        var created = DraftStore.CreateBlank(familyId);
+        Navigation.NavigateTo($"draft/{created.Id}");
+    }
 
     private async Task DeleteDraft(AlgorithmDraft draft)
     {
