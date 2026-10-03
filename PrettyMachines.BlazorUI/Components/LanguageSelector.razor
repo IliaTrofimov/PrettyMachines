@@ -28,9 +28,6 @@
 
 	private async Task ApplyCultureAsync(int index)
 	{
-		if (selectedIndex == index)
-			return;
-
 		selectedIndex = index;
 		var selectedCulture = CultureHelper.SupportedCultures[index];
 		var language = selectedCulture.ThreeLetterISOLanguageName;

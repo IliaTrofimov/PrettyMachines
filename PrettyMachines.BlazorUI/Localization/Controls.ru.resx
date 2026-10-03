@@ -186,6 +186,9 @@
   <data name="Definition" xml:space="preserve">
     <value>Определение</value>
   </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
   <data name="DoneState" xml:space="preserve">
     <value>Готово</value>
   </data>
@@ -261,6 +264,9 @@
   <data name="MaxSteps" xml:space="preserve">
     <value>макс. шагов</value>
   </data>
+  <data name="Menu" xml:space="preserve">
+    <value>Меню</value>
+  </data>
   <data name="Move" xml:space="preserve">
     <value>Сдвиг</value>
   </data>
@@ -329,6 +335,9 @@
   </data>
   <data name="ResetAlgorithmTooltip" xml:space="preserve">
     <value>Остановить алгоритм, очистить ввод и вывод</value>
+  </data>
+  <data name="ResetDefinition" xml:space="preserve">
+    <value>Вернуть исходное определение</value>
   </data>
   <data name="ResetOutputTooltip" xml:space="preserve">
     <value>Остановить алгоритм и очистить вывод</value>

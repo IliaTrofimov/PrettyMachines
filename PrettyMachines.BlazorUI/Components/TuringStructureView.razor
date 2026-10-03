@@ -23,15 +23,15 @@
             <div class="turing-cell" role="cell" data-label="@LocControls["Name"]">
                 <div class="turing-composite form-control form-control-sm d-flex align-items-center gap-2">
                     <input type="text" class="form-control form-control-sm font-monospace border-0 p-0 shadow-none bg-transparent flex-grow-1"
-                           @bind="captured.Name"
+                           @bind="captured.Name" @bind:after="OnEdited"
                     />
                          
-                    <ToggleButton Id=@($"state-initial-{i}") Value="@captured.IsInitial" ValueChanged="_ => SetInitial(captured)"
+                    <ToggleButton Id=@($"state-initial-{i}") Value="@captured.IsInitial" ValueChanged="_ => Update(() => SetInitial(captured))"
                         Text="@LocControls["StartStateShort"]" Title="@LocControls["StartState"]"
                         ClassLabel="turing-state-toggle btn-sm btn-outline-secondary"
                     />
 
-                    <ToggleButton Id=@($"state-terminal-{i}") @bind-Value="captured.IsTerminal" Disabled="@captured.IsInitial" 
+                    <ToggleButton Id=@($"state-terminal-{i}") @bind-Value="captured.IsTerminal" @bind-Value:after="OnEdited" Disabled="@captured.IsInitial" 
                         TextChecked="@LocControls["TerminalStateShort"]" TextUnchecked="@LocControls["NonTerminalStateShort"]"
                         TitleChecked="@LocControls["TerminalState"]" TitleUnchecked="@LocControls["NonTerminalState"]"
                         ClassLabel="turing-state-toggle btn-sm btn-outline-secondary"
@@ -115,13 +115,8 @@
 
 
 @code {
-    private string newSymbol = string.Empty;
-
     [Parameter, EditorRequired]
     public TuringMachineDraft Draft { get; set; } = null!;
-
-    [Parameter]
-    public bool Editable { get; set; }
 
     [Parameter]
     public EventCallback OnChanged { get; set; }
@@ -133,24 +128,7 @@
         await OnChanged.InvokeAsync();
     }
 
-    private void AddSymbol()
-    {
-        if (string.IsNullOrEmpty(newSymbol))
-            return;
-
-        if (!Draft.Alphabet.Contains(newSymbol))
-            Draft.Alphabet.Add(newSymbol);
-        newSymbol = string.Empty;
-    }
-
-    private void ReplaceSymbol(string oldSymbol, string newValue)
-    {
-        var index = Draft.Alphabet.IndexOf(oldSymbol);
-        if (index < 0 || string.IsNullOrEmpty(newValue))
-            return;
-
-        Draft.Alphabet[index] = newValue;
-    }
+    private Task OnEdited() => OnChanged.InvokeAsync();
 
     private void SetInitial(DraftState state)
     {

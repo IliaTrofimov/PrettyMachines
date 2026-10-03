@@ -1,5 +1,6 @@
 ﻿@inject NavigationManager Navigation
 @inject AlgorithmDraftStore DraftStore
+@inject DraftPersistenceService DraftPersistence
 @inject IStringLocalizer<Locale.Controls> LocControls
 @inject AlgorithmLocalizer LocNames    
 @implements IDisposable
@@ -30,13 +31,13 @@
                 {
                     <li class="mb-1">
                         <button type="button"
-                                class="btn btn-toggle d-inline-flex align-items-center rounded border-0 @(expanded.Contains(family.Id) ? "" : "collapsed")"
-                                aria-expanded="@(expanded.Contains(family.Id).ToString().ToLowerInvariant())"
+                                class="btn btn-toggle d-inline-flex align-items-center rounded border-0 @CollapsedClass(family.Id)"
+                                aria-expanded="@(IsExpanded(family.Id) ? "true" : "false")"
                                 @onclick="() => Toggle(family.Id)">
                             <Icon Name="chevron-right" Class="btn-toggle-icon me-1" />
                             @LocNames.GetAlgorithmFamilyName(family.Id)
                         </button>
-                        <div class="@(expanded.Contains(family.Id) ? "collapse show" : "collapse")">
+                        <div class="@ExpandedClass(family.Id)">
                             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
                                 <li>
                                     <a href="editor/@family.Id" class="link-body-emphasis d-inline-flex align-items-center text-decoration-none rounded">
@@ -57,25 +58,33 @@
                     </li>
                 }
 
-                @if (DraftStore.Drafts.Count > 0)
+                @{
+                    var drafts = DraftStore.Drafts;
+                }
+                @if (drafts.Count > 0)
                 {
                     <li class="mb-1">
                         <button type="button"
-                                class="btn btn-toggle d-inline-flex align-items-center rounded border-0 @(expanded.Contains(CustomSectionId) ? "" : "collapsed")"
-                                aria-expanded="@(expanded.Contains(CustomSectionId).ToString().ToLowerInvariant())"
+                                class="btn btn-toggle d-inline-flex align-items-center rounded border-0 @CollapsedClass(CustomSectionId)"
+                                aria-expanded="@(IsExpanded(CustomSectionId) ? "true" : "false")"
                                 @onclick="() => Toggle(CustomSectionId)">
                             <Icon Name="chevron-right" Class="btn-toggle-icon me-1" />
                             @LocControls["Custom"]
                         </button>
-                        <div class="@(expanded.Contains(CustomSectionId) ? "collapse show" : "collapse")">
+                        <div class="@ExpandedClass(CustomSectionId)">
                             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                                @foreach (var draft in DraftStore.Drafts)
+                                @foreach (var draft in drafts)
                                 {
-                                    <li>
+                                    <li class="d-flex align-items-center">
                                         <a href="draft/@draft.Id"
-                                           class="link-body-emphasis d-inline-flex text-decoration-none rounded">
+                                           class="link-body-emphasis d-inline-flex flex-grow-1 text-decoration-none rounded">
                                             @draft.Name
                                         </a>
+                                        <button type="button" class="btn btn-link text-danger p-0 ms-1 lh-1"
+                                                title="@LocControls["Delete"]" aria-label="@LocControls["Delete"]"
+                                                @onclick="() => DeleteDraft(draft)">
+                                            <Icon Name="clear" />
+                                        </button>
                                     </li>
                                 }
                             </ul>
@@ -136,11 +145,26 @@
 
     private void CloseMenu() => menuOpen = false;
 
+    private async Task DeleteDraft(AlgorithmDraft draft)
+    {
+        var path = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', 2)[0];
+        await DraftPersistence.DeleteAsync(draft);
+
+        if (string.Equals(path, $"draft/{draft.Id}", StringComparison.Ordinal))
+            Navigation.NavigateTo("");
+    }
+
     private void Toggle(string id)
     {
         if (!expanded.Remove(id))
             expanded.Add(id);
     }
+
+    private bool IsExpanded(string id) => expanded.Contains(id);
+
+    private string CollapsedClass(string id) => IsExpanded(id) ? "" : "collapsed";
+
+    private string ExpandedClass(string id) => IsExpanded(id) ? "collapse show" : "collapse";
 
     public void Dispose()
     {

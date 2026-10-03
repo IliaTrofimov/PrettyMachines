@@ -1,4 +1,3 @@
-@using System.Data
 @inject IStringLocalizer<Locale.Controls> LocControls
 
 
@@ -43,10 +42,8 @@
                 @index
             </div>
             <div class="rule-input" role="cell">
-                <input type="text" class="form-control form-control-sm font-monospace" 
-                    value="@rule.Pattern"
-                    @onchange="e => Update(() => rule.Pattern = e.Value?.ToString() ?? string.Empty)" 
-                />
+                <input type="text" class="form-control form-control-sm font-monospace"
+                    @bind="rule.Pattern" @bind:after="OnRuleEdited" />
             </div>
             <div class="rule-arrow" role="cell">
                 @if (rule.IsTerminal)
@@ -61,16 +58,14 @@
             <div class="rule-input" role="cell">
                 <div class="rule-replacement form-control form-control-sm d-flex align-items-center gap-2 ">
                     <input type="text" class="form-control form-control-sm font-monospace border-0 p-0 shadow-none bg-transparent flex-grow-1"
-                        value="@rule.Replacement"
-                        @onchange="e => Update(() => rule.Replacement = e.Value?.ToString() ?? string.Empty)" />
+                        @bind="rule.Replacement" @bind:after="OnRuleEdited" />
 
-                    <input type="checkbox" class="btn-check" id="@($"rule-terminal-{index}")" checked="@rule.IsTerminal"
-                        @onchange="e => Update(() => rule.IsTerminal = e.Value is true)" />
-
-                    <label class="btn btn-sm btn-outline-secondary rule-terminal-toggle" for="@($"rule-terminal-{index}")"
-                        title="@(rule.IsTerminal ? LocControls["TerminalState"] : LocControls["NonTerminalState"])">
-                        @(rule.IsTerminal ? LocControls["TerminalStateShort"] : LocControls["NonTerminalStateShort"])
-                    </label>
+                    <ToggleButton Id="@($"rule-terminal-{index}")"
+                        Value="@rule.IsTerminal"
+                        ValueChanged="v => Update(() => rule.IsTerminal = v)"
+                        TextChecked="@LocControls["TerminalStateShort"]" TextUnchecked="@LocControls["NonTerminalStateShort"]"
+                        TitleChecked="@LocControls["TerminalState"]" TitleUnchecked="@LocControls["NonTerminalState"]"
+                        ClassLabel="btn-sm btn-outline-secondary rule-terminal-toggle" />
                 </div>
             </div>
 
@@ -103,21 +98,8 @@
     public MarkovAlgorithmDraft Draft { get; set; } = null!;
 
     [Parameter]
-    public bool Editable { get; set; }
-
-    [Parameter]
     public EventCallback OnChanged { get; set; }
 
-
-    private string AlphabetText => new(Draft.Alphabet.ToArray());
-
-    private string MarkersText => new(Draft.Markers.ToArray());
-
-    private List<string> DuplicatePatterns => Draft.Rules
-        .GroupBy(rule => rule.Pattern, StringComparer.Ordinal)
-        .Where(group => group.Count() > 1)
-        .Select(group => group.Key)
-        .ToList();
 
     private bool CommentsExpanded { get; set; }
 
@@ -128,14 +110,7 @@
         await OnChanged.InvokeAsync();
     }
 
-    private void SetChars(List<char> target, string? text)
-    {
-        target.Clear();
-        if (string.IsNullOrEmpty(text))
-            return;
-
-        target.AddRange(text.Distinct());
-    }
+    private Task OnRuleEdited() => OnChanged.InvokeAsync();
 
     private void AddRule() => Draft.Rules.Add(new DraftRule());
 

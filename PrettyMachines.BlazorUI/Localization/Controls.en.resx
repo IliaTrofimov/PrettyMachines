@@ -186,6 +186,9 @@
   <data name="Definition" xml:space="preserve">
     <value>Definition</value>
   </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
   <data name="DoneState" xml:space="preserve">
     <value>Done</value>
   </data>
@@ -261,6 +264,9 @@
   <data name="MaxSteps" xml:space="preserve">
     <value>max steps</value>
   </data>
+  <data name="Menu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
   <data name="Move" xml:space="preserve">
     <value>Move</value>
   </data>
@@ -329,6 +335,9 @@
   </data>
   <data name="ResetAlgorithmTooltip" xml:space="preserve">
     <value>Stop algorithm, clear input and output </value>
+  </data>
+  <data name="ResetDefinition" xml:space="preserve">
+    <value>Reset default definition</value>
   </data>
   <data name="ResetOutputTooltip" xml:space="preserve">
     <value>Stop algorithm and clear output </value>
