@@ -48,7 +48,7 @@
 }
 .rule-replacement > input[type="text"] { flex: 1 1 auto; min-width: 0; }
 
-.rule-terminal-toggle {
+.rule-replacement ::deep .rule-terminal-toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -123,7 +123,7 @@
     .rules-grid.is-comments-expanded .rule-input,
     .rules-grid.is-comments-expanded .rule-arrow { display: none; }
 
-    .rule-terminal-toggle {
+    .rule-replacement ::deep .rule-terminal-toggle {
         flex-basis: 2.5rem;
         padding: 0 1px;
         font-size: 0.7rem;
