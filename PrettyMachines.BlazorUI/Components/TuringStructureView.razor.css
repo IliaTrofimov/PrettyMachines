@@ -49,6 +49,19 @@
 }
 .turing-composite > input[type="text"] { flex: 1 1 auto; min-width: 0; }
 
+.turing-composite ::deep .turing-state-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 3.25rem;
+    height: 1.5rem;
+    padding: 0 0.15rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* Narrow: shrink controls, keep every column. */
 @container (max-width: 760px) {
     .transitions-grid .turing-row {
