@@ -28,6 +28,21 @@ public static class DraftAlgorithmFactory
         };
     }
 
+    /// <summary>Converts a built-in algorithm into its editable draft definition, or <c>null</c> when unsupported.</summary>
+    /// <param name="algorithm">Algorithm to convert.</param>
+    /// <returns>The matching draft definition, or <c>null</c>.</returns>
+    internal static object? DefinitionFrom(IAlgorithm algorithm)
+    {
+        ArgumentNullException.ThrowIfNull(algorithm);
+
+        return algorithm switch
+        {
+            TuringMachine turing => TuringDraftAdapter.From(turing),
+            MarkovAlgorithm markov => MarkovDraftAdapter.From(markov),
+            _ => null,
+        };
+    }
+
     /// <summary>Creates a new blank draft for the given family.</summary>
     /// <param name="familyId">Family identifier (for example <c>TuringMachines</c>).</param>
     /// <returns>A new draft with sensible starter content.</returns>
@@ -63,12 +78,8 @@ public static class DraftAlgorithmFactory
         var algorithm = descriptor.Create();
         var name = algorithm.Name ?? descriptor.Name;
 
-        var definition = algorithm switch
-        {
-            TuringMachine turing => (object)TuringDraftAdapter.From(turing),
-            MarkovAlgorithm markov => MarkovDraftAdapter.From(markov),
-            _ => throw new InvalidOperationException($"Algorithm '{descriptor.Id}' does not support drafting yet."),
-        };
+        var definition = DefinitionFrom(algorithm)
+            ?? throw new InvalidOperationException($"Algorithm '{descriptor.Id}' does not support drafting yet.");
 
         if (definition is TuringMachineDraft turingDraft)
             turingDraft.Name = name;

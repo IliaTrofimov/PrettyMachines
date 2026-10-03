@@ -19,6 +19,13 @@
     &lt;Project Location="/Users/iliat/RiderProjects/PrettyMachines/PrettyMachines.Tests" Presentation="&amp;lt;PrettyMachines.Tests&amp;gt;" /&gt;
   &lt;/And&gt;
 &lt;/SessionState&gt;</s:String>
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=PrettyMachines_002EBlazorUI_002FLocalization_002FControls/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=PrettyMachines_002EBlazorUI_002FLocalization_002FLocalizationEN/@EntryIndexedValue">False</s:Boolean>
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=PrettyMachines_002EBlazorUI_002FLocalization_002FLocalizationEN/@EntryIndexRemoved">True</s:Boolean>
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=PrettyMachines_002EBlazorUI_002FLocalization_002FNames/@EntryIndexedValue">False</s:Boolean>
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=PrettyMachines_002EBlazorUI_002FLocalization_002FStrings/@EntryIndexedValue">False</s:Boolean>
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=PrettyMachines_002EBlazorUI_002FLocalization_002FStrings/@EntryIndexRemoved">True</s:Boolean>
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/Initialized/@EntryValue">True</s:Boolean>
 	
 	
 	

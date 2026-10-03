@@ -4,6 +4,7 @@
 
 
 @inject AlgorithmDraftStore DraftStore
+@inject DraftPersistenceService DraftPersistence
 @inject NavigationManager Navigation
 @inject AlgorithmLocalizer LocNames
 @inject IStringLocalizer<Locale.Controls> LocControls
@@ -25,14 +26,22 @@
     {
         <div class="card panel-card">
             <h4 class="card-header bg-warning-subtle border-bottom border-2 border-dark fw-semibold">
-                @DisplayName
-                @if (isDraft)
+                @if (draft is { } currentDraft && isDraft)
                 {
-                    <h6>@LocControls["Draft"]</h6>
+                    <input type="text" id="algorithm-name" class="font-monospace form-control form-control-sm algorithm-name-input"
+                           placeholder="@LocControls["Name"]" @bind="DraftName" @bind:after="OnNameChanged" />
+                    <h6>@LocNames.GetAlgorithmFamilyName(currentDraft.FamilyId)</h6>
+                    <button type="button" class="btn btn-sm btn-outline-danger" title="@LocControls["Delete"]" @onclick="DeleteDraft">
+                        <Icon Name="clear" Class="me-1" />@LocControls["Delete"]
+                    </button>
                 }
-                else if (descriptor is not null)
+                else
                 {
-                    <h6>@LocNames.GetAlgorithmFamilyName(descriptor.FamilyId)</h6>
+                    @DisplayName
+                    @if (descriptor is not null)
+                    {
+                        <h6>@LocNames.GetAlgorithmFamilyName(descriptor.FamilyId)</h6>
+                    }
                 }
             </h4>
 
@@ -89,9 +98,9 @@
         <div class="card panel-card">
             <h4 class="card-header bg-warning-subtle border-bottom border-2 border-dark fw-semibold">
                 @LocControls["Definition"]
-                @if (descriptor != null)
+                @if (descriptor != null || draft?.SourceDescriptorId is not null)
                 {
-                    <button type="button" class="btn btn-link btn-sm p-0 align-baseline" >
+                    <button type="button" class="btn btn-link btn-sm p-0 align-baseline" @onclick="ResetDefinition">
                         <Icon Name="reset"/>@LocControls["ResetDefinition"]
                     </button>
                 }
@@ -151,6 +160,23 @@
 
 
     private string DisplayName => draft?.Name ?? LocNames.GetAlgorithmName(descriptor?.Name ?? algorithm?.Name);
+
+    private string DraftName
+    {
+        get => draft?.Turing?.Name ?? draft?.Markov?.Name ?? draft?.Name ?? "";
+        set
+        {
+            if (draft is null)
+                return;
+
+            if (draft.Turing is { } turing)
+                turing.Name = value;
+            else if (draft.Markov is { } markov)
+                markov.Name = value;
+
+            draft.Name = value;
+        }
+    }
 
     private bool CanExecute => algorithm is not null;
 
@@ -252,12 +278,7 @@
 
     private static AlgorithmDraft? CreateDisplayDraft(AlgorithmDescriptor descriptor, IAlgorithm algorithm)
     {
-        object? definition = algorithm switch
-        {
-            TuringMachine turing => TuringDraftAdapter.From(turing),
-            MarkovAlgorithm markov => MarkovDraftAdapter.From(markov),
-            _ => null,
-        };
+        var definition = DraftAlgorithmFactory.DefinitionFrom(algorithm);
 
         if (definition is null)
             return null;
@@ -299,25 +320,41 @@
         if (!string.IsNullOrWhiteSpace(name))
             draft.Name = name!;
 
-        DraftStore.NotifyChanged();
+        if (!isDraft && descriptor is not null)
+        {
+            DraftStore.Add(draft);
+            isDraft = true;
+            Navigation.NavigateTo($"draft/{draft.Id}");
+        }
+        else
+        {
+            DraftStore.NotifyChanged();
+        }
+
         RebuildDraft();
     }
 
-    private void EditAsDraft()
+    private void OnNameChanged() => DraftStore.NotifyChanged();
+
+    private void ResetDefinition()
     {
-        if (descriptor is null)
+        if (descriptor is not null)
+        {
+            Navigation.NavigateTo($"algorithm/{descriptor.FamilyId}/{descriptor.Id}");
+            return;
+        }
+
+        if (draft?.SourceDescriptorId is { } sourceId)
+            Navigation.NavigateTo($"algorithm/{draft.FamilyId}/{sourceId}");
+    }
+
+    private async Task DeleteDraft()
+    {
+        if (draft is not { } current)
             return;
 
-        try
-        {
-            var forked = DraftAlgorithmFactory.Fork(descriptor);
-            DraftStore.Add(forked);
-            Navigation.NavigateTo($"draft/{forked.Id}");
-        }
-        catch (Exception exception)
-        {
-            structureError = exception.Message;
-        }
+        await DraftPersistence.DeleteAsync(current);
+        Navigation.NavigateTo("");
     }
 
     private async Task RunAlgorithm()
@@ -328,34 +365,22 @@
         if (!session.IsActive)
             return;
 
-        var cts = new CancellationTokenSource();
-        executionCts = cts;
-        var token = cts.Token;
+        await ExecuteAsync(RunTick, resetAutoStepping: false);
+    }
 
-        try
+    private async Task RunTick(CancellationToken token)
+    {
+        var lastYield = Environment.TickCount64;
+        while (!token.IsCancellationRequested && session.Status == TerminationStatus.Unknown)
         {
-            var lastYield = Environment.TickCount64;
-            while (!token.IsCancellationRequested && session.Status == TerminationStatus.Unknown)
-            {
-                session.Step();
+            session.Step();
 
-                if (Environment.TickCount64 - lastYield < RunYieldIntervalMs)
-                    continue;
+            if (Environment.TickCount64 - lastYield < RunYieldIntervalMs)
+                continue;
 
-                lastYield = Environment.TickCount64;
-                RenderIfAlive();
-                await Task.Yield();
-            }
-        }
-        catch (OperationCanceledException)
-        {
-        }
-        finally
-        {
-            cts.Dispose();
-            if (ReferenceEquals(executionCts, cts))
-                executionCts = null;
+            lastYield = Environment.TickCount64;
             RenderIfAlive();
+            await Task.Yield();
         }
     }
 
@@ -380,18 +405,27 @@
             return;
 
         autoStepping = true;
+        await ExecuteAsync(AutoStepTick, resetAutoStepping: true);
+    }
+
+    private async Task AutoStepTick(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested && session.Status == TerminationStatus.Unknown)
+        {
+            await Task.Delay(AutoStepDelayMs, token);
+            session.Step();
+            RenderIfAlive();
+        }
+    }
+
+    private async Task ExecuteAsync(Func<CancellationToken, Task> tick, bool resetAutoStepping)
+    {
         var cts = new CancellationTokenSource();
         executionCts = cts;
-        var token = cts.Token;
 
         try
         {
-            while (!token.IsCancellationRequested && session.Status == TerminationStatus.Unknown)
-            {
-                await Task.Delay(AutoStepDelayMs, token);
-                session.Step();
-                RenderIfAlive();
-            }
+            await tick(cts.Token);
         }
         catch (OperationCanceledException)
         {
@@ -402,7 +436,8 @@
             if (ReferenceEquals(executionCts, cts))
             {
                 executionCts = null;
-                autoStepping = false;
+                if (resetAutoStepping)
+                    autoStepping = false;
             }
             RenderIfAlive();
         }
@@ -439,8 +474,6 @@
         autoStepping = false;
         session.Reset(keepInput: false);
     }
-
-    private void StopAlgorithm() => session.Stop();
 
     public void Dispose()
     {

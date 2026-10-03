@@ -1,8 +1,11 @@
 @page "/"
 
 @inject NavigationManager Navigation
+@inject AlgorithmDraftStore DraftStore
+@inject DraftPersistenceService DraftPersistence
 @inject IStringLocalizer<Locale.Controls> LocControls
 @inject AlgorithmLocalizer LocNames
+@implements IDisposable
 
 
 <div class="page-container catalog-page">
@@ -34,14 +37,55 @@
             </div>
         </div>
     }
+
+    @{
+        var drafts = DraftStore.Drafts;
+    }
+    @if (drafts.Count > 0)
+    {
+        <div class="card catalog-card shadow-sm">
+            <h4 class="card-header bg-warning-subtle border-bottom border-2 border-dark fw-semibold">
+                @LocControls["Custom"]
+            </h4>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    @foreach (var draft in drafts)
+                    {
+                        <div class="list-group-item d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-link link-body-emphasis text-decoration-none text-start flex-grow-1 p-0"
+                                    @onclick="() => OpenDraft(draft.Id)">
+                                @draft.Name
+                            </button>
+                            <button type="button" class="btn btn-sm btn-link text-danger p-0" title="@LocControls["Delete"]"
+                                    aria-label="@LocControls["Delete"]" @onclick="() => DeleteDraft(draft)">
+                                <Icon Name="clear" />
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
     private IReadOnlyList<AlgorithmFamily> families = [];
 
-    protected override void OnInitialized() => families = AlgorithmCatalog.Discover();
+    protected override void OnInitialized()
+    {
+        families = AlgorithmCatalog.Discover();
+        DraftStore.Changed += OnDraftsChanged;
+    }
+
+    private void OnDraftsChanged() => InvokeAsync(StateHasChanged);
 
     private void OpenAlgorithm(string familyId, string algorithmId) => Navigation.NavigateTo($"algorithm/{familyId}/{algorithmId}");
 
     private void CreateNew(string familyId) => Navigation.NavigateTo($"editor/{familyId}");
+
+    private void OpenDraft(string id) => Navigation.NavigateTo($"draft/{id}");
+
+    private Task DeleteDraft(AlgorithmDraft draft) => DraftPersistence.DeleteAsync(draft);
+
+    public void Dispose() => DraftStore.Changed -= OnDraftsChanged;
 }

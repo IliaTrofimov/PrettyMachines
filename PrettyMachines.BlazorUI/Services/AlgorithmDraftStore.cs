@@ -7,14 +7,17 @@ namespace PrettyMachines.BlazorUI.Services;
 public sealed class AlgorithmDraftStore
 {
     private readonly List<AlgorithmDraft> drafts = [];
+    private List<AlgorithmDraft>? orderedDrafts;
 
 
     /// <summary>Raised after the set of drafts changes.</summary>
     public event Action? Changed;
 
     /// <summary>Gets the drafts ordered by name.</summary>
-    public IReadOnlyList<AlgorithmDraft> Drafts =>
-        drafts.OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase).ThenBy(d => d.Id, StringComparer.Ordinal).ToList();
+    public IReadOnlyList<AlgorithmDraft> Drafts => orderedDrafts ??= drafts
+        .OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase)
+        .ThenBy(d => d.Id, StringComparer.Ordinal)
+        .ToList();
 
 
     /// <summary>Finds a draft by identifier.</summary>
@@ -36,6 +39,7 @@ public sealed class AlgorithmDraftStore
             return;
 
         drafts.Add(draft);
+        orderedDrafts = null;
         Changed?.Invoke();
     }
 
@@ -47,9 +51,14 @@ public sealed class AlgorithmDraftStore
             return;
 
         drafts.Remove(draft);
+        orderedDrafts = null;
         Changed?.Invoke();
     }
 
     /// <summary>Notifies subscribers that a draft's contents changed.</summary>
-    public void NotifyChanged() => Changed?.Invoke();
+    public void NotifyChanged()
+    {
+        orderedDrafts = null;
+        Changed?.Invoke();
+    }
 }

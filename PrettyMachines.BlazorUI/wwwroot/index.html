@@ -52,6 +52,10 @@
         return results;
     };
 
+    window.deleteDraftFromLocalStoage = (algFamilyId, draftId) => {
+        window.localStorage.removeItem(`draft-${algFamilyId}-${draftId}`);
+    };
+
     window.saveCultureToLocalStorage = (cultureName) => {
         return window.localStorage.setItem("culture", cultureName ?? "en-US");
     };
