@@ -1,47 +1,29 @@
-# PrettyMachines
+# Pretty Machines
 
 [![Tests](https://github.com/IliaTrofimov/PrettyMachines/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/IliaTrofimov/PrettyMachines/actions/workflows/ci.yml)
 
-A .NET 10 library for defining, executing and printing formal algorithms like Turing machines and
-normal Markov algorithm.
+A .NET 10 library for building and running automatons like Turing machines and Markov algorithms. You can try pre-made algorithms or create your own in this [demo application](https://iliatrofimov.github.io/PrettyMachines/) (или [версия на русском](https://iliatrofimov.github.io/PrettyMachines/?lang=rus)).
 
-The project represents algorithms as computable (effectively calculable) functions: a finite set of exact
-instructions that always terminates and always produces the expected answer for the class of problems it
-was built for. Algorithms are defined with fluent builders, executed step by step, and can be rendered as
-text/CSV.
+### Features
 
-You can try this library with this [demo application](https://iliatrofimov.github.io/PrettyMachines/).
+- Basic abstract interface for all formal algorithms. Each algorithm can be executed step-by-step (using `IEnumerable`) or with one action (from start to the end). 
+- Algorithm snapshots carry debug information about each step of the algoritm run.
+- Fluent builders for Turing machines and Markov algorithms.
+- Turing machine definition is expanded. Machine can scan special symbols like `empty`, `non-empty` or `any`.
+- Several example algorithms.
+
+### Requirements
+[.NET 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) for main projects, [xUnit](https://github.com/xunit/xunit) and [FluentAssertions](https://github.com/fluentassertions/fluentassertions) for unit tests.
 
 ## Table of contents
 
-- [Features](#features)
-- [Requirements](#requirements)
 - [Solution layout](#solution-layout)
-- [Building and testing](#building-and-testing)
 - [Core concepts](#core-concepts)
 - [Quick start: Turing machine](#quick-start-turing-machine)
 - [Quick start: Markov algorithm](#quick-start-markov-algorithm)
 - [Execution results](#execution-results)
 - [Built-in algorithms](#built-in-algorithms)
 - [Printing and parsing](#printing-and-parsing)
-
-## Features
-
-- Immutable algorithm definitions built with fluent builders.
-- Lazy execution: `Run` yields one immutable snapshot per step; `Execute` consumes the sequence.
-- Snapshots expose the step number, termination status, typed output and an optional trace line.
-- Bounded execution via step limits and `CancellationToken`.
-- Infinite Turing machine tape simulation with left/right/none head movement.
-- Symbol matching by exact value, empty/not-empty, or "any" cell.
-- Text and CSV printers for machines, instruction tables and tapes.
-- Parser for Markov substitution rules (`a -> b`, `a => b`, quoted and unquoted forms).
-- Library of ready-to-use example algorithms.
-- Blazor WebAssembly playground for running algorithms and inspecting their traces.
-
-## Requirements
-
-- [.NET 10 SDK](https://dotnet.microsoft.com/download) (`net10.0`).
-- Unit tests use xUnit and FluentAssertions.
 
 ## Solution layout
 
@@ -51,19 +33,6 @@ You can try this library with this [demo application](https://iliatrofimov.githu
 | `PrettyMachines.Implementations` | Ready-to-use algorithms built on the core library. |
 | `PrettyMachines.BlazorUI` | Blazor WebAssembly app for building and executing algorithms. |
 | `PrettyMachines.Tests` | xUnit tests for the core library and implementations. |
-
-## Building and testing
-
-```bash
-dotnet build PrettyMachines.sln
-dotnet test
-```
-
-Run the Blazor WebAssembly playground:
-
-```bash
-dotnet run --project PrettyMachines.BlazorUI
-```
 
 ## Core concepts
 
@@ -133,7 +102,7 @@ using PrettyMachines.Turing;
 using PrettyMachines.Utils.Printing;
 
 var machine = TuringMachine.Create("Toggle first bit")
-    .WithAlphabet("0", "1")          // strict alphabet; unknown symbols fail the machine
+    .WithAlphabet("0", "1") // strict alphabet; unknown symbols fail the machine
     .WithBlankSymbol("_")
     .AddInitialState("scan", out var q0)
     .AddTerminalState("done", out var qDone)
@@ -154,7 +123,7 @@ Rules can also reference states by name (`rules.AddRule("scan", "0", "done", ...
 using PrettyMachines.Turing;
 
 rules.AddRule(q0, SymbolMatch.NotEmpty, q0, null, TapeMovement.Right)
-     .AddHalt(q0, SymbolMatch.Empty, "1");   // AddHalt targets TuringMachineState.Halt
+     .AddHalt(q0, SymbolMatch.Empty, "1"); // AddHalt targets TuringMachineState.Halt
 ```
 
 The same machine typed over the tape (no input mutation of the caller's tape):
@@ -230,7 +199,7 @@ outputs the accepted or rejected symbol.
 using PrettyMachines.Implementations;
 
 var adder = TuringMachines.Create_BinaryAdditionMachine();
-var sum = adder.Execute("101+11", new AlgorithmCancellation(100_000)).Output;   // "1000"
+var sum = adder.Execute("101+11", new AlgorithmCancellation(100_000)).Output; // "1000"
 ```
 
 ## Printing and parsing
