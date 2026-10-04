@@ -35,6 +35,12 @@
 
 .rule-row > * { min-width: 0; }
 
+.rule-row.is-current {
+    background-color: var(--bs-warning-bg-subtle);
+    box-shadow: inset 2px 0 0 var(--bs-warning);
+    border-radius: .25rem;
+}
+
 .rules-header { color: var(--bs-secondary-color); font-size: 0.8rem; }
 .rule-index { font-size: 0.75rem; text-align: right; }
 .rule-arrow { text-align: center; color: var(--bs-secondary-color); white-space: nowrap; }

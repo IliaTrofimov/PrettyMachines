@@ -159,5 +159,17 @@ public static class TuringDraftAdapter
                 throw new InvalidOperationException(
                     $"A transition starts from the terminal state '{draft.States[transition.StateIndex].Name}', which is not allowed.");
         }
+
+        var seenConditions = new HashSet<(int StateIndex, SymbolMatch Match, string? Value)>();
+        foreach (var transition in draft.Transitions)
+        {
+            var condition = (transition.StateIndex,
+                transition.SymbolMatch,
+                transition.SymbolMatch == SymbolMatch.Exact ? transition.SymbolValue : null);
+
+            if (!seenConditions.Add(condition))
+                throw new InvalidOperationException(
+                    $"Duplicate transition for state '{draft.GetStateName(transition.StateIndex)}' and the same symbol condition; each condition must be defined once.");
+        }
     }
 }

@@ -11,12 +11,14 @@ internal sealed class MarkovAlgorithmSnapshot : IAlgorithmSnapshot<string>
     /// <param name="steps">Number of steps executed to reach this state.</param>
     /// <param name="termination">Termination reason for this state.</param>
     /// <param name="traceLine">Trace line produced by the transition, or <c>null</c>.</param>
-    public MarkovAlgorithmSnapshot(string output, long steps, TerminationStatus termination, string? traceLine)
+    /// <param name="appliedInstruction">Zero-based index of the rule applied to reach this state, or <c>-1</c>.</param>
+    public MarkovAlgorithmSnapshot(string output, long steps, TerminationStatus termination, string? traceLine, int appliedInstruction = -1)
     {
         Output = output;
         Steps = steps;
         Termination = termination;
         TraceLine = traceLine;
+        AppliedInstruction = appliedInstruction;
     }
 
     public long Steps { get; }
@@ -28,4 +30,6 @@ internal sealed class MarkovAlgorithmSnapshot : IAlgorithmSnapshot<string>
     public string Output { get; }
 
     public string? TraceLine { get; }
+
+    public int AppliedInstruction { get; }
 }

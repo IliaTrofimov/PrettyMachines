@@ -15,12 +15,14 @@ internal sealed class TuringMachineSnapshot : IAlgorithmSnapshot<IReadOnlyTape>
     /// <param name="steps">Number of steps executed to reach this state.</param>
     /// <param name="termination">Termination reason for this state.</param>
     /// <param name="traceLine">Trace line produced by the transition, or <c>null</c>.</param>
-    public TuringMachineSnapshot(MachineTape tape, long steps, TerminationStatus termination, string? traceLine)
+    /// <param name="appliedInstruction">Zero-based index of the transition applied to reach this state, or <c>-1</c>.</param>
+    public TuringMachineSnapshot(MachineTape tape, long steps, TerminationStatus termination, string? traceLine, int appliedInstruction = -1)
     {
         this.tape = tape;
         Steps = steps;
         Termination = termination;
         TraceLine = traceLine;
+        AppliedInstruction = appliedInstruction;
     }
 
     public long Steps { get; }
@@ -34,4 +36,6 @@ internal sealed class TuringMachineSnapshot : IAlgorithmSnapshot<IReadOnlyTape>
     string IAlgorithmSnapshot.Output => MachineTapePrinter.Print(tape);
 
     public string? TraceLine { get; }
+
+    public int AppliedInstruction { get; }
 }

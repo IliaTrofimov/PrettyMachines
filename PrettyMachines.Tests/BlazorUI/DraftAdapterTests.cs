@@ -3,6 +3,7 @@ using PrettyMachines.Markov;
 using PrettyMachines.Turing;
 using PrettyMachines.BlazorUI.Services;
 using PrettyMachines.BlazorUI.Services.DraftAdapters;
+using PrettyMachines.BlazorUI.Models.Drafts;
 using PrettyMachines.Implementations;
 using PrettyMachines.Implementations.Catalog;
 
@@ -116,6 +117,33 @@ public class DraftAdapterTests
     }
 
     [Fact]
+    public void Turing_draft_rejects_duplicate_transition_conditions()
+    {
+        var draft = new TuringMachineDraft { Name = "Duplicate transitions" };
+        draft.Alphabet.AddRange(["0", "1"]);
+        draft.States.Add(new DraftState { Name = "Start", IsInitial = true });
+        draft.States.Add(new DraftState { Name = "Done", IsTerminal = true });
+        draft.Transitions.Add(new DraftTransition
+        {
+            StateIndex = 0,
+            SymbolMatch = SymbolMatch.NotEmpty,
+            NextStateIndex = 1,
+            Movement = TapeMovement.None,
+        });
+        draft.Transitions.Add(new DraftTransition
+        {
+            StateIndex = 0,
+            SymbolMatch = SymbolMatch.NotEmpty,
+            NextStateIndex = 1,
+            Movement = TapeMovement.None,
+        });
+
+        Action act = () => TuringDraftAdapter.ToAlgorithm(draft);
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("*Duplicate transition*");
+    }
+
+    [Fact]
     public void Fork_creates_a_runnable_copy_of_a_built_in()
     {
         var descriptor = AlgorithmCatalog.Find(nameof(TuringMachines), "Create_BinaryIncrement")!;
@@ -125,6 +153,38 @@ public class DraftAdapterTests
 
         var algorithm = DraftAlgorithmFactory.Build(draft);
         algorithm.Execute("101", Cancellation).Output.Should().Be("110");
+    }
+
+    [Theory]
+    [InlineData("Create_BinaryIncrement", "101")]
+    [InlineData("Create_StringConcatenation", "ab+cd")]
+    [InlineData("Create_StringReversal", "abc")]
+    public void Turing_draft_round_trip_preserves_applied_instructions(string algorithmId, string input)
+    {
+        var descriptor = AlgorithmCatalog.Find(nameof(TuringMachines), algorithmId)!;
+        var original = (TuringMachine)descriptor.Create();
+        var rebuilt = TuringDraftAdapter.ToAlgorithm(TuringDraftAdapter.From(original));
+
+        var originalResult = original.Execute(input, Cancellation);
+        var rebuiltResult = rebuilt.Execute(input, Cancellation);
+
+        rebuiltResult.AppliedInstructions.Should().Equal(originalResult.AppliedInstructions);
+    }
+
+    [Theory]
+    [InlineData("Create_BinaryIncrement", "101")]
+    [InlineData("Create_StringConcatenation", "ab+cd")]
+    [InlineData("Create_LeadingZerosTrim", "000123")]
+    public void Markov_draft_round_trip_preserves_applied_instructions(string algorithmId, string input)
+    {
+        var descriptor = AlgorithmCatalog.Find(nameof(MarkovAlgorithms), algorithmId)!;
+        var original = (MarkovAlgorithm)descriptor.Create();
+        var rebuilt = MarkovDraftAdapter.ToAlgorithm(MarkovDraftAdapter.From(original));
+
+        var originalResult = original.Execute(input, Cancellation);
+        var rebuiltResult = rebuilt.Execute(input, Cancellation);
+
+        rebuiltResult.AppliedInstructions.Should().Equal(originalResult.AppliedInstructions);
     }
 
 

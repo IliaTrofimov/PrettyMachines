@@ -110,11 +110,13 @@
 
                 @if (draft?.Turing is { } turingDraft)
                 {
-                    <TuringStructureView Draft="turingDraft" OnChanged="OnStructureChanged" />
+                    <TuringStructureView Draft="turingDraft" OnChanged="OnStructureChanged"
+                                         HighlightedTransitionIndex="@session.AppliedInstruction" />
                 }
                 else if (draft?.Markov is { } markovDraft)
                 {
-                    <MarkovStructureView Draft="markovDraft" OnChanged="OnStructureChanged" />
+                    <MarkovStructureView Draft="markovDraft" OnChanged="OnStructureChanged"
+                                         HighlightedRuleIndex="@session.AppliedInstruction" />
                 }
                 else if (structureError is null)
                 {

@@ -180,10 +180,11 @@ public class TuringMachine : IAlgorithm, IAlgorithm<IReadOnlyTape, IReadOnlyTape
 
             steps++;
             var traceLine = traceBuilder is null ? null : CreateTrace(traceBuilder, state, symbol, in action);
+            var appliedInstruction = instructions.IndexOf(state, symbol);
             state = action.NextState;
 
             var termination = state.IsTerminal ? TerminationStatus.Success : TerminationStatus.Unknown;
-            yield return new TuringMachineSnapshot(tape.Clone(), steps, termination, traceLine);
+            yield return new TuringMachineSnapshot(tape.Clone(), steps, termination, traceLine, appliedInstruction);
 
             if (state.IsTerminal)
                 yield break;

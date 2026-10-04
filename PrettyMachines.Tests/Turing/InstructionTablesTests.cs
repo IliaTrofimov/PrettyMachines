@@ -211,6 +211,23 @@ public class InstructionsTableTests
         foundAction.PrintedSymbol.Should().Be("x");
     }
 
+    [Fact]
+    public void AddRule_OverridesExistingRuleInPlace()
+    {
+        var table = new InstructionsTable(blankSymbol: DefaultBlank);
+        var state0 = new TuringMachineState(0, "q0");
+        var state1 = new TuringMachineState(1, "q1");
+
+        table.AddRule(state0, FuzzyKey<string>.Exact("0"), TuringMachineAction.CreateHalt("x"));
+        table.AddRule(state1, FuzzyKey<string>.Exact("1"), TuringMachineAction.CreateHalt("y"));
+        table.AddRule(state0, FuzzyKey<string>.Exact("0"), TuringMachineAction.CreateHalt("z"));
+
+        table.Select(instruction => instruction.InitialState.Name).Should().Equal("q0", "q1");
+        table.IndexOf(state0, "0").Should().Be(0);
+        table.TryFindAction(state0, "0", out var foundAction).Should().BeTrue();
+        foundAction.PrintedSymbol.Should().Be("z");
+    }
+
     #endregion
 
     #region TryFindRule Tests
@@ -336,6 +353,81 @@ public class InstructionsTableTests
         instructions.Should().HaveCount(2);
         instructions.Should().Contain(i => i.InitialState == state1);
         instructions.Should().Contain(i => i.InitialState == state2);
+    }
+
+    [Fact]
+    public void GetEnumerator_PreservesDefinitionOrder()
+    {
+        var table = new InstructionsTable(blankSymbol: DefaultBlank);
+        var state0 = new TuringMachineState(0, "q0");
+        var state1 = new TuringMachineState(1, "q1");
+        var state2 = new TuringMachineState(2, "q2");
+
+        table.AddRule(state2, FuzzyKey<string>.Exact("2"), TuringMachineAction.CreateHalt("z"));
+        table.AddRule(state0, FuzzyKey<string>.Exact("0"), TuringMachineAction.CreateHalt("x"));
+        table.AddRule(state1, FuzzyKey<string>.Exact("1"), TuringMachineAction.CreateHalt("y"));
+
+        table.Select(instruction => instruction.InitialState.Name).Should().Equal("q2", "q0", "q1");
+    }
+
+    [Fact]
+    public void CopyConstructor_PreservesDefinitionOrder()
+    {
+        var table = new InstructionsTable(blankSymbol: DefaultBlank);
+        var state0 = new TuringMachineState(0, "q0");
+        var state1 = new TuringMachineState(1, "q1");
+
+        table.AddRule(state1, FuzzyKey<string>.Exact("1"), TuringMachineAction.CreateHalt("y"));
+        table.AddRule(state0, FuzzyKey<string>.Exact("0"), TuringMachineAction.CreateHalt("x"));
+
+        var copy = new InstructionsTable(table);
+
+        copy.Select(instruction => instruction.InitialState.Name).Should().Equal("q1", "q0");
+        copy.IndexOf(state0, "0").Should().Be(1);
+    }
+
+    #endregion
+
+    #region IndexOf Tests
+
+    [Fact]
+    public void IndexOf_PrioritizesExactOverFuzzy()
+    {
+        var table = new InstructionsTable(blankSymbol: DefaultBlank);
+        var state = new TuringMachineState(0, "q0");
+
+        table.AddRule(state, FuzzyKey<string>.Any, TuringMachineAction.CreateHalt("a"));
+        table.AddRule(state, FuzzyKey<string>.Exact("0"), TuringMachineAction.CreateHalt("b"));
+        table.AddRule(state, FuzzyKey<string>.NotEmpty, TuringMachineAction.CreateHalt("c"));
+
+        table.IndexOf(state, "0").Should().Be(1);
+        table.IndexOf(state, "5").Should().Be(2);
+        table.IndexOf(state, DefaultBlank).Should().Be(0);
+    }
+
+    [Fact]
+    public void IndexOf_UsesEmptyMatchForBlankSymbol()
+    {
+        var table = new InstructionsTable(blankSymbol: DefaultBlank);
+        var state = new TuringMachineState(0, "q0");
+
+        table.AddRule(state, FuzzyKey<string>.Any, TuringMachineAction.CreateHalt("a"));
+        table.AddRule(state, FuzzyKey<string>.Empty, TuringMachineAction.CreateHalt("b"));
+
+        table.IndexOf(state, DefaultBlank).Should().Be(1);
+        table.IndexOf(state, "x").Should().Be(0);
+    }
+
+    [Fact]
+    public void IndexOf_ReturnsNegativeWhenUnmatched()
+    {
+        var table = new InstructionsTable(blankSymbol: DefaultBlank);
+        var state = new TuringMachineState(0, "q0");
+        var otherState = new TuringMachineState(1, "q1");
+        table.AddRule(state, FuzzyKey<string>.Exact("0"), TuringMachineAction.CreateHalt("x"));
+
+        table.IndexOf(state, "1").Should().Be(-1);
+        table.IndexOf(otherState, "0").Should().Be(-1);
     }
 
     #endregion

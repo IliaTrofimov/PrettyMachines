@@ -25,6 +25,9 @@ public sealed class AlgorithmRunSession : IDisposable
     /// <summary>Gets the current termination status.</summary>
     public TerminationStatus Status { get; private set; } = TerminationStatus.Unknown;
 
+    /// <summary>Gets the zero-based index of the rule applied by the last executed step, or <c>-1</c> when none.</summary>
+    public int AppliedInstruction { get; private set; } = -1;
+
     /// <summary>Gets the number of executed steps.</summary>
     public long Steps { get; private set; }
 
@@ -127,6 +130,7 @@ public sealed class AlgorithmRunSession : IDisposable
         trace.Clear();
         Output = "";
         Steps = 0;
+        AppliedInstruction = -1;
         Status = TerminationStatus.Unknown;
         IsFinished = true;
         Error = null;
@@ -168,6 +172,7 @@ public sealed class AlgorithmRunSession : IDisposable
         Tape = (snapshot as IAlgorithmSnapshot<IReadOnlyTape>)?.Output;
         Steps = snapshot.Steps;
         Status = snapshot.Termination;
+        AppliedInstruction = snapshot.AppliedInstruction;
 
         if (snapshot.IsFinished)
             IsFinished = true;

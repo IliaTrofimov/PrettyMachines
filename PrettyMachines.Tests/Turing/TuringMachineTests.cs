@@ -234,6 +234,30 @@ public class TuringMachineTests
         result.Trace.Should().HaveCountGreaterThan(0);
     }
 
+    [Fact]
+    public void Execute_ReportsAppliedTransitionIndices()
+    {
+        var machine = CreateSimpleIncrementMachine();
+        var tape = new MachineTape("0");
+
+        var result = machine.Execute(tape, AlgorithmCancellation.Default);
+
+        result.Termination.Should().Be(TerminationStatus.Success);
+        result.AppliedInstructions.Should().Equal(0, 1);
+    }
+
+    [Fact]
+    public void Execute_WhenStuck_DoesNotReportAppliedInstructionForLastStep()
+    {
+        var machine = CreateSimpleIncrementMachine(strictAlphabet: false);
+        var tape = new MachineTape("2");
+
+        var result = machine.Execute(tape, AlgorithmCancellation.Default);
+
+        result.Termination.Should().Be(TerminationStatus.Stuck);
+        result.AppliedInstructions.Should().BeEmpty();
+    }
+
     #endregion
 
     #region Helper Methods for Test Setup

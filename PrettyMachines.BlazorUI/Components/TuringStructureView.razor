@@ -1,52 +1,65 @@
 @inject IStringLocalizer<Locale.Controls> LocControls;
 
 
-<h5 class="mt-1 mb-1">
+<h5 class="mt-1 mb-1 d-flex flex-wrap align-items-center gap-2">
     @LocControls["States"]
-    <button type="button" class="btn btn-link btn-sm p-0 align-baseline" @onclick="AddState">
-        <Icon Name="plus" Class="me-1" />@LocControls["AddState"]
+    
+    <button type="button" class="btn btn-sm badge btn-secondary"
+            @onclick="() => statesCollapsed = !statesCollapsed">
+        <Icon Name="@(statesCollapsed ? "chevron-down" : "chevron-up")" Class="me-1" />
+        @(statesCollapsed ? LocControls["Show"] : LocControls["Hide"])
     </button>
+
+    @if (!statesCollapsed)
+    {
+        <button type="button" class="btn btn-link btn-sm p-0 align-baseline" @onclick="AddState">
+            <Icon Name="plus" Class="me-1" />@LocControls["AddState"]
+        </button>        
+    }
 </h5>
 
-<div class="turing-grid states-grid" role="table">
-    <div class="turing-row turing-header" role="row">
-        <div class="turing-index" role="columnheader">#</div>
-        <div class="turing-cell" role="columnheader">@LocControls["Name"]</div>
-        <div class="turing-actions" role="columnheader"></div>
-    </div>
+@if (!statesCollapsed)
+{
+    <div class="turing-grid states-grid" role="table">
+        <div class="turing-row turing-header" role="row">
+            <div class="turing-index" role="columnheader">#</div>
+            <div class="turing-cell" role="columnheader">@LocControls["Name"]</div>
+            <div class="turing-actions" role="columnheader"></div>
+        </div>
 
-    @for (var i = 0; i < Draft.States.Count; i++)
-    {
-        var captured = Draft.States[i];
-        <div class="turing-row" role="row">
-            <div class="turing-index" role="cell">q@($"{i:d2}")</div>
-            <div class="turing-cell" role="cell" data-label="@LocControls["Name"]">
-                <div class="turing-composite form-control form-control-sm d-flex align-items-center gap-2">
-                    <input type="text" class="form-control form-control-sm font-monospace border-0 p-0 shadow-none bg-transparent flex-grow-1"
-                           @bind="captured.Name" @bind:after="OnEdited"
-                    />
-                         
-                    <ToggleButton Id=@($"state-initial-{i}") Value="@captured.IsInitial" ValueChanged="_ => Update(() => SetInitial(captured))"
-                        Text="@LocControls["StartStateShort"]" Title="@LocControls["StartState"]"
-                        ClassLabel="turing-state-toggle btn-sm btn-outline-secondary"
-                    />
+        @for (var i = 0; i < Draft.States.Count; i++)
+        {
+            var captured = Draft.States[i];
+            <div class="turing-row" role="row">
+                <div class="turing-index" role="cell">q@($"{i:d2}")</div>
+                <div class="turing-cell" role="cell" data-label="@LocControls["Name"]">
+                    <div class="turing-composite form-control form-control-sm d-flex align-items-center gap-2">
+                        <input type="text" class="form-control form-control-sm font-monospace border-0 p-0 shadow-none bg-transparent flex-grow-1"
+                            @bind="captured.Name" @bind:after="OnEdited"
+                        />
+                            
+                        <ToggleButton Id=@($"state-initial-{i}") Value="@captured.IsInitial" ValueChanged="_ => Update(() => SetInitial(captured))"
+                            Text="@LocControls["StartStateShort"]" Title="@LocControls["StartState"]"
+                            ClassLabel="turing-state-toggle btn-sm btn-outline-secondary"
+                        />
 
-                    <ToggleButton Id=@($"state-terminal-{i}") @bind-Value="captured.IsTerminal" @bind-Value:after="OnEdited" Disabled="@captured.IsInitial" 
-                        TextChecked="@LocControls["TerminalStateShort"]" TextUnchecked="@LocControls["NonTerminalStateShort"]"
-                        TitleChecked="@LocControls["TerminalState"]" TitleUnchecked="@LocControls["NonTerminalState"]"
-                        ClassLabel="turing-state-toggle btn-sm btn-outline-secondary"
-                    />
+                        <ToggleButton Id=@($"state-terminal-{i}") @bind-Value="captured.IsTerminal" @bind-Value:after="OnEdited" Disabled="@captured.IsInitial" 
+                            TextChecked="@LocControls["TerminalStateShort"]" TextUnchecked="@LocControls["NonTerminalStateShort"]"
+                            TitleChecked="@LocControls["TerminalState"]" TitleUnchecked="@LocControls["NonTerminalState"]"
+                            ClassLabel="turing-state-toggle btn-sm btn-outline-secondary"
+                        />
+                    </div>
+                </div>
+                <div class="turing-actions" role="cell">
+                    <button type="button" class="btn btn-sm btn-outline-danger turing-remove"
+                            @onclick="() => Update(() => RemoveState(captured))">
+                        <Icon Name="minus" />
+                    </button>
                 </div>
             </div>
-            <div class="turing-actions" role="cell">
-                <button type="button" class="btn btn-sm btn-outline-danger turing-remove"
-                        @onclick="() => Update(() => RemoveState(captured))">
-                    <Icon Name="minus" />
-                </button>
-            </div>
-        </div>
-    }
-</div>
+        }
+    </div>
+}
 
 <hr/>
 
@@ -70,7 +83,8 @@
     @for (var i = 0; i < Draft.Transitions.Count; i++)
     {
         var captured = Draft.Transitions[i];
-        <div class="turing-row" role="row">
+        var index = i;
+        <div class="turing-row @(index == HighlightedTransitionIndex ? "is-current" : "")" role="row">
             <div class="turing-cell" role="cell" data-label="@LocControls["State"]">
                 <SelectDropdown TValue="int"
                                 Value="captured.StateIndex"
@@ -115,11 +129,16 @@
 
 
 @code {
+    private bool statesCollapsed;
+
     [Parameter, EditorRequired]
     public TuringMachineDraft Draft { get; set; } = null!;
 
     [Parameter]
     public EventCallback OnChanged { get; set; }
+
+    [Parameter]
+    public int HighlightedTransitionIndex { get; set; } = -1;
 
 
     private async Task Update(Action change)

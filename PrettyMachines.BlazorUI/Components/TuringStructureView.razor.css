@@ -29,6 +29,12 @@
 
 .turing-row > * { min-width: 0; }
 
+.turing-row.is-current {
+    background-color: var(--bs-warning-bg-subtle);
+    box-shadow: inset 2px 0 0 var(--bs-warning);
+    border-radius: .25rem;
+}
+
 .turing-header { color: var(--bs-secondary-color); font-size: 0.8rem; }
 .turing-index { font-size: 0.75rem; text-align: right; }
 .turing-actions { display: flex; justify-content: flex-end; }

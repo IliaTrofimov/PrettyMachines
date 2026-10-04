@@ -20,6 +20,7 @@ public class InstructionsTable : IReadOnlyInstructionsTable
     private readonly HashSet<string?> alphabet;
     private readonly FuzzyKeyComparer<string> fuzzySymbolsComparer;
     private readonly Dictionary<TuringMachineState, Dictionary<FuzzyKey<string>, TuringMachineAction>> statesDict;
+    private readonly List<TuringInstruction> instructions;
     
     
     /// <summary>Gets total number of added instructions.</summary>
@@ -90,6 +91,7 @@ public class InstructionsTable : IReadOnlyInstructionsTable
         
         alphabet.Add(blankSymbol);
         statesDict = new(StateComparer);
+        instructions = [];
         BlankSymbol = blankSymbol;
         fuzzySymbolsComparer = new FuzzyKeyComparer<string>(comparer);
     }
@@ -108,7 +110,8 @@ public class InstructionsTable : IReadOnlyInstructionsTable
         
         foreach (var (state, symbolsDict) in other.statesDict)
             statesDict[state] = symbolsDict.ToDictionary(x => x.Key, x => x.Value, fuzzySymbolsComparer);
-        
+
+        instructions = [..other.instructions];
         BlankSymbol = other.BlankSymbol;
         RulesCount = other.RulesCount;
     }
@@ -140,9 +143,18 @@ public class InstructionsTable : IReadOnlyInstructionsTable
             statesDict.Add(initialState, symbolsDict);
         }
 
-        if (!symbolsDict.ContainsKey(symbol))
+        var instruction = CreateInstruction(initialState, symbol, action);
+        var existingIndex = FindIndex(initialState, symbol);
+        if (existingIndex >= 0)
+        {
+            instructions[existingIndex] = instruction;
+        }
+        else
+        {
+            instructions.Add(instruction);
             RulesCount++;
-        
+        }
+
         symbolsDict[symbol] = action;
         
         if (action.NextState.Equals(TuringMachineState.Halt) && !statesDict.ContainsKey(action.NextState))
@@ -198,24 +210,60 @@ public class InstructionsTable : IReadOnlyInstructionsTable
     
     public IEnumerator<TuringInstruction> GetEnumerator()
     {
-        foreach (var (state, symbolsDict) in statesDict)
-        {
-            foreach (var (key, action) in symbolsDict)
-            {
-                yield return new TuringInstruction
-                {
-                    InitialState = state,
-                    ScannedSymbol = key,
-                    PrintedSymbol = action.PrintedSymbol,
-                    NextState = action.NextState,
-                    Movement = action.Movement
-                };
-            }
-        }
+        foreach (var instruction in instructions)
+            yield return instruction;
     }
     
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    
+
+    /// <summary>Gets the zero-based definition-order index of the instruction matching the given state and symbol.</summary>
+    /// <param name="state">Current state of the machine.</param>
+    /// <param name="symbol">Input symbol.</param>
+    /// <returns>Index of the matching instruction, or <c>-1</c> when no instruction matches.</returns>
+    /// <remarks>Uses the same exact/empty/not-empty/any priority as <see cref="TryFindAction"/>.</remarks>
+    public int IndexOf(TuringMachineState state, string? symbol)
+    {
+        if (!statesDict.TryGetValue(state, out var symbolsDict))
+            return -1;
+
+        if (symbol != null)
+        {
+            var exactKey = FuzzyKey<string>.Exact(symbol);
+            if (symbolsDict.ContainsKey(exactKey))
+                return FindIndex(state, exactKey);
+        }
+
+        var fuzzyKey = Equals(symbol, BlankSymbol) ? FuzzyKey<string>.Empty : FuzzyKey<string>.NotEmpty;
+        if (symbolsDict.ContainsKey(fuzzyKey))
+            return FindIndex(state, fuzzyKey);
+
+        if (symbolsDict.ContainsKey(FuzzyKey<string>.Any))
+            return FindIndex(state, FuzzyKey<string>.Any);
+
+        return -1;
+    }
+
+    private int FindIndex(TuringMachineState state, FuzzyKey<string> symbol)
+    {
+        for (var i = 0; i < instructions.Count; i++)
+        {
+            if (StateComparer.Equals(instructions[i].InitialState, state) &&
+                fuzzySymbolsComparer.Equals(instructions[i].ScannedSymbol, symbol))
+                return i;
+        }
+
+        return -1;
+    }
+
+    private static TuringInstruction CreateInstruction(TuringMachineState state, FuzzyKey<string> symbol, TuringMachineAction action) => new()
+    {
+        InitialState = state,
+        ScannedSymbol = symbol,
+        PrintedSymbol = action.PrintedSymbol,
+        NextState = action.NextState,
+        Movement = action.Movement,
+    };
+
     private void ValidateSymbols(in FuzzyKey<string> symbol, in TuringMachineAction action)
     {
         if (isAutoAlphabet)

@@ -251,6 +251,58 @@ public class MarkovAlgorithmTests(ITestOutputHelper output)
 
 	#endregion
 
+	#region AppliedInstruction Tests
+
+    [Fact]
+    public void Execute_collects_applied_rule_indices_in_definition_order()
+    {
+        var builder = MarkovAlgorithm.Create();
+        builder.AddRule("a", "b");
+        builder.AddRule("b", "c");
+        builder.AddRule("c", "d");
+        var algorithm = builder.Build();
+
+        var result = algorithm.Execute("a", AlgorithmCancellation.Default);
+
+        result.Termination.Should().Be(TerminationStatus.Stuck);
+        result.AppliedInstructions.Should().Equal(0, 1, 2);
+    }
+
+    [Fact]
+    public void Run_initial_snapshot_has_no_applied_instruction()
+    {
+        var algorithm = CreateSimpleReplacementAlgorithm();
+
+        var snapshots = algorithm.Run("abc", AlgorithmCancellation.Default).ToList();
+
+        snapshots[0].Steps.Should().Be(0);
+        snapshots[0].AppliedInstruction.Should().Be(-1);
+    }
+
+    [Fact]
+    public void Run_terminal_step_reports_terminal_rule_index()
+    {
+        var algorithm = CreateSimpleReplacementAlgorithm();
+
+        var last = algorithm.Run("abc", AlgorithmCancellation.Default).Last();
+
+        last.Termination.Should().Be(TerminationStatus.Success);
+        last.AppliedInstruction.Should().Be(0);
+    }
+
+    [Fact]
+    public void Run_stuck_snapshot_has_no_applied_instruction()
+    {
+        var algorithm = CreateSimpleReplacementAlgorithm();
+
+        var last = algorithm.Run("xyz", AlgorithmCancellation.Default).Last();
+
+        last.Termination.Should().Be(TerminationStatus.Stuck);
+        last.AppliedInstruction.Should().Be(-1);
+    }
+
+	#endregion
+
 	#region Property Tests
 
     [Fact]

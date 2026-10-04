@@ -10,11 +10,11 @@ public static class AlgorithmRunner
     {
         ArgumentNullException.ThrowIfNull(snapshots);
 
-        var (last, trace) = Consume(snapshots);
+        var (last, trace, applied) = Consume(snapshots);
 
         return last is null
             ? new AlgorithmResult<string>(TerminationStatus.Aborted, string.Empty)
-            : new AlgorithmResult<string>(GetTermination(last), last.Output, last.Steps, trace);
+            : new AlgorithmResult<string>(GetTermination(last), last.Output, last.Steps, trace, applied);
     }
 
     /// <inheritdoc cref="Execute(IEnumerable{IAlgorithmSnapshot})"/>
@@ -22,28 +22,31 @@ public static class AlgorithmRunner
     {
         ArgumentNullException.ThrowIfNull(snapshots);
 
-        var (last, trace) = Consume(snapshots);
+        var (last, trace, applied) = Consume(snapshots);
 
         return last is null
             ? new AlgorithmResult<TOutput>(TerminationStatus.Aborted, default!)
-            : new AlgorithmResult<TOutput>(GetTermination(last), last.Output, last.Steps, trace);
+            : new AlgorithmResult<TOutput>(GetTermination(last), last.Output, last.Steps, trace, applied);
     }
 
 
-    private static (TSnapshot? Last, List<string>? Trace) Consume<TSnapshot>(IEnumerable<TSnapshot> snapshots)
+    private static (TSnapshot? Last, List<string>? Trace, List<int>? Applied) Consume<TSnapshot>(IEnumerable<TSnapshot> snapshots)
         where TSnapshot : class, IAlgorithmSnapshot
     {
         var last = default(TSnapshot);
         List<string>? trace = null;
+        List<int>? applied = null;
 
         foreach (var snapshot in snapshots)
         {
             last = snapshot;
             if (snapshot.TraceLine is not null)
                 (trace ??= []).Add(snapshot.TraceLine);
+            if (snapshot.AppliedInstruction >= 0)
+                (applied ??= []).Add(snapshot.AppliedInstruction);
         }
 
-        return (last, trace);
+        return (last, trace, applied);
     }
 
     private static TerminationStatus GetTermination(IAlgorithmSnapshot snapshot)

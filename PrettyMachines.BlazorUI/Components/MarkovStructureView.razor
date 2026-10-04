@@ -37,7 +37,7 @@
         var rule = Draft.Rules[i];
         var index = i;
 
-        <div class="rule-row" role="row">
+        <div class="rule-row @(index == HighlightedRuleIndex ? "is-current" : "")" role="row">
             <div class="rule-index" role="cell">
                 @index
             </div>
@@ -99,6 +99,9 @@
 
     [Parameter]
     public EventCallback OnChanged { get; set; }
+
+    [Parameter]
+    public int HighlightedRuleIndex { get; set; } = -1;
 
 
     private bool CommentsExpanded { get; set; }

@@ -19,6 +19,12 @@ public interface IAlgorithmSnapshot
 
     /// <summary>Gets the trace line produced by the transition into this state, or <c>null</c> unless verbose.</summary>
     public string? TraceLine { get; }
+
+    /// <summary>
+    /// Gets the zero-based index of the instruction used to reach this state,
+    /// or <c>-1</c> when no instruction has been applied (initial or error state).
+    /// </summary>
+    public int AppliedInstruction { get; }
 }
 
 

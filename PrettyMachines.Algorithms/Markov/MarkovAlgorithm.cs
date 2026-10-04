@@ -131,13 +131,15 @@ public class MarkovAlgorithm : IAlgorithm<string, string>, IAlgorithm
                 yield break;
             }
 
+            var appliedInstruction = rules.IndexOf(matchedRule);
+
             if (matchedRule.IsTerminal)
             {
-                yield return new MarkovAlgorithmSnapshot(result, steps, TerminationStatus.Success, traceLine);
+                yield return new MarkovAlgorithmSnapshot(result, steps, TerminationStatus.Success, traceLine, appliedInstruction);
                 yield break;
             }
 
-            yield return new MarkovAlgorithmSnapshot(result, steps, TerminationStatus.Unknown, traceLine);
+            yield return new MarkovAlgorithmSnapshot(result, steps, TerminationStatus.Unknown, traceLine, appliedInstruction);
         }
     }
     

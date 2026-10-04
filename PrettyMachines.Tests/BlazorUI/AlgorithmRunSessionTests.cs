@@ -114,4 +114,48 @@ public class AlgorithmRunSessionTests
         session.IsFinished.Should().BeTrue();
         session.Status.Should().Be(TerminationStatus.Aborted);
     }
+
+    [Fact]
+    public void Session_starts_without_an_applied_instruction()
+    {
+        using var session = new AlgorithmRunSession();
+
+        session.AppliedInstruction.Should().Be(-1);
+
+        session.Start(MarkovAlgorithms.Create_BinaryIncrement(), "101", 1000);
+
+        session.AppliedInstruction.Should().Be(-1);
+    }
+
+    [Fact]
+    public void Session_tracks_the_applied_instruction_while_stepping()
+    {
+        using var session = new AlgorithmRunSession();
+        session.Start(MarkovAlgorithms.Create_BinaryIncrement(), "101", 1000);
+
+        session.Step();
+        session.AppliedInstruction.Should().BeGreaterThanOrEqualTo(0);
+
+        session.Run();
+        var finishedOn = session.AppliedInstruction;
+        finishedOn.Should().BeGreaterThanOrEqualTo(0);
+
+        session.Step();
+        session.AppliedInstruction.Should().Be(finishedOn);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Reset_clears_the_applied_instruction(bool keepInput)
+    {
+        using var session = new AlgorithmRunSession();
+        session.Start(MarkovAlgorithms.Create_BinaryIncrement(), "101", 1000);
+        session.Step();
+        session.AppliedInstruction.Should().BeGreaterThanOrEqualTo(0);
+
+        session.Reset(keepInput);
+
+        session.AppliedInstruction.Should().Be(-1);
+    }
 }
