@@ -1,4 +1,5 @@
 using System.Text;
+using PrettyMachines.Automata;
 using PrettyMachines.Turing;
 
 

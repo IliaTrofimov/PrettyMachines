@@ -1,6 +1,6 @@
-namespace PrettyMachines.Turing;
+namespace PrettyMachines.Automata;
 
-/// <summary>Symbol comparision types.</summary>
+/// <summary>Symbol comparison types.</summary>
 public enum SymbolMatch
 {
     /// <summary>Matches when scanned symbol has expected exact value.</summary>

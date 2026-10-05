@@ -1,4 +1,5 @@
 using PrettyMachines.Abstract;
+using PrettyMachines.Automata;
 using PrettyMachines.Markov;
 using PrettyMachines.Turing;
 using PrettyMachines.BlazorUI.Models;

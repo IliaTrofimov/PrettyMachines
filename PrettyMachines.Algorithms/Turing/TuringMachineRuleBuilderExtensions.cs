@@ -1,3 +1,6 @@
+using PrettyMachines.Automata;
+
+
 namespace PrettyMachines.Turing;
 
 public static class TuringMachineRuleBuilderExtensions

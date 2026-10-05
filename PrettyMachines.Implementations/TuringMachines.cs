@@ -1,3 +1,4 @@
+using PrettyMachines.Automata;
 using PrettyMachines.Implementations.Catalog;
 using PrettyMachines.Turing;
 

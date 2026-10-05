@@ -1,3 +1,6 @@
+using PrettyMachines.Automata;
+
+
 namespace PrettyMachines.Turing;
 
 /// <summary>

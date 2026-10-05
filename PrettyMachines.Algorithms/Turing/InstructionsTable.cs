@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Diagnostics;
-using PrettyMachines.Abstract;
+using PrettyMachines.Automata;
+
 
 namespace PrettyMachines.Turing;
 
@@ -8,45 +9,22 @@ namespace PrettyMachines.Turing;
 /// Set of conditions and corresponding actions that define Turing machine instructions.
 /// </summary>
 [DebuggerDisplay("Rules: {RulesCount}, stats: {States.Count}, symbols: {Alphabet.Count}")]
-public class InstructionsTable : IReadOnlyInstructionsTable
+public class InstructionsTable : TransitionTable<TuringMachineState, string, TuringMachineAction>, IReadOnlyInstructionsTable
 {
-    private static readonly EqualityComparer<TuringMachineState> StateComparer =
-        EqualityComparer<TuringMachineState>.Create(
-            (x, y) => x?.Id == y?.Id,
-            (x) => x.Id.GetHashCode()
-        );
+    /// <summary>Gets the action returned when no transition matches.</summary>
+    protected override TuringMachineAction DefaultAction => TuringMachineAction.Halt;
 
-    private readonly bool isAutoAlphabet;
-    private readonly HashSet<string?> alphabet;
-    private readonly FuzzyKeyComparer<string> fuzzySymbolsComparer;
-    private readonly Dictionary<TuringMachineState, Dictionary<FuzzyKey<string>, TuringMachineAction>> statesDict;
-    private readonly List<TuringInstruction> instructions;
-    
-    
-    /// <summary>Gets total number of added instructions.</summary>
-    /// <remarks>Always less or equal than <i>States.Count</i> * <i>Alphabet.Count</i>.</remarks>
-    public int RulesCount { get; protected set; }
-    
-    /// <summary>Gets special value that represents an empty symbol.</summary>
-    public string? BlankSymbol { get; init; }
-    
-    /// <summary>Gets the collection of all defined states.</summary>
-    public IReadOnlyCollection<TuringMachineState> States => statesDict.Keys;
 
-    /// <summary>Gets collection of allowed symbols. Blank symbol is always included.</summary>
-    public IReadOnlySet<string?> Alphabet => alphabet;
-    
-    
-    /// <summary>Initializes new instructions table with given set of allowed symbols and string comparision type.</summary>
+    /// <summary>Initializes new instructions table with given set of allowed symbols and string comparison type.</summary>
     /// <param name="alphabetSymbols">Alphabet that defines set of allowed symbols. Duplicate items will be ignored.</param>
-    /// <param name="symbolsComparison"></param>
+    /// <param name="symbolsComparison">String comparison mode for the symbols.</param>
     public InstructionsTable(IEnumerable<string> alphabetSymbols, StringComparison symbolsComparison = StringComparison.Ordinal)
         : this(alphabetSymbols, null, symbolsComparison)
     {
     }
 
     /// <summary>
-    /// Initializes new instructions table with an unrestricted alphabet, predefined empty symbol and string comparision type.
+    /// Initializes new instructions table with an unrestricted alphabet, predefined empty symbol and string comparison type.
     /// </summary>
     /// <inheritdoc cref="InstructionsTable(IEnumerable{string}?,string?,StringComparison)"/>
     public InstructionsTable(string? blankSymbol, StringComparison symbolsComparison = StringComparison.Ordinal)
@@ -55,7 +33,7 @@ public class InstructionsTable : IReadOnlyInstructionsTable
     }
     
     /// <summary>
-    /// Initializes new instructions table with an unrestricted alphabet set of allowed symbols and string comparision type.
+    /// Initializes new instructions table with an unrestricted alphabet set of allowed symbols and string comparison type.
     /// </summary>
     /// <inheritdoc cref="InstructionsTable(IEnumerable{string}?,string?,StringComparison)"/>
     public InstructionsTable(StringComparison symbolsComparison = StringComparison.Ordinal) 
@@ -64,223 +42,59 @@ public class InstructionsTable : IReadOnlyInstructionsTable
     }
     
     /// <summary>
-    /// Initializes new instructions table with given set of allowed symbols, predefined empty symbol and string comparision type.
+    /// Initializes new instructions table with given set of allowed symbols, predefined empty symbol and string comparison type.
     /// </summary>
     /// <param name="alphabetSymbols">
     /// Alphabet that defines set of allowed symbols. Duplicate items will be ignored.
     /// <c>Null</c> value means unrestricted alphabet.
     /// </param>
     /// <param name="blankSymbol">Special value that represents an empty symbol.</param>
-    /// <param name="symbolsComparison">String comparision mode for the symbols.</param>
+    /// <param name="symbolsComparison">String comparison mode for the symbols.</param>
     public InstructionsTable(IEnumerable<string>? alphabetSymbols, string? blankSymbol, StringComparison symbolsComparison = StringComparison.Ordinal)
+        : base(alphabetSymbols, blankSymbol, StringComparer.FromComparison(symbolsComparison))
     {
-        var comparer = StringComparer.FromComparison(symbolsComparison);
-
-        if (alphabetSymbols != null)
-        {
-            isAutoAlphabet = false;
-            alphabet = new HashSet<string?>(alphabetSymbols, comparer);
-            if (alphabet.Count == 0)
-                throw new ArgumentException("Alphabet cannot be empty.", nameof(alphabetSymbols));
-        }
-        else
-        {
-            isAutoAlphabet = true;
-            alphabet = new HashSet<string?>(comparer);
-        }
-        
-        alphabet.Add(blankSymbol);
-        statesDict = new(StateComparer);
-        instructions = [];
-        BlankSymbol = blankSymbol;
-        fuzzySymbolsComparer = new FuzzyKeyComparer<string>(comparer);
     }
 
     /// <summary>Creates a deep copy of another instructions table.</summary>
     /// <param name="other">The instructions to copy.</param>
-    public InstructionsTable(InstructionsTable other)
+    public InstructionsTable(InstructionsTable other) : base(other)
     {
-        isAutoAlphabet = other.isAutoAlphabet;
-        alphabet = new HashSet<string?>(other.alphabet, other.alphabet.Comparer);
-        fuzzySymbolsComparer = other.fuzzySymbolsComparer;
-        statesDict = new Dictionary<TuringMachineState, Dictionary<FuzzyKey<string>, TuringMachineAction>>(
-            other.statesDict.Count,
-            StateComparer
-        );
-        
-        foreach (var (state, symbolsDict) in other.statesDict)
-            statesDict[state] = symbolsDict.ToDictionary(x => x.Key, x => x.Value, fuzzySymbolsComparer);
+    }
+    
+    
+    /// <summary>Gets the symbols produced by the given action that must belong to the alphabet.</summary>
+    /// <param name="action">Action to inspect.</param>
+    /// <returns>The printed symbol of the action, or an empty sequence.</returns>
+    protected override IEnumerable<string?> GetProducedSymbols(TuringMachineAction action) => [action.PrintedSymbol];
 
-        instructions = [..other.instructions];
-        BlankSymbol = other.BlankSymbol;
-        RulesCount = other.RulesCount;
-    }
-    
-    /// <summary>Adds new state with no instructions. Does nothing if state is already added.</summary>
-    /// <param name="state">State object.</param>
-    public void AddState(TuringMachineState state)
-    {
-        if (!statesDict.ContainsKey(state))
-            statesDict[state] = new(Alphabet.Count, fuzzySymbolsComparer);
-    }
-    
     /// <summary>Adds new instruction with given condition and action. Overrides instructions with same conditions.</summary>
     /// <param name="initialState">Initial state that matches this rule.</param>
     /// <param name="symbol">Scanned symbol that matches this rule. Symbol can use fuzzy matching (not empty, empty, any).</param>
     /// <param name="action">Action that will be associated with given conditions.</param>
     /// <exception cref="AlgorithmException">Initial state is terminal.</exception>
     /// <exception cref="SymbolIsNotAllowedException">Symbol or action have invalid symbols.</exception>
-    public void AddRule(TuringMachineState initialState, in FuzzyKey<string> symbol, in TuringMachineAction action)
+    public override void AddRule(TuringMachineState initialState, in FuzzyKey<string> symbol, in TuringMachineAction action)
     {
-        if (initialState.IsTerminal)
-            throw new AlgorithmException("Instruction's initial state must not be terminal.");
+        base.AddRule(initialState, in symbol, in action);
 
-        ValidateSymbols(in symbol, in action);
-        
-        if (!statesDict.TryGetValue(initialState, out var symbolsDict))
-        {
-            symbolsDict = new(alphabet.Count, fuzzySymbolsComparer);
-            statesDict.Add(initialState, symbolsDict);
-        }
-
-        var instruction = CreateInstruction(initialState, symbol, action);
-        var existingIndex = FindIndex(initialState, symbol);
-        if (existingIndex >= 0)
-        {
-            instructions[existingIndex] = instruction;
-        }
-        else
-        {
-            instructions.Add(instruction);
-            RulesCount++;
-        }
-
-        symbolsDict[symbol] = action;
-        
-        if (action.NextState.Equals(TuringMachineState.Halt) && !statesDict.ContainsKey(action.NextState))
-        {
-            statesDict.Add(action.NextState, new(alphabet.Count, fuzzySymbolsComparer));
-        }
+        if (action.NextState.Equals(TuringMachineState.Halt) && !States.Contains(action.NextState))
+            AddState(action.NextState);
     }
 
-    /// <summary>Outputs the action for given state and input symbol.</summary>
-    /// <param name="state">Current state of the machine.</param>
-    /// <param name="symbol">Input symbol.</param>
-    /// <param name="action">Resulting action. When the returned value is <c>false</c> always equal to the HALT action.</param>
-    /// <returns><c>True</c> if such action exists in the instructions table.</returns>
-    public bool TryFindAction(TuringMachineState state, string? symbol, out TuringMachineAction action)
-    {
-        if (!statesDict.TryGetValue(state, out var symbolsDict))
-        {
-            action = TuringMachineAction.Halt;
-            return false;
-        }
-
-        if (symbol != null)
-        {
-            var exactKey = FuzzyKey<string>.Exact(symbol);
-            if (symbolsDict.TryGetValue(exactKey, out action))
-                return true;
-        }
-        
-        var fuzzyKey = Equals(symbol, BlankSymbol) ? FuzzyKey<string>.Empty : FuzzyKey<string>.NotEmpty;
-        if (symbolsDict.TryGetValue(fuzzyKey, out action))
-            return true;
-
-        if (symbolsDict.TryGetValue(FuzzyKey<string>.Any, out action)) 
-            return true;
-
-        action = TuringMachineAction.Halt;
-        return false;
-    }
-
-    /// <summary>Gets the action that is defined for given state and symbol</summary>
-    /// <param name="state">State to match.</param>
-    /// <param name="symbolMatch">Symbol to match.</param>
-    /// <returns>Found action or <c>null</c> if it isn't defined.</returns>
-    public TuringMachineAction? this[TuringMachineState state, in FuzzyKey<string> symbolMatch]
-    {
-        get
-        {
-            if (statesDict.TryGetValue(state, out var symbolsDict) && symbolsDict.TryGetValue(symbolMatch, out var action))
-                return action;
-            return null;
-        }
-    }
-    
     public IEnumerator<TuringInstruction> GetEnumerator()
     {
-        foreach (var instruction in instructions)
-            yield return instruction;
+        foreach (var transition in Transitions)
+        {
+            yield return new TuringInstruction
+            {
+                InitialState = transition.InitialState,
+                ScannedSymbol = transition.ScannedSymbol,
+                NextState = transition.Action.NextState,
+                PrintedSymbol = transition.Action.PrintedSymbol,
+                Movement = transition.Action.Movement,
+            };
+        }
     }
     
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    /// <summary>Gets the zero-based definition-order index of the instruction matching the given state and symbol.</summary>
-    /// <param name="state">Current state of the machine.</param>
-    /// <param name="symbol">Input symbol.</param>
-    /// <returns>Index of the matching instruction, or <c>-1</c> when no instruction matches.</returns>
-    /// <remarks>Uses the same exact/empty/not-empty/any priority as <see cref="TryFindAction"/>.</remarks>
-    public int IndexOf(TuringMachineState state, string? symbol)
-    {
-        if (!statesDict.TryGetValue(state, out var symbolsDict))
-            return -1;
-
-        if (symbol != null)
-        {
-            var exactKey = FuzzyKey<string>.Exact(symbol);
-            if (symbolsDict.ContainsKey(exactKey))
-                return FindIndex(state, exactKey);
-        }
-
-        var fuzzyKey = Equals(symbol, BlankSymbol) ? FuzzyKey<string>.Empty : FuzzyKey<string>.NotEmpty;
-        if (symbolsDict.ContainsKey(fuzzyKey))
-            return FindIndex(state, fuzzyKey);
-
-        if (symbolsDict.ContainsKey(FuzzyKey<string>.Any))
-            return FindIndex(state, FuzzyKey<string>.Any);
-
-        return -1;
-    }
-
-    private int FindIndex(TuringMachineState state, FuzzyKey<string> symbol)
-    {
-        for (var i = 0; i < instructions.Count; i++)
-        {
-            if (StateComparer.Equals(instructions[i].InitialState, state) &&
-                fuzzySymbolsComparer.Equals(instructions[i].ScannedSymbol, symbol))
-                return i;
-        }
-
-        return -1;
-    }
-
-    private static TuringInstruction CreateInstruction(TuringMachineState state, FuzzyKey<string> symbol, TuringMachineAction action) => new()
-    {
-        InitialState = state,
-        ScannedSymbol = symbol,
-        PrintedSymbol = action.PrintedSymbol,
-        NextState = action.NextState,
-        Movement = action.Movement,
-    };
-
-    private void ValidateSymbols(in FuzzyKey<string> symbol, in TuringMachineAction action)
-    {
-        if (isAutoAlphabet)
-        {
-            if (symbol.Match == SymbolMatch.Exact)
-                alphabet.Add(symbol.Value);
-
-            if (action.PrintedSymbol is not null)
-                alphabet.Add(action.PrintedSymbol);
-        }
-        else
-        {
-            if (symbol.Match == SymbolMatch.Exact && !Alphabet.Contains(symbol.Value!))
-                throw new SymbolIsNotAllowedException(symbol.Value!, "invalid scanned symbol");
-
-            if (action.PrintedSymbol is not null && !Alphabet.Contains(action.PrintedSymbol))
-                throw new SymbolIsNotAllowedException(action.PrintedSymbol, "invalid printed symbol");
-        }
-    }
 }

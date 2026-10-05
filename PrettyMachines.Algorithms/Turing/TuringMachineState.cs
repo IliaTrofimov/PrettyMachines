@@ -1,34 +1,29 @@
+using PrettyMachines.Automata;
+
+
 namespace PrettyMachines.Turing;
 
 /// <summary>Turing machine's state.</summary>
-public class TuringMachineState
+public class TuringMachineState : AutomatonState
 {
-    private string? stringView;
-    
-    /// <summary>Unique identifier of the state.</summary>
-    public int Id { get; private init; }
-
-    /// <summary>Returns <c>true</c> if this state requires Turing machine to stop.</summary>
-    public bool IsTerminal { get; } = true;
-
-    /// <summary>Optional state's name.</summary>
-    public string? Name { get; }
-    
-    
     /// <summary>Get the default terminating state.</summary>
-    public static TuringMachineState Halt { get; } = new() { Id = int.MinValue };
+    public static TuringMachineState Halt { get; } = new();
     
-    private TuringMachineState() {}
+
+    private TuringMachineState() : base(int.MinValue, null, true)
+    {
+    }
     
     /// <summary>Initializes new state with id, optional name and terminal flag.</summary>
+    /// <param name="id">Unique identifier of the state.</param>
+    /// <param name="stateName">Optional state's name.</param>
+    /// <param name="isTerminal">Indicates that state requires Turing machine to stop.</param>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="id"/> equals to the default state ID.</exception>
     public TuringMachineState(int id, string? stateName = null, bool isTerminal = false)
+        : base(id, stateName, isTerminal)
     {
         if (id == Halt.Id)
             throw new ArgumentException("Cannot create a new state with a default state ID.", nameof(id));
-        
-        Id = id;
-        IsTerminal = isTerminal;
-        Name = stateName;
     }
     
     /// <inheritdoc cref="object.ToString()"/>
@@ -39,7 +34,6 @@ public class TuringMachineState
     /// </remarks>
     public override string ToString()
     {
-        if (Id == Halt.Id) return "!";
-        return stringView ??= IsTerminal ? $"!q{Id:D2}" : $"q{Id:D2}";
+        return Id == Halt.Id ? "!" : base.ToString();
     }
 }
