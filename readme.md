@@ -27,12 +27,10 @@ A .NET 10 library for building and running automatons like Turing machines and M
 
 ## Solution layout
 
-| Project | Description |
-| --- | --- |
-| `PrettyMachines.Algorithms` | Core library: abstract algorithm model, `Turing`, `Markov` and `Utils` (printing/parsing). |
-| `PrettyMachines.Implementations` | Ready-to-use algorithms built on the core library. |
-| `PrettyMachines.BlazorUI` | Blazor WebAssembly app for building and executing algorithms. |
-| `PrettyMachines.Tests` | xUnit tests for the core library and implementations. |
+1. `PrettyMachines.Algorithms` - Core library: abstract algorithm model, `Turing`, `Markov` and `Utils` (printing/parsing)
+2. `PrettyMachines.Implementations` - Ready-to-use algorithms built on the core library.
+3. `PrettyMachines.BlazorUI` - Blazor WebAssembly app for building and executing algorithms.
+4. `PrettyMachines.Tests` - xUnit tests for the core library and implementations.
 
 ## Core concepts
 
@@ -94,7 +92,7 @@ foreach (var snapshot in machine.Run("101", new AlgorithmCancellation(10_000)))
 
 ## Quick start: Turing machine
 
-A [Turing machine](https://en.wikipedia.org/wiki/Turing_machine) is a mathematical model of computation describing an abstract machine that manipulates symbols on a strip of tape according to a table of rules.[ Despite the model's simplicity, it is capable of implementing any computer algorithm. Machine is defined by an alphabet (optionally strict), a blank symbol, a set of states with one initial state, and a transition table.
+A [Turing machine](https://en.wikipedia.org/wiki/Turing_machine) is a mathematical model of computation describing an abstract machine that manipulates symbols on a strip of tape according to a table of rules. Despite the model's simplicity, it is capable of implementing any computer algorithm. Machine is defined by an alphabet (optionally strict), a blank symbol, a set of states with one initial state, and a transition table.
 
 ```csharp
 using PrettyMachines.Abstract;
