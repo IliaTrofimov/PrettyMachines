@@ -170,6 +170,29 @@ Console.WriteLine($"{result.Output} ({result.Termination} after {result.Steps} s
 - Acceptance produces `"A"`, rejection produces `"R"`; both tokens are configurable with
   `WithOutput("accepted", "rejected")`.
 
+You can also use implicit states creation shortcut:
+
+```csharp
+var dfa = FiniteStateMachine.Create()
+    .AddState("one", out var qOne)
+    .BuildRules(rules => rules
+        .AddRule(qOne, '1', "qOther") // "qOther" will add new state
+        .AddRule("qOther", 'x', qOne));
+```
+
+Several transitions between 2 states can be created with `char` array like this:
+
+```csharp
+var dfa = FiniteStateMachine.Create()
+    .BuildRules(rules => rules
+        // this method...
+        .AddRule("qDigits", new char[] {'0', '1', '2', ... }, "qOther"))
+        // is equalto these 3 operations:
+        .AddRule("qDigits", '0', "qOther")
+        .AddRule("qDigits", '1', "qOther")
+        .AddRule("qDigits", '2', "qOther"));
+```
+
 ## Quick start: Markov algorithm
 
 A [Markov algorithm](https://en.wikipedia.org/wiki/Markov_algorithm) is a string rewriting system that uses grammar-like rules to operate on strings of symbols. Markov algorithms have been shown to be Turing-complete, which means that they are suitable as a general model of computation and can represent any mathematical expression from its simple notation. Markov algorithms are named after the Soviet mathematician Andrey Markov, Jr. Algorithm applies the first matching substitution rule, replacing the leftmost occurrence of its pattern. A rule marked terminal stops the algorithm after it is applied.
