@@ -45,6 +45,8 @@ public class FiniteStateMachine : IAlgorithm, IAlgorithm<string, string>
     public string RejectedOutput { get; init; } = "R";
 
 
+    #region Constructors
+
     /// <summary>Creates a new builder instance for constructing finite state machines.</summary>
     /// <param name="name">Optional name for the algorithm.</param>
     /// <returns>A builder for fluent configuration.</returns>
@@ -82,6 +84,9 @@ public class FiniteStateMachine : IAlgorithm, IAlgorithm<string, string>
             InitialState = initialState;
     }
 
+    #endregion
+
+    #region Validation
 
     /// <inheritdoc/>
     public bool ValidateInput(string input)
@@ -93,22 +98,9 @@ public class FiniteStateMachine : IAlgorithm, IAlgorithm<string, string>
         return input.All(table.Alphabet.Contains);
     }
 
-    /// <summary>Applies single step of this algorithm to the given symbol.</summary>
-    /// <param name="state">Current state of this machine.</param>
-    /// <param name="symbol">Input symbol to scan.</param>
-    /// <param name="action">Outputs the action that was applied.</param>
-    /// <returns><c>True</c> if this machine defines an action for given state and symbol.</returns>
-    public bool NextStep(AutomatonState state, char symbol, out FsmAction action)
-    {
-        return table.TryFindAction(state, symbol, out action);
-    }
+    #endregion
 
-    /// <inheritdoc/>
-    public IEnumerable<IAlgorithmSnapshot<string>> Run(string input, AlgorithmCancellation cancellation, bool verbose = false)
-    {
-        ArgumentNullException.ThrowIfNull(input);
-        return RunIterator(input, cancellation, verbose);
-    }
+    #region Execution
 
     IEnumerable<IAlgorithmSnapshot> IAlgorithm.Run(string input, AlgorithmCancellation cancellation, bool verbose)
     {
@@ -121,6 +113,26 @@ public class FiniteStateMachine : IAlgorithm, IAlgorithm<string, string>
         return AlgorithmRunner.Execute(Run(input, cancellation, verbose));
     }
 
+    /// <inheritdoc/>
+    public IEnumerable<IAlgorithmSnapshot<string>> Run(string input, AlgorithmCancellation cancellation, bool verbose = false)
+    {
+        ArgumentNullException.ThrowIfNull(input);
+        return RunIterator(input, cancellation, verbose);
+    }
+
+    /// <summary>Applies single step of this algorithm to the given symbol.</summary>
+    /// <param name="state">Current state of this machine.</param>
+    /// <param name="symbol">Input symbol to scan.</param>
+    /// <param name="action">Outputs the action that was applied.</param>
+    /// <returns><c>True</c> if this machine defines an action for given state and symbol.</returns>
+    public bool NextStep(AutomatonState state, char symbol, out FsmAction action)
+    {
+        return table.TryFindAction(state, symbol, out action);
+    }
+
+    #endregion
+
+    #region Private methods
 
     private IEnumerable<IAlgorithmSnapshot<string>> RunIterator(string input, AlgorithmCancellation cancellation, bool verbose)
     {
@@ -228,6 +240,7 @@ public class FiniteStateMachine : IAlgorithm, IAlgorithm<string, string>
             .ToString();
     }
 
+    #endregion
 
     #region Builder classes
 
@@ -297,7 +310,7 @@ public class FiniteStateMachine : IAlgorithm, IAlgorithm<string, string>
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"Error occured while building rules for the {nameof(FiniteStateMachine)}: {ex.Message}", ex);
+                throw new InvalidOperationException($"Error occurred while building rules for the {nameof(FiniteStateMachine)}: {ex.Message}", ex);
             }
         }
     }
@@ -325,6 +338,16 @@ public class FiniteStateMachine : IAlgorithm, IAlgorithm<string, string>
 
             transitions.AddRule(from, in scan, new FsmAction(to));
             return this;
+        }
+
+        public IFiniteStateMachineRuleBuilder AddRule(string from, FuzzyKey<char> scan, string to)
+        {
+            var id = transitions.States.Count;
+            var fromState = transitions.States.FirstOrDefault(s => s.Name == from, new AutomatonState(id++, from));
+            var toState = transitions.States.FirstOrDefault(s => s.Name == to, new AutomatonState(id, to));
+            transitions.AddState(fromState);
+            transitions.AddState(toState);
+            return AddRule(fromState, scan, toState);
         }
 
         private void ValidateState(AutomatonState state, [CallerArgumentExpression("state")] string paramName = "")

@@ -6,37 +6,6 @@ namespace PrettyMachines.FSM;
 /// <summary>Convenience extensions for <see cref="IFiniteStateMachineRuleBuilder"/>.</summary>
 public static class FiniteStateMachineRuleBuilderExtensions
 {
-
-
-    /// <inheritdoc cref="IFiniteStateMachineRuleBuilder.AddRule(AutomatonState,FuzzyKey{char},AutomatonState)"/>
-    public static IFiniteStateMachineRuleBuilder AddRule(this IFiniteStateMachineRuleBuilder b,
-                                                         string from,
-                                                         FuzzyKey<char> scan,
-                                                         AutomatonState to)
-    {
-        return b.AddRule(b[from], scan, to);
-    }
-
-    /// <inheritdoc cref="IFiniteStateMachineRuleBuilder.AddRule(AutomatonState,FuzzyKey{char},AutomatonState)"/>
-    public static IFiniteStateMachineRuleBuilder AddRule(this IFiniteStateMachineRuleBuilder b,
-                                                         AutomatonState from,
-                                                         FuzzyKey<char> scan,
-                                                         string to)
-    {
-        return b.AddRule(from, scan, b[to]);
-    }
-
-    /// <inheritdoc cref="IFiniteStateMachineRuleBuilder.AddRule(AutomatonState,FuzzyKey{char},AutomatonState)"/>
-    public static IFiniteStateMachineRuleBuilder AddRule(this IFiniteStateMachineRuleBuilder b,
-                                                         string from,
-                                                         FuzzyKey<char> scan,
-                                                         string to)
-    {
-        return b.AddRule(b[from], scan, b[to]);
-    }
-
-    // ------------------
-
     /// <inheritdoc cref="IFiniteStateMachineRuleBuilder.AddRule(AutomatonState,FuzzyKey{char},AutomatonState)"/>
     public static IFiniteStateMachineRuleBuilder AddRule(this IFiniteStateMachineRuleBuilder b,
                                                          AutomatonState from,
@@ -50,30 +19,10 @@ public static class FiniteStateMachineRuleBuilderExtensions
     public static IFiniteStateMachineRuleBuilder AddRule(this IFiniteStateMachineRuleBuilder b,
                                                          string from,
                                                          char scan,
-                                                         AutomatonState to)
-    {
-        return b.AddRule(b[from], new FuzzyKey<char>(scan), to);
-    }
-
-    /// <inheritdoc cref="IFiniteStateMachineRuleBuilder.AddRule(AutomatonState,FuzzyKey{char},AutomatonState)"/>
-    public static IFiniteStateMachineRuleBuilder AddRule(this IFiniteStateMachineRuleBuilder b,
-                                                         AutomatonState from,
-                                                         char scan,
                                                          string to)
     {
-        return b.AddRule(from, new FuzzyKey<char>(scan), b[to]);
+        return b.AddRule(from, new FuzzyKey<char>(scan), to);
     }
-
-    /// <inheritdoc cref="IFiniteStateMachineRuleBuilder.AddRule(AutomatonState,FuzzyKey{char},AutomatonState)"/>
-    public static IFiniteStateMachineRuleBuilder AddRule(this IFiniteStateMachineRuleBuilder b,
-                                                         string from,
-                                                         char scan,
-                                                         string to)
-    {
-        return b.AddRule(b[from], new FuzzyKey<char>(scan), b[to]);
-    }
-
-    // ------------------
 
     /// <inheritdoc cref="IFiniteStateMachineRuleBuilder.AddRule(AutomatonState,FuzzyKey{char},AutomatonState)"/>
     public static IFiniteStateMachineRuleBuilder AddRule(this IFiniteStateMachineRuleBuilder b,
@@ -88,26 +37,19 @@ public static class FiniteStateMachineRuleBuilderExtensions
     public static IFiniteStateMachineRuleBuilder AddRule(this IFiniteStateMachineRuleBuilder b,
                                                          string from,
                                                          SymbolMatch scan,
-                                                         AutomatonState to)
-    {
-        return b.AddRule(b[from], new FuzzyKey<char>(default, scan), to);
-    }
-
-    /// <inheritdoc cref="IFiniteStateMachineRuleBuilder.AddRule(AutomatonState,FuzzyKey{char},AutomatonState)"/>
-    public static IFiniteStateMachineRuleBuilder AddRule(this IFiniteStateMachineRuleBuilder b,
-                                                         AutomatonState from,
-                                                         SymbolMatch scan,
                                                          string to)
     {
-        return b.AddRule(from, new FuzzyKey<char>(default, scan), b[to]);
+        return b.AddRule(from, new FuzzyKey<char>(default, scan), to);
     }
 
     /// <inheritdoc cref="IFiniteStateMachineRuleBuilder.AddRule(AutomatonState,FuzzyKey{char},AutomatonState)"/>
     public static IFiniteStateMachineRuleBuilder AddRule(this IFiniteStateMachineRuleBuilder b,
                                                          string from,
-                                                         SymbolMatch scan,
+                                                         IReadOnlyCollection<char> symbols,
                                                          string to)
     {
-        return b.AddRule(b[from], new FuzzyKey<char>(default, scan), b[to]);
+        foreach (var symbol in symbols)
+            b.AddRule(from, symbol, to);
+        return b;
     }
 }

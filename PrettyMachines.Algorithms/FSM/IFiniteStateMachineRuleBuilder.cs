@@ -15,5 +15,12 @@ public interface IFiniteStateMachineRuleBuilder
     /// <returns>The builder instance for chaining.</returns>
     public IFiniteStateMachineRuleBuilder AddRule(AutomatonState from, FuzzyKey<char> scan, AutomatonState to);
 
+    /// <summary>Adds a transition rule for given initial and next states.</summary>
+    /// <param name="from">Current state name.</param>
+    /// <param name="scan">Symbol condition to match (exact or any).</param>
+    /// <param name="to">Name of the state to transition to.</param>
+    /// <returns>The builder instance for chaining.</returns>
+    public IFiniteStateMachineRuleBuilder AddRule(string from, FuzzyKey<char> scan, string to);
+
     public AutomatonState this[string name] { get; }
 }
