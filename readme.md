@@ -8,8 +8,9 @@ A .NET 10 library for building and running automatons like Turing machines and M
 
 - Basic abstract interface for all formal algorithms. Each algorithm can be executed step-by-step (using `IEnumerable`) or with one action (from start to the end). 
 - Algorithm snapshots carry debug information about each step of the algoritm run.
-- Fluent builders for Turing machines and Markov algorithms.
+- Fluent builders for Turing machines, finite state machines and Markov algorithms.
 - Turing machine definition is expanded. Machine can scan special symbols like `empty`, `non-empty` or `any`.
+- Shared `PrettyMachines.Automata` core: common state, symbol-matching and transition-table primitives reused by Turing and finite state machines.
 - Several example algorithms.
 
 ### Requirements
@@ -20,6 +21,7 @@ A .NET 10 library for building and running automatons like Turing machines and M
 - [Solution layout](#solution-layout)
 - [Core concepts](#core-concepts)
 - [Quick start: Turing machine](#quick-start-turing-machine)
+- [Quick start: finite state machine](#quick-start-finite-state-machine)
 - [Quick start: Markov algorithm](#quick-start-markov-algorithm)
 - [Execution results](#execution-results)
 - [Built-in algorithms](#built-in-algorithms)
@@ -29,7 +31,7 @@ A .NET 10 library for building and running automatons like Turing machines and M
 
 | Project | Description |
 | --- | --- |
-| `PrettyMachines.Algorithms` | Core library: abstract algorithm model, `Turing`, `Markov` and `Utils` (printing/parsing). |
+| `PrettyMachines.Algorithms` | Core library: abstract algorithm model, `Automata` (shared state/symbol/transition primitives), `Turing`, `FSM`, `Markov` and `Utils` (printing/parsing). |
 | `PrettyMachines.Implementations` | Ready-to-use algorithms built on the core library. |
 | `PrettyMachines.BlazorUI` | Blazor WebAssembly app for building and executing algorithms. |
 | `PrettyMachines.Tests` | xUnit tests for the core library and implementations. |
@@ -120,6 +122,7 @@ Rules can also reference states by name (`rules.AddRule("scan", "0", "done", ...
 `SymbolMatch.Empty`, `SymbolMatch.NotEmpty` or `SymbolMatch.Any` matches a whole class of cells:
 
 ```csharp
+using PrettyMachines.Automata; // SymbolMatch, FuzzyKey and FuzzyKeyComparer live here
 using PrettyMachines.Turing;
 
 rules.AddRule(q0, SymbolMatch.NotEmpty, q0, null, TapeMovement.Right)
@@ -132,6 +135,40 @@ The same machine typed over the tape (no input mutation of the caller's tape):
 var tape = new MachineTape(new[] { "1", "0", "1" }, blankSymbol: "_");
 AlgorithmResult<IReadOnlyTape> tapeResult = machine.Execute(tape, new AlgorithmCancellation(10_000));
 ```
+
+## Quick start: finite state machine
+
+A deterministic [finite state machine](https://en.wikipedia.org/wiki/Finite-state_machine) (DFA) is
+defined by an alphabet, a set of states with one initial state, accepting (terminal) states, and at most
+one transition per `(state, symbol)`. The machine consumes the whole input; after the input is exhausted
+it accepts when the current state is accepting, otherwise it rejects.
+
+```csharp
+using PrettyMachines.Abstract;
+using PrettyMachines.Automata;
+using PrettyMachines.FSM;
+
+var dfa = FiniteStateMachine.Create("Even number of ones")
+    .WithAlphabet('0', '1')                 // strict alphabet; unknown symbols yield InvalidInput
+    .AddTerminalState("even", out var qEven) // accepting state; the first state is the initial one
+    .AddState("odd", out var qOdd)
+    .BuildRules(rules => rules
+        .AddRule(qEven, '0', qEven)
+        .AddRule(qEven, '1', qOdd)
+        .AddRule(qOdd, '0', qOdd)
+        .AddRule(qOdd, '1', qEven));
+
+var result = dfa.Execute("1101", new AlgorithmCancellation(1000), verbose: true);
+Console.WriteLine($"{result.Output} ({result.Termination} after {result.Steps} steps)");
+```
+
+- Accepting/final states are declared with `AddTerminalState`/`AddState(..., isTerminal: true)`.
+  Reaching one does **not** stop the run, and transitions out of accepting states are allowed.
+- `AddRule(from, SymbolMatch.Any, to)` is a catch-all ("otherwise") transition. `SymbolMatch.Empty` and
+  `SymbolMatch.NotEmpty` are not valid for finite state machines and throw `AlgorithmException`.
+- States can also be referenced by name: `rules.AddRule("even", '1', "odd")`.
+- Acceptance produces `"A"`, rejection produces `"R"`; both tokens are configurable with
+  `WithOutput("accepted", "rejected")`.
 
 ## Quick start: Markov algorithm
 
